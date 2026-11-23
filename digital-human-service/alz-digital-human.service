@@ -1,0 +1,15 @@
+[Unit]
+Description=Alzheimer Voice Assistant Digital Human
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu22/Documents/Codex/2026-10-09/new-chat/work/alzheimers-voice-assistant
+ExecStart=/home/ubuntu22/Documents/Codex/2026-10-09/new-chat/work/alzheimers-voice-assistant/digital-human-service/run-local.sh
+Restart=on-failure
+RestartSec=3
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=default.target

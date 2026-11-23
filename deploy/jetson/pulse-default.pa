@@ -1,0 +1,12 @@
+# Install as ~/.config/pulse/default.pa; keep the normal desktop modules.
+.include /etc/pulse/default.pa
+.nofail
+set-card-profile alsa_card.platform-sound off
+.fail
+load-module module-alsa-sink sink_name=yisheng_speaker device=hw:tegrasndt210ref,0 format=s32le rate=48000 channels=2 tsched=0 sink_properties=device.description=YiSheng_MAX98357
+load-module module-alsa-source source_name=yisheng_raw device=hw:tegrasndt210ref,0 format=s32le rate=48000 channels=2 tsched=0 source_properties=device.description=YiSheng_ICS43434_Raw
+load-module module-remap-source source_name=yisheng_microphone master=yisheng_raw channels=1 channel_map=mono master_channel_map=front-left remix=no source_properties=device.description=YiSheng_ICS43434
+set-default-sink yisheng_speaker
+set-default-source yisheng_microphone
+set-sink-volume yisheng_speaker 32768
+set-sink-mute yisheng_speaker no

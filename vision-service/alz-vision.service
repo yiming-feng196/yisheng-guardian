@@ -1,0 +1,18 @@
+[Unit]
+Description=YiSheng Guardian local visual emotion service
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu22/Documents/Codex/2026-10-09/new-chat/work/alzheimers-voice-assistant/vision-service
+Environment=PYTHONPATH=/home/ubuntu22/Documents/Codex/2026-10-09/new-chat/work/alzheimers-voice-assistant/vision-service
+Environment=VISION_EMOTION_TEMPERATURE=2.00
+Environment=VISION_EMOTION_BIASES=angry=2.00,neutral=-0.60,sad=1.30,surprised=1.20
+Environment=VISION_ANGER_DISGUST_GATE=0.17
+Environment=VISION_ANGER_DISGUST_SAD_RATIO=2.00
+ExecStart=/home/ubuntu22/miniforge3/envs/alz-sadtalker/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8092 --workers 1
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,288 @@
+name: alzheimers-voice-assistant
+
+services:
+  mysql:
+    image: ${DOCKER_REGISTRY_PREFIX:-}library/mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: alz_system
+      MYSQL_USER: alz_app
+      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./deploy/mysql/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  redis:
+    image: ${DOCKER_REGISTRY_PREFIX:-}library/redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  rabbitmq:
+    image: ${DOCKER_REGISTRY_PREFIX:-}library/rabbitmq:4.1-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: alz_app
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?set RABBITMQ_PASSWORD in .env}
+      RABBITMQ_DEFAULT_VHOST: /alz
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+
+  screening:
+    image: alzheimers-voice-assistant-screening:local
+    build:
+      context: ./screening-service
+      args:
+        REGISTRY_PREFIX: ${DOCKER_REGISTRY_PREFIX:-}
+    restart: unless-stopped
+    environment:
+      AUDIO_ROOT: /data/audio
+      SCREENING_ENGINE_FACTORY: ${SCREENING_ENGINE_FACTORY:-}
+      SCREENING_REQUIRE_AI: ${SCREENING_REQUIRE_AI:-false}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_SCREENING_MODEL: ${DEEPSEEK_SCREENING_MODEL:-deepseek-chat}
+      WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-small}
+      WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
+      WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
+      HF_ENDPOINT: ${HF_ENDPOINT:-https://huggingface.co}
+      HF_HUB_DISABLE_XET: ${HF_HUB_DISABLE_XET:-1}
+    volumes:
+      - audio-data:/data/audio
+      - whisper-model-data:/root/.cache/huggingface
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  screening-transcription-worker:
+    image: alzheimers-voice-assistant-screening:local
+    build:
+      context: ./screening-service
+      args:
+        REGISTRY_PREFIX: ${DOCKER_REGISTRY_PREFIX:-}
+    command: ["python", "-m", "app.workers.pipeline", "transcription"]
+    restart: unless-stopped
+    environment:
+      AUDIO_ROOT: /data/audio
+      SCREENING_ARTIFACT_DIR: /data/screening-artifacts
+      SCREENING_WORKER_ID: transcription-1
+      SCREENING_WORKER_MAX_RETRIES: ${SCREENING_WORKER_MAX_RETRIES:-3}
+      SCREENING_RETRY_DELAY_MS: ${SCREENING_RETRY_DELAY_MS:-10000}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: /alz
+      RABBITMQ_USERNAME: alz_app
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?set RABBITMQ_PASSWORD in .env}
+      WHISPER_MODEL_SIZE: ${WHISPER_MODEL_SIZE:-small}
+      WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
+      WHISPER_DEVICE_INDEX: ${WHISPER_DEVICE_INDEX:-0}
+      WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
+      HF_ENDPOINT: ${HF_ENDPOINT:-https://huggingface.co}
+      HF_HUB_DISABLE_XET: ${HF_HUB_DISABLE_XET:-1}
+    volumes:
+      - audio-data:/data/audio:ro
+      - screening-artifact-data:/data/screening-artifacts
+      - whisper-model-data:/root/.cache/huggingface
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  screening-features-worker:
+    image: alzheimers-voice-assistant-screening:local
+    build:
+      context: ./screening-service
+      args:
+        REGISTRY_PREFIX: ${DOCKER_REGISTRY_PREFIX:-}
+    command: ["python", "-m", "app.workers.pipeline", "features"]
+    restart: unless-stopped
+    environment:
+      AUDIO_ROOT: /data/audio
+      SCREENING_ARTIFACT_DIR: /data/screening-artifacts
+      SCREENING_WORKER_ID: features-1
+      SCREENING_WORKER_MAX_RETRIES: ${SCREENING_WORKER_MAX_RETRIES:-3}
+      SCREENING_RETRY_DELAY_MS: ${SCREENING_RETRY_DELAY_MS:-10000}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: /alz
+      RABBITMQ_USERNAME: alz_app
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?set RABBITMQ_PASSWORD in .env}
+    volumes:
+      - audio-data:/data/audio:ro
+      - screening-artifact-data:/data/screening-artifacts
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  screening-llm-worker:
+    image: alzheimers-voice-assistant-screening:local
+    build:
+      context: ./screening-service
+      args:
+        REGISTRY_PREFIX: ${DOCKER_REGISTRY_PREFIX:-}
+    command: ["python", "-m", "app.workers.pipeline", "llm"]
+    restart: unless-stopped
+    environment:
+      AUDIO_ROOT: /data/audio
+      SCREENING_ARTIFACT_DIR: /data/screening-artifacts
+      SCREENING_WORKER_ID: llm-1
+      SCREENING_WORKER_MAX_RETRIES: ${SCREENING_WORKER_MAX_RETRIES:-3}
+      SCREENING_RETRY_DELAY_MS: ${SCREENING_RETRY_DELAY_MS:-10000}
+      SCREENING_REQUIRE_AI: ${SCREENING_REQUIRE_AI:-false}
+      SCREENING_PIPELINE_MODEL_VERSION: ${DEEPSEEK_SCREENING_MODEL:-deepseek-chat}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_SCREENING_MODEL: ${DEEPSEEK_SCREENING_MODEL:-deepseek-chat}
+      DEEPSEEK_SCREENING_MAX_TOKENS: ${DEEPSEEK_SCREENING_MAX_TOKENS:-1500}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: /alz
+      RABBITMQ_USERNAME: alz_app
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?set RABBITMQ_PASSWORD in .env}
+    volumes:
+      - audio-data:/data/audio:ro
+      - screening-artifact-data:/data/screening-artifacts
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  vision:
+    build:
+      context: ./vision-service
+      args:
+        REGISTRY_PREFIX: ${DOCKER_REGISTRY_PREFIX:-}
+    restart: unless-stopped
+    ports:
+      - "${VISION_PORT:-8092}:8092"
+    environment:
+      VISION_MODEL_DIR: /app/models
+      VISION_FACE_SCORE_THRESHOLD: ${VISION_FACE_SCORE_THRESHOLD:-0.78}
+      VISION_MAX_FACES: ${VISION_MAX_FACES:-5}
+      VISION_EMOTION_TEMPERATURE: ${VISION_EMOTION_TEMPERATURE:-2.00}
+      VISION_EMOTION_BIASES: ${VISION_EMOTION_BIASES:-angry=2.00,neutral=-0.60,sad=1.30,surprised=1.20}
+      VISION_ANGER_DISGUST_GATE: ${VISION_ANGER_DISGUST_GATE:-0.17}
+      VISION_ANGER_DISGUST_SAD_RATIO: ${VISION_ANGER_DISGUST_SAD_RATIO:-2.00}
+      VISION_ALLOWED_ORIGINS: "*"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8092/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      network: host
+      args:
+        REGISTRY_PREFIX: ${DOCKER_REGISTRY_PREFIX:-}
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/alz_system?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      DB_USERNAME: alz_app
+      DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: /alz
+      RABBITMQ_USERNAME: alz_app
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?set RABBITMQ_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      PYTHON_DIAGNOSIS_URL: http://screening:5000/api/diagnosis
+      PYTHON_TRANSCRIPTION_URL: http://screening:5000/api/transcription
+      AUDIO_STORAGE_DIR: /data/audio
+      PDF_STORAGE_DIR: /data/pdf
+      ADMIN_AUDIO_STORAGE_DIR: /data/admin_audio
+      SCREENING_ARTIFACT_DIR: /data/screening-artifacts
+      DIGITAL_HUMAN_DATA_DIR: /data/digital-human
+      SCREENING_ASYNC_ENABLED: ${SCREENING_ASYNC_ENABLED:-false}
+      SCREENING_REQUIRE_AI: ${SCREENING_REQUIRE_AI:-false}
+      DEEPSEEK_SCREENING_MODEL: ${DEEPSEEK_SCREENING_MODEL:-deepseek-chat}
+      DEEPSEEK_ENABLED: ${DEEPSEEK_ENABLED:-false}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      RAG_VECTOR_ENABLED: ${RAG_VECTOR_ENABLED:-false}
+      RAG_EMBEDDING_ENABLED: ${RAG_EMBEDDING_ENABLED:-false}
+      QDRANT_BASE_URL: http://qdrant:6333
+    volumes:
+      - audio-data:/data/audio
+      - pdf-data:/data/pdf
+      - admin-audio-data:/data/admin_audio
+      - screening-artifact-data:/data/screening-artifacts
+      - ./digital-human-data:/data/digital-human:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      screening:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8080/actuator/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  qdrant:
+    image: ${DOCKER_REGISTRY_PREFIX:-}qdrant/qdrant:${QDRANT_VERSION:-v1.18.2}
+    profiles: ["rag"]
+    restart: unless-stopped
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+volumes:
+  mysql-data:
+  redis-data:
+  rabbitmq-data:
+  qdrant-data:
+  audio-data:
+  pdf-data:
+  admin-audio-data:
+  screening-artifact-data:
+  whisper-model-data:

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=忆声守护
+Comment=启动忆声守护 Jetson 前端
+Exec=sh -c "exec chromium-browser --kiosk --user-data-dir=$HOME/.config/chromium-yisheng --noerrdialogs --disable-session-crashed-bubble --autoplay-policy=no-user-gesture-required --use-fake-ui-for-media-stream http://127.0.0.1:8080/"
+X-GNOME-Autostart-enabled=true
+Terminal=false

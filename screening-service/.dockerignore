@@ -1,0 +1,8 @@
+.venv/
+.venv-embedding/
+__pycache__/
+.pytest_cache/
+tests/
+evaluation/
+*.pyc
+*.log

@@ -1,0 +1,17 @@
+[Unit]
+Description=YiSheng Guardian Jetson frontend and API proxy
+After=network-online.target nvargus-daemon.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=jetson
+Group=jetson
+Environment=YISHENG_FRONTEND_ROOT=/opt/yisheng-guardian/frontend
+Environment=YISHENG_WORKSTATION_HOST=192.168.55.1
+ExecStart=/usr/bin/python3 /opt/yisheng-guardian/frontend_server.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

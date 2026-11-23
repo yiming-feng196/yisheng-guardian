@@ -1,0 +1,11 @@
+[Unit]
+Description=YiSheng Guardian I2S4 full duplex audio route
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/amixer -q -c tegrasndt210ref cset "name=I2S4 Mux" ADMAIF1
+ExecStart=/usr/bin/amixer -q -c tegrasndt210ref cset "name=ADMAIF1 Mux" I2S4
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

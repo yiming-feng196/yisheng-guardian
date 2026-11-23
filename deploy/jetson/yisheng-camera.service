@@ -1,0 +1,15 @@
+[Unit]
+Description=YiSheng Guardian left CSI camera MJPEG stream
+After=nvargus-daemon.service
+Requires=nvargus-daemon.service
+
+[Service]
+Type=simple
+User=jetson
+Group=video
+ExecStart=/usr/bin/gst-launch-1.0 -q nvarguscamerasrc sensor-id=0 ! video/x-raw(memory:NVMM),width=1920,height=1080,framerate=30/1 ! nvvidconv ! video/x-raw,width=640,height=360,format=I420 ! videorate drop-only=true ! video/x-raw,framerate=12/1 ! nvvidconv ! video/x-raw(memory:NVMM),width=640,height=360,format=I420 ! nvjpegenc quality=76 ! multipartmux boundary=yishengframe ! tcpserversink host=127.0.0.1 port=8094 sync=false
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
