@@ -1,4 +1,6 @@
 window.YISHENG_CONFIG = {
+  wakeApiBase: "/wake-api",
+  wakeSilenceMs: 1800,
   visionApiBase: "/vision-api",
   digitalHumanBaseUrl: "/digital-human-api",
   emotionAutoStart: true,
@@ -7,7 +9,7 @@ window.YISHENG_CONFIG = {
   microphoneDeviceLabel: "YiSheng_ICS43434",
   microphoneGain: 20,
   audioControlUrl: "/device-audio/volume",
-  emotionIntervalMs: 450,
+  emotionIntervalMs: 250,
   negativeEmotionHoldMs: 3000,
   negativeEmotionConfidence: 0.48,
   emotionComfortCooldownMs: 90000

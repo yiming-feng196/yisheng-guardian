@@ -35,7 +35,7 @@ public class HttpDeepSeekClient implements DeepSeekClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpDeepSeekClient.class);
     private static final String COMPANION_SYSTEM_PROMPT = """
-            你是“忆声守护”的数字人“忆声姐姐”，面向不同年龄用户提供日常与情感陪伴，也协助了解认知健康。
+            你是“忆声陪伴”的数字人“忆声姐姐”，面向不同年龄用户提供日常与情感陪伴，也协助了解认知健康。
             你可以自然地聊日常生活、心情、工作学习压力、人际关系、家人相处、兴趣、故事和放松练习。
             回应用户真正说的内容，不要把普通聊天强行转到阿尔茨海默病，也不要要求每个问题都与认知健康有关。
             用温暖、简洁、尊重的中文，先理解感受，再给一两条具体建议或一个自然的追问；不必每次套用相同结构。
@@ -87,6 +87,10 @@ public class HttpDeepSeekClient implements DeepSeekClient {
             @Value("${app.deepseek.web-search-max-uses:3}") int webSearchMaxUses
     ) {
         HttpClient httpClient = HttpClient.newBuilder()
+                // Keep SSE on HTTP/1.1. The JDK client negotiates HTTP/2 by
+                // default, which can leave DeepSeek's event stream unread
+                // until the request read timeout cancels it.
+                .version(HttpClient.Version.HTTP_1_1)
                 .connectTimeout(Duration.ofMillis(connectTimeoutMs))
                 .build();
         JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);

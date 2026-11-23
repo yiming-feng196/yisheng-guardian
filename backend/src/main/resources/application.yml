@@ -72,7 +72,7 @@ app:
     model: ${DEEPSEEK_MODEL:deepseek-v4-flash}
     max-tokens: ${DEEPSEEK_MAX_TOKENS:700}
     connect-timeout-ms: ${DEEPSEEK_CONNECT_TIMEOUT_MS:3000}
-    read-timeout-ms: ${DEEPSEEK_READ_TIMEOUT_MS:20000}
+    read-timeout-ms: ${DEEPSEEK_READ_TIMEOUT_MS:120000}
     web-search-enabled: ${DEEPSEEK_WEB_SEARCH_ENABLED:false}
     web-search-max-uses: ${DEEPSEEK_WEB_SEARCH_MAX_USES:3}
   rag:

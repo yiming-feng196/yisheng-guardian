@@ -1,0 +1,20 @@
+[Unit]
+Description=YiSheng offline Xiaoyi voice wake listener
+After=pulseaudio.service yisheng-audio-route.service
+Wants=yisheng-audio-route.service
+
+[Service]
+Environment=PYTHONPATH=%h/yisheng-guardian/.runtime/wake-python
+Environment=LD_LIBRARY_PATH=%h/yisheng-guardian/.runtime/wake-cpp/lib
+Environment=OPENBLAS_NUM_THREADS=1
+Environment=OMP_NUM_THREADS=1
+Environment=WAKE_SOURCE=yisheng_microphone
+Environment=WAKE_GAIN=20
+ExecStart=/usr/bin/python3 %h/yisheng-guardian/wake_service.py
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+LimitCORE=0
+
+[Install]
+WantedBy=default.target

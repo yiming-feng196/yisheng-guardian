@@ -173,6 +173,8 @@ class YiShengHandler(BaseHTTPRequestHandler):
             return True
 
     def _upstream(self):
+        if self.path.startswith("/wake-api/"):
+            return 8095, "/" + self.path[len("/wake-api/"):]
         if self.path.startswith("/vision-api/"):
             return 8092, "/" + self.path[len("/vision-api/"):]
         if self.path.startswith("/digital-human-api/"):
@@ -220,9 +222,10 @@ class YiShengHandler(BaseHTTPRequestHandler):
         }
         if body is not None:
             headers["Content-Length"] = str(len(body))
-        headers["Host"] = "{}:{}".format(WORKSTATION_HOST, port)
+        upstream_host = "127.0.0.1" if self.path.startswith("/wake-api/") else WORKSTATION_HOST
+        headers["Host"] = "{}:{}".format(upstream_host, port)
         headers["X-Forwarded-For"] = self.client_address[0]
-        connection = http.client.HTTPConnection(WORKSTATION_HOST, port, timeout=310)
+        connection = http.client.HTTPConnection(upstream_host, port, timeout=5 if port == 8095 else 310)
         try:
             connection.request(self.command, upstream_path, body=body, headers=headers)
             response = connection.getresponse()

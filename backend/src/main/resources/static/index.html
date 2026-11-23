@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>忆声守护 · 认知健康与情感陪伴</title>
+  <title>忆声陪伴 · 陪您聊聊生活、心情与记忆</title>
   <link rel="stylesheet" href="/app.css">
-  <link rel="stylesheet" href="/experience.css">
+  <link rel="stylesheet" href="/experience.css?v=wake-6">
 </head>
 <body>
   <div class="app-shell">
@@ -13,28 +13,26 @@
       <div class="site-header">
         <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M6 13v6m6-12v18m8-21v24m6-16v8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></div>
         <div>
-          <h1>忆声守护<span class="brand-period">.</span></h1>
-          <p class="subtitle">认知健康 · 情感陪伴</p>
+          <h1>忆声陪伴<span class="brand-period">.</span></h1>
         </div>
       </div>
 
       <nav class="tabs" role="tablist" aria-label="功能选择">
         <button id="chatTab" class="tab active" type="button" role="tab" aria-selected="true" aria-controls="chatPanel">
           <span class="tab-icon" aria-hidden="true">问</span>
-          <span class="tab-copy"><strong>陪伴空间</strong><small>聊聊生活与心情</small></span>
+          <span class="tab-copy"><strong>陪伴空间</strong></span>
         </button>
         <button id="screeningTab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="screeningPanel">
           <span class="tab-icon" aria-hidden="true">声</span>
-          <span class="tab-copy"><strong>认知观察</strong><small>从一段讲述开始</small></span>
+          <span class="tab-copy"><strong>认知观察</strong></span>
         </button>
         <button id="workspaceTab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="workspacePanel">
           <span class="tab-icon" aria-hidden="true">管</span>
-          <span class="tab-copy"><strong>我的空间</strong><small>记录每一点变化</small></span>
+          <span class="tab-copy"><strong>我的记录</strong></span>
         </button>
       </nav>
 
       <div class="sidebar-footer">
-        <p><span class="privacy-dot" aria-hidden="true"></span>本地守护，安心表达</p>
         <button id="fontToggle" class="sidebar-button" type="button" aria-pressed="false">Aa · 大字模式</button>
       </div>
     </header>
@@ -42,48 +40,48 @@
     <div class="app-stage">
       <div class="stage-topbar" aria-live="polite">
         <div>
-          <span id="currentSectionKicker">知识普及</span>
-          <strong id="currentSectionName">科普助手</strong>
+
+          <strong id="currentSectionName">陪伴空间</strong>
         </div>
-        <span class="service-status"><i aria-hidden="true"></i>服务已就绪</span>
+            <div id="wakeControls" class="wake-controls" hidden>
+              <span id="wakeStatus" role="status">正在连接语音唤醒…</span>
+              <button id="wakeToggle" class="secondary-button" type="button" aria-pressed="false" disabled>开启唤醒</button>
+            </div>
+        <div class="service-connection"><span id="serviceStatus" class="service-status" data-state="connecting" role="status">正在连接</span><button id="serviceRetry" class="secondary-button" type="button" hidden>重试连接</button></div>
       </div>
 
       <details class="medical-notice">
-        <summary><span class="notice-icon" aria-hidden="true">i</span><span>温柔陪伴，科学观察。本工具不能替代专业诊断。</span><span class="notice-more">使用须知 ↗</span></summary>
+        <summary><span class="notice-icon" aria-hidden="true">i</span><span>温柔陪伴，科学观察。本工具不能替代专业诊断。</span><span class="notice-more">使用须知</span></summary>
         <p><strong>重要医疗提示</strong>本系统只提供风险筛查和健康科普，不能诊断、排除或治疗阿尔茨海默病。突然说话困难、口角歪斜、单侧无力或意识异常时，请立即拨打 120。</p>
       </details>
 
-      <section id="digitalHome" class="digital-home" aria-labelledby="digitalHomeTitle">
-        <div class="digital-home-copy">
-          <p class="digital-kicker"><span></span> 您的日常陪伴空间</p>
-          <h2 id="digitalHomeTitle">认知健康与<br><span>日常情感陪伴</span></h2>
-          <p id="digitalStatus" class="digital-status" role="status">我是忆声姐姐。开心的事、难说出口的心情，或是对记忆的小小担心，都可以和我聊聊。</p>
-          <p id="digitalTranscript" class="digital-transcript" aria-live="polite">不必组织好语言，就从今天的你开始。</p>
-          <div class="digital-actions" aria-label="主要操作">
-            <button id="digitalListen" class="digital-listen" type="button" aria-pressed="false">
-              <span class="listen-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="12" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3m-4 0h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
-              <span id="digitalListenLabel">开始说话</span>
-            </button>
-            <button id="digitalScreening" class="digital-action-button" type="button">开始录音筛查</button>
-            <button id="digitalReports" class="digital-action-button action-link" type="button">查看记录 ↗</button>
-          </div>
-          <div class="volume-control" role="group" aria-label="声音大小">
-            <button id="volumeMute" class="volume-mute" type="button" aria-pressed="false">静音</button>
-            <label for="speakerVolume">音量</label>
-            <input id="speakerVolume" type="range" min="0" max="100" step="1" value="100" aria-describedby="volumeStatus">
-            <output id="speakerVolumeValue" for="speakerVolume">100%</output>
-            <span id="volumeStatus" class="volume-status" role="status"></span>
-          </div>
-          <form id="digitalTextForm" class="digital-text-form">
-            <label class="sr-only" for="digitalTextInput">输入想说的话</label>
-            <input id="digitalTextInput" maxlength="500" autocomplete="off" placeholder="今天，有什么想和我聊聊？">
-            <button type="submit" aria-label="发送消息">发送 ↗</button>
-          </form>
-          <p class="digital-hint">说完后点击「提交语音」，我会认真听。</p>
-        </div>
-
-        <div id="avatarStage" class="avatar-stage avatar-female" data-avatar-state="idle" aria-label="女性数字人忆声姐姐，当前待机">
-          <div class="avatar-card-heading"><span>AI 陪伴助手</span><strong>忆声姐姐</strong></div>
+      <div class="companion-overview">
+        <aside class="emotion-observation" aria-label="情绪观察">
+          <section id="emotionInsight" class="emotion-insight" aria-labelledby="emotionInsightTitle">
+            <h2 id="emotionInsightTitle">情绪观察</h2>
+            <div id="emotionPreview" class="emotion-preview" data-active="false">
+              <video id="emotionCameraVideo" autoplay muted playsinline></video>
+              <img id="emotionCameraStream" alt="摄像头实时画面">
+              <canvas id="emotionOverlay" aria-hidden="true"></canvas>
+              <div id="emotionCameraPlaceholder" class="emotion-camera-placeholder"><strong>摄像头已暂停</strong></div>
+            </div>
+            <span id="emotionConnection" class="emotion-connection">正在连接</span>
+            <strong id="emotionLabel" class="emotion-label" aria-live="polite">等待开启</strong>
+            <button id="emotionToggle" class="secondary-button" type="button">开启观察</button>
+            <details class="emotion-details">
+              <summary>观察详情</summary>
+              <button id="cameraFitToggle" class="secondary-button" type="button" aria-pressed="false">显示完整画面</button>
+              <p>识别置信度：<strong id="emotionConfidence">--</strong></p>
+              <div class="emotion-level" aria-hidden="true"><span id="emotionConfidenceBar"></span></div>
+              <p id="emotionStability">等待开启</p>
+              <p id="emotionDetail">画面仅用于本机识别，不会保存。表情结果不作为医疗判断。</p>
+              <div class="emotion-palette" aria-label="可观察的表情"><span data-emotion="neutral">平静</span><span data-emotion="happy">愉悦</span><span data-emotion="surprised">惊讶</span><span data-emotion="sad">低落</span><span data-emotion="fearful">紧张</span><span data-emotion="angry">生气</span><span data-emotion="disgust">厌恶</span></div>
+            </details>
+          </section>
+        </aside>
+        <section id="digitalHome" class="digital-home" aria-label="忆声姐姐">
+        <div id="avatarStage" class="avatar-stage avatar-female" data-avatar-state="idle" aria-label="女性数字人忆声姐姐，我在这里">
+          <div class="avatar-card-heading"><strong>忆声姐姐</strong></div>
           <div class="avatar-aura" aria-hidden="true"></div>
           <div class="avatar-orbit orbit-one" aria-hidden="true"></div>
           <div class="avatar-orbit orbit-two" aria-hidden="true"></div>
@@ -92,131 +90,64 @@
             <video class="avatar-video" playsinline preload="auto" hidden></video>
           </div>
           <audio class="avatar-audio" preload="auto" aria-label="忆声姐姐语音播放器" hidden></audio>
-          <div class="avatar-state"><span></span><strong id="avatarStateText">待机中</strong></div>
+          <div class="avatar-state"><span></span><strong id="avatarStateText">我在这里</strong></div>
+          <div class="avatar-caption">
+            <p id="digitalStatus" class="digital-status" role="status">我是忆声姐姐，很高兴见到您。</p>
+            <p id="digitalTranscript" class="digital-transcript" aria-live="polite"></p>
+          </div>
+          <button id="digitalStopPlayback" class="secondary-button" type="button" hidden>停止播放</button>
+          <div class="volume-control" role="group" aria-label="声音大小">
+            <button id="volumeMute" class="volume-mute" type="button" aria-pressed="false">静音</button>
+            <label for="speakerVolume">音量</label><input id="speakerVolume" type="range" min="0" max="100" step="1" value="50" aria-describedby="volumeStatus">
+            <output id="speakerVolumeValue" for="speakerVolume">50%</output><span id="volumeStatus" class="volume-status" role="status"></span>
+          </div>
           <div class="avatar-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         </div>
-      </section>
-
-      <div class="moment-heading"><div><p class="step-label">持续观察</p><h2>了解此刻的状态</h2></div><p>不急着下结论，给每一种感受一点时间。</p></div>
-
-        <section id="emotionInsight" class="emotion-insight" aria-labelledby="emotionInsightTitle">
-          <div id="emotionPreview" class="emotion-preview" data-active="false">
-            <video id="emotionCameraVideo" autoplay muted playsinline></video>
-            <img id="emotionCameraStream" alt="左侧摄像头实时画面">
-            <canvas id="emotionOverlay" aria-hidden="true"></canvas>
-            <div id="emotionCameraPlaceholder" class="emotion-camera-placeholder">
-              <span aria-hidden="true">视</span>
-              <strong>摄像头尚未开启</strong>
-              <small>画面仅发送到本机识别，不会保存</small>
-            </div>
+        </section>
+        <section id="chatPanel" class="panel companion-chat" role="tabpanel" aria-labelledby="chatTab">
+          <header class="chat-heading">
+            <div><h2 id="digitalHomeTitle">今天想聊些什么？</h2><p>陪您聊聊生活、心情与记忆</p></div>
+            <details id="conversationHistory" class="conversation-history">
+              <summary>对话记录</summary>
+              <aside class="conversation-sidebar" aria-label="对话列表">
+                <button id="newConversation" class="secondary-button" type="button">新对话</button>
+                <div id="conversationList" class="conversation-list"></div>
+              </aside>
+            </details>
+          </header>
+          <div class="conversation-status"><strong id="currentConversationTitle">新对话</strong><span id="conversationTurnCount" class="sr-only">0 / 100 轮</span></div>
+          <div class="quick-questions" aria-label="从一句话开始">
+            <button type="button" data-question="今天有点累，可以陪我聊聊吗？">聊聊今天</button>
+            <button type="button" data-question="可以陪我做一个简单的放松练习吗？">一起放松</button>
+            <button type="button" data-question="给我讲一个温暖的小故事吧。">听个故事</button>
           </div>
-          <div class="emotion-copy">
-            <div class="emotion-heading">
-              <div>
-                <p class="digital-kicker">本地识别 · 不保存画面</p>
-                <h3 id="emotionInsightTitle">情绪观察</h3>
-              </div>
-              <span id="emotionConnection" class="emotion-connection"><i aria-hidden="true"></i>未连接</span>
+          <div id="chatMessages" class="chat-messages" aria-live="polite" aria-label="对话内容" tabindex="0"></div>
+          <div class="chat-composer">
+            <div id="digitalVoiceFeedback" class="voice-feedback" hidden>
+              <span id="digitalVoiceFeedbackText">正在录音</span><output id="digitalRecordingTime" aria-label="录音时长">00:00</output>
+              <label for="digitalVoiceLevel">麦克风音量</label><progress id="digitalVoiceLevel" value="0" max="100"></progress>
             </div>
-            <div class="emotion-reading" aria-live="polite">
-              <strong id="emotionLabel">等待开启</strong>
-              <span id="emotionConfidence">--</span>
+            <div class="digital-actions" aria-label="语音操作">
+              <button id="digitalListen" class="digital-listen" type="button" aria-pressed="false"><span class="listen-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="12" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3m-4 0h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span id="digitalListenLabel">开始说话</span></button>
+              <button id="digitalCancelRecording" class="secondary-button" type="button" hidden>取消录音</button>
+              <button id="digitalScreening" class="secondary-button" type="button">认知观察</button>
             </div>
-            <div class="emotion-level" aria-hidden="true"><span id="emotionConfidenceBar"></span></div>
-            <div class="emotion-stability"><span></span><span id="emotionStability">等待开启</span><small>连续观察 · 温和理解</small></div>
-            <p id="emotionDetail" class="emotion-detail">开启后将识别生气、厌恶、紧张、愉悦、平静、低落和惊讶七类表情。</p>
-            <div class="emotion-palette" aria-label="可观察的表情"><span data-emotion="neutral">平静</span><span data-emotion="happy">愉悦</span><span data-emotion="surprised">惊讶</span><span data-emotion="sad">低落</span><span data-emotion="fearful">紧张</span><span data-emotion="angry">生气</span><span data-emotion="disgust">厌恶</span></div>
-            <div class="emotion-actions">
-              <button id="emotionToggle" class="secondary-button" type="button">开启情绪感知</button>
-              <small>结果只用于交互提示，不作为医疗判断。</small>
-            </div>
+            <div id="digitalRecovery" class="recovery-actions" hidden><button id="digitalVoiceRetry" class="secondary-button" type="button">重试</button><button id="digitalUseText" class="secondary-button" type="button">改用文字</button></div>
+            <form id="chatForm" class="chat-form">
+              <label class="sr-only" for="chatInput">输入想说的话</label>
+              <textarea id="chatInput" rows="2" maxlength="500" placeholder="也可以在这里打字…" required></textarea>
+              <button id="chatSend" class="secondary-button" type="submit" disabled>发送</button>
+            </form>
           </div>
         </section>
-
+      </div>
       <main>
-    <section id="chatPanel" class="panel" role="tabpanel" aria-labelledby="chatTab">
-      <div class="section-heading">
-        <div>
-          <p class="step-label">日常对话</p>
-          <h2>聊聊心事，也聊聊生活。</h2>
-        </div>
-        <p>一段不被催促的对话。从日常陪伴，到对认知健康的科学了解。</p>
-      </div>
-
-      <div class="assistant-workspace">
-        <aside class="conversation-sidebar" aria-label="对话列表">
-          <div class="conversation-sidebar-heading">
-            <strong>我的对话</strong>
-            <button id="newConversation" class="secondary-button small-button" type="button">新对话</button>
-          </div>
-          <div id="conversationList" class="conversation-list"></div>
-        </aside>
-
-        <div class="conversation-main">
-          <details id="modelSettingsPanel" class="model-settings">
-            <summary>
-              <span>回答模型</span>
-              <span id="activeModelBadge" class="model-badge">系统默认</span>
-            </summary>
-            <form id="modelSettingsForm" class="model-settings-form">
-              <label for="modelProvider">服务商</label>
-              <select id="modelProvider">
-                <option value="SYSTEM">系统默认（start.ps1 配置）</option>
-                <option value="DEEPSEEK">DeepSeek</option>
-                <option value="KIMI">Kimi</option>
-                <option value="GLM">智谱 GLM</option>
-                <option value="QWEN">通义千问</option>
-              </select>
-              <label for="modelName">模型名称</label>
-              <input id="modelName" maxlength="100" spellcheck="false" autocomplete="off">
-              <label for="modelApiKey">API Key</label>
-              <input id="modelApiKey" type="password" maxlength="1024" spellcheck="false" autocomplete="off" placeholder="请输入所选服务商的 API Key">
-              <div class="button-row">
-                <button id="saveModelSettings" class="secondary-button small-button" type="submit">保存并切换</button>
-                <button id="toggleModelApiKey" class="quiet-button small-button" type="button">显示 Key</button>
-                <button id="clearModelApiKey" class="quiet-button small-button" type="button">清除此 Key</button>
-              </div>
-              <p id="modelSettingsStatus" class="status-text" aria-live="polite"></p>
-              <p class="model-security-note">设置按当前账号或匿名浏览器 ID 隔离，仅保存在此浏览器。本次提问时 Key 会发送给本机后端并仅在请求内使用，不写入对话或数据库。请勿在公共电脑保存。</p>
-            </form>
-          </details>
-
-          <div class="conversation-status">
-            <strong id="currentConversationTitle">新对话</strong>
-            <span id="conversationTurnCount">0 / 100 轮</span>
-          </div>
-
-          <div class="quick-questions" aria-label="常见问题">
-            <button type="button" data-question="今天有点累，可以陪我聊聊吗？">今天有点累</button>
-            <button type="button" data-question="最近总忘事，应该注意什么？">聊聊记忆变化</button>
-            <button type="button" data-question="可以陪我做一个简单的放松练习吗？">一起放松一下</button>
-            <button type="button" data-question="给我讲一个温暖的小故事吧。">听一个小故事</button>
-          </div>
-
-          <div id="chatMessages" class="chat-messages" aria-live="polite" aria-label="对话内容"></div>
-
-          <form id="chatForm" class="chat-form">
-            <label for="chatInput">有什么想和我分享？</label>
-            <textarea id="chatInput" rows="3" maxlength="500" placeholder="一句问候、一件小事，或者现在的心情……" required></textarea>
-            <button id="chatSend" class="primary-button" type="submit" disabled>发送问题</button>
-          </form>
-        </div>
-      </div>
-    </section>
-
     <section id="screeningPanel" class="panel" role="tabpanel" aria-labelledby="screeningTab" hidden>
       <div class="section-heading">
         <div>
-          <p class="step-label">看图说话 · 语音风险筛查</p>
           <h2>观察图片并自然讲述</h2>
         </div>
-        <p>先选择一张图片，随后连续讲述约 30 到 90 秒；也可以上传已有 PCM WAV 文件。</p>
-      </div>
-
-      <div class="migration-strip" aria-label="认知观察流程">
-        <span><strong>01 · 选择一张图片</strong>观察画面，无需准备标准答案。</span>
-        <span><strong>02 · 说一段自己的话</strong>按平时的语速，自然讲述即可。</span>
-        <span><strong>03 · 留下一份观察</strong>查看结果与建议，关注长期变化。</span>
+        <p>每次完成一个步骤，轻松留下一份观察记录。</p>
       </div>
 
       <section id="authCard" class="card auth-card">
@@ -240,58 +171,42 @@
           <button id="logoutButton" class="quiet-button" type="button">退出登录</button>
         </div>
 
+        <nav class="screening-progress" aria-label="观察进度">
+          <button type="button" data-screening-step="0" aria-current="step">1 准备</button>
+          <button type="button" data-screening-step="1" disabled>2 看图讲述</button>
+          <button type="button" data-screening-step="2" disabled>3 确认录音</button>
+          <button type="button" data-screening-step="3" disabled>4 查看结果</button>
+        </nav>
+        <p id="screeningStatus" class="status-text" role="status"></p>
         <ol class="screening-steps">
-          <li>
-            <h3>阅读并同意</h3>
-            <label class="consent-row">
-              <input id="consentCheckbox" type="checkbox">
-              <span>我理解语音、转写和图片任务记录属于敏感健康信息，本次结果仅作风险提示，不能替代医生诊断。</span>
-            </label>
+          <li data-screening-page="0">
+            <h3 tabindex="-1">准备一次语音观察</h3>
+            <label class="consent-row"><input id="consentCheckbox" type="checkbox"><span>我理解语音、转写和图片任务记录属于敏感健康信息，本次结果仅作风险提示，不能替代医生诊断。</span></label>
+            <label for="imageSelect">选择一张图片</label><select id="imageSelect"></select><p id="imageHint" class="hint-text"></p>
           </li>
-          <li>
-            <h3>选择看图说话任务</h3>
+          <li data-screening-page="1" hidden>
+            <h3 tabindex="-1">看着图片，自然讲述</h3>
+            <p>按平时的语速讲述 30–90 秒，说完后结束录音。</p>
             <div class="picture-task">
-              <div>
-                <label for="imageSelect">图片任务</label>
-                <select id="imageSelect"></select>
-                <p id="imageHint" class="hint-text"></p>
-              </div>
               <img id="taskImage" class="task-image" alt="看图说话任务图片">
-            </div>
-          </li>
-          <li>
-            <h3>开始讲述</h3>
-            <div class="recorder-card">
-              <div id="recordingIndicator" class="recording-indicator" aria-live="polite">
-                <span class="recording-dot"></span>
-                <span id="recordingText">尚未开始录音</span>
-                <strong id="recordingTime">00:00</strong>
+              <div class="recorder-card">
+                <div id="recordingIndicator" class="recording-indicator" aria-live="polite"><span class="recording-dot"></span><span id="recordingText">准备好后开始录音</span><strong id="recordingTime">00:00</strong></div>
+                <div class="button-row"><button id="startRecording" class="primary-button" type="button">开始录音</button><button id="stopRecording" class="secondary-button" type="button" disabled>结束录音</button></div>
+                <details class="file-alternative"><summary>使用已有录音</summary><label for="audioFile">选择 WAV 录音文件</label><input id="audioFile" type="file" accept="audio/wav,.wav"></details>
               </div>
-              <div class="button-row">
-                <button id="startRecording" class="primary-button" type="button">开始录音</button>
-                <button id="stopRecording" class="danger-button" type="button" disabled>停止录音</button>
-              </div>
-              <p class="or-divider"><span>或者</span></p>
-              <label for="audioFile">选择已有 PCM WAV 文件</label>
-              <input id="audioFile" type="file" accept="audio/wav,.wav">
-              <audio id="audioPreview" controls hidden></audio>
             </div>
           </li>
-          <li>
-            <h3>上传并分析</h3>
-            <div class="button-row">
-              <button id="uploadAudio" class="primary-button" type="button" disabled>上传录音</button>
-              <button id="refreshHistory" class="secondary-button" type="button">刷新历史录音</button>
-            </div>
-            <p id="screeningStatus" class="status-text" aria-live="polite"></p>
-            <div id="audioHistory" class="audio-history"></div>
+          <li data-screening-page="2" hidden>
+            <h3 tabindex="-1">听一听，确认这段录音</h3>
+            <p id="screeningRecordingSummary">可以先试听，再保存并查看观察结果。</p>
+            <audio id="audioPreview" controls hidden></audio>
+            <div class="button-row"><button id="screeningRerecord" class="secondary-button" type="button">重新录音</button><button id="uploadAudio" class="primary-button" type="button" disabled>保存并继续</button></div>
           </li>
-        </ol>
-
+          <li data-screening-page="3" hidden>
+            <h3 tabindex="-1">查看观察结果</h3><div id="screeningActiveTask" class="card" hidden aria-live="polite"></div>
         <section id="resultCard" class="result-card" hidden aria-live="polite">
           <div class="result-heading">
             <div>
-              <p class="step-label">筛查结果</p>
               <h3 id="resultTitle">需要人工复核</h3>
             </div>
             <span id="resultBadge" class="result-badge">结果未定</span>
@@ -309,30 +224,63 @@
           <div class="result-section"><h4>语音转写</h4><p id="transcriptionText"></p></div>
           <div class="result-section"><h4>下一步建议</h4><ul id="recommendedActions"></ul></div>
         </section>
+
+            <details class="recording-history" open><summary>已保存的录音</summary><button id="refreshHistory" class="secondary-button" type="button">刷新录音</button><div id="audioHistory" class="audio-history"></div></details>
+          </li>
+        </ol>
+        <div class="wizard-actions"><button id="screeningPrevious" class="secondary-button" type="button" hidden>上一步</button><button id="screeningNext" class="primary-button" type="button">下一步：看图讲述</button></div>
       </section>
     </section>
 
     <section id="workspacePanel" class="panel" role="tabpanel" aria-labelledby="workspaceTab" hidden>
       <div class="section-heading">
         <div>
-          <p class="step-label">功能中心</p>
-          <h2>资料、录音、检测与管理</h2>
+          <h2>我的记录</h2>
         </div>
         <p>把每一次讲述、每一份观察，好好保存在自己的空间。</p>
       </div>
 
       <section id="workspaceLoginNotice" class="card">
-        <h3>请先登录</h3>
+        <h3>请先登录</h3><button id="recordLogin" class="primary-button" type="button">登录查看记录</button>
         <p>登录后即可查看自己的录音、认知观察记录和报告。</p>
       </section>
 
+      <details id="advancedSettings" class="advanced-settings"><summary>高级设置</summary>
+          <details id="modelSettingsPanel" class="model-settings">
+            <summary>
+              <span>回答模型</span>
+              <span id="activeModelBadge" class="model-badge">系统默认</span>
+            </summary>
+            <form id="modelSettingsForm" class="model-settings-form">
+              <label for="modelProvider">服务商</label>
+              <select id="modelProvider">
+                <option value="SYSTEM">系统默认</option>
+                <option value="DEEPSEEK">DeepSeek</option>
+                <option value="KIMI">Kimi</option>
+                <option value="GLM">智谱 GLM</option>
+                <option value="QWEN">通义千问</option>
+              </select>
+              <label for="modelName">模型名称</label>
+              <input id="modelName" maxlength="100" spellcheck="false" autocomplete="off">
+              <label for="modelApiKey">API Key</label>
+              <input id="modelApiKey" type="password" maxlength="1024" spellcheck="false" autocomplete="off" placeholder="请输入所选服务商的 API Key">
+              <div class="button-row">
+                <button id="saveModelSettings" class="secondary-button small-button" type="submit">保存并切换</button>
+                <button id="toggleModelApiKey" class="quiet-button small-button" type="button">显示 Key</button>
+                <button id="clearModelApiKey" class="quiet-button small-button" type="button">清除此 Key</button>
+              </div>
+              <p id="modelSettingsStatus" class="status-text" aria-live="polite"></p>
+              <p class="model-security-note">设置按当前账号或匿名浏览器 ID 隔离，仅保存在此浏览器。本次提问时 Key 会发送给本机后端并仅在请求内使用，不写入对话或数据库。请勿在公共电脑保存。</p>
+            </form>
+          </details>
+
+        <div class="button-row"><button class="secondary-button" type="button" data-view="detectView">扩展语音分析</button><button class="secondary-button admin-only" type="button" data-view="adminView" hidden>管理员工具</button></div>
+      </details>
       <section id="workspaceContent" hidden>
         <div class="feature-nav" aria-label="功能导航">
           <button class="secondary-button" type="button" data-view="profileView">个人信息</button>
           <button class="secondary-button" type="button" data-view="audioListView">历史录音</button>
-          <button class="secondary-button" type="button" data-view="detectView">Python 检测</button>
-          <button class="secondary-button" type="button" data-view="diagnosisView">AI 辅助检测 / PDF</button>
-          <button class="secondary-button admin-only" type="button" data-view="adminView" hidden>管理员工具</button>
+          <button class="secondary-button" type="button" data-view="diagnosisView">观察报告</button>
         </div>
 
         <section id="profileView" class="workspace-view">
@@ -372,12 +320,12 @@
         </section>
 
         <section id="detectView" class="workspace-view" hidden>
-          <h3>Python 语音检测</h3>
+          <h3>扩展语音分析</h3>
           <div class="form-grid compact-form">
             <label>选择录音<select id="detectAudioSelect"></select></label>
           </div>
           <div class="button-row">
-            <button id="runDetect" class="primary-button" type="button">开始 Python 检测</button>
+            <button id="runDetect" class="primary-button" type="button">开始分析</button>
             <button id="refreshDetectAudio" class="secondary-button" type="button">刷新录音</button>
           </div>
           <div id="detectResult" class="metric-strip" hidden></div>
@@ -385,19 +333,19 @@
         </section>
 
         <section id="diagnosisView" class="workspace-view" hidden>
-          <h3>AI 辅助检测与 PDF 报告</h3>
+          <h3>观察报告</h3>
           <div class="form-grid compact-form">
             <label>选择录音<select id="diagnosisAudioSelect"></select></label>
           </div>
           <div class="button-row">
-            <button id="runDiagnosis" class="primary-button" type="button">提交 AI 辅助筛查任务</button>
+            <button id="runDiagnosis" class="primary-button" type="button">生成观察报告</button>
             <button id="refreshPdfList" class="secondary-button" type="button">刷新历史报告</button>
           </div>
           <p id="diagnosisStatus" class="status-text" aria-live="polite"></p>
           <div id="diagnosisPreview" class="report-preview" hidden></div>
-          <h4>后台筛查任务</h4>
+          <h4>观察进度</h4>
           <div id="screeningTaskTable" class="data-table"></div>
-          <h4>历史 PDF 报告</h4>
+          <h4>历史报告</h4>
           <div id="pdfTable" class="data-table"></div>
           <div id="historyReportPreview" class="report-preview" hidden></div>
         </section>
@@ -460,18 +408,16 @@
       </section>
     </section>
       </main>
-
-      <footer>
-        <div class="footer-brand">忆声守护<span>.</span><small>认知健康 · 情感陪伴</small></div>
-        <p>让关心发生在每一天。<br><small>认知观察与情感陪伴 · 尊重、耐心、温和。</small></p>
-      </footer>
     </div>
   </div>
 
   <script src="/runtime-config.js"></script>
   <script src="/microphone.js"></script>
   <script src="/volume-control.js" defer></script>
-  <script src="/emotion-filter.js"></script>
-  <script src="/app.js" defer></script>
+  <script src="/emotion-filter.js?v=wake-6"></script>
+  <script src="/voice-endpoint.js?v=wake-6"></script>
+  <script src="/app.js?v=wake-6" defer></script>
+  <script src="/companion-ui.js?v=wake-6" defer></script>
+  <script src="/wake-listener.js?v=wake-6" defer></script>
 </body>
 </html>

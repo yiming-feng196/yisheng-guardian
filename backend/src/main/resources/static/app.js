@@ -18,7 +18,7 @@ const YISHENG_CONFIG = Object.freeze({
   emotionAutoStart: false,
   cameraStreamUrl: "",
   preferredCameraLabel: "",
-  emotionIntervalMs: 500,
+  emotionIntervalMs: 250,
   negativeEmotionHoldMs: 3000,
   negativeEmotionConfidence: 0.48,
   emotionComfortCooldownMs: 90000,
@@ -91,9 +91,9 @@ function switchTab(target) {
     workspace: ["workspaceTab", "workspacePanel"]
   };
   const sectionCopy = {
-    chat: ["忆声守护", "陪伴空间"],
+    chat: ["忆声陪伴", "陪伴空间"],
     screening: ["认知健康", "认知观察"],
-    workspace: ["个人记录", "我的空间"]
+    workspace: ["个人记录", "我的记录"]
   };
   if (!panels[target]) return;
   Object.entries(panels).forEach(([key, [tabId, panelId]]) => {
@@ -103,6 +103,11 @@ function switchTab(target) {
     $(tabId).setAttribute("aria-selected", String(active));
     $(tabId).tabIndex = active ? 0 : -1;
   });
+  if (target !== "chat") { cancelDigitalRecording(false); stopDigitalPlayback(false); }
+  if (target !== "screening") {
+    state.recordingSession = (state.recordingSession || 0) + 1;
+    if (state.audioContext) stopRecording();
+  }
   document.body.dataset.activeSection = target;
   if ($("currentSectionKicker")) $("currentSectionKicker").textContent = sectionCopy[target][0];
   if ($("currentSectionName")) $("currentSectionName").textContent = sectionCopy[target][1];
@@ -371,13 +376,16 @@ async function assistantApi(path, options = {}) {
 
 function renderAssistantWelcome() {
   $("chatMessages").replaceChildren();
-  appendAssistantMessage({ title: "你好，我是忆声助手", answer: "我可以解释常见表现、语音筛查、就医评估、风险管理、治疗常识和家庭照护。" });
+  appendAssistantMessage({ title: "忆声姐姐", answer: "很高兴见到您。今天过得怎么样？想聊生活、心情，或是记忆方面的小小担心，我都在这里。" });
 }
 
 function updateConversationHeader(conversation) {
   $("currentConversationTitle").textContent = conversation?.title || "新对话";
   $("conversationTurnCount").textContent = `${conversation?.turnCount || 0} / ${conversation?.maxTurns || 100} 轮`;
-  $("chatSend").disabled = state.chatStreaming || !conversation || conversation.turnCount >= conversation.maxTurns;
+  window.dispatchEvent(new CustomEvent("yisheng-conversation-ready", { detail: Boolean(conversation) }));
+  const unavailable = state.chatStreaming || !conversation || conversation.turnCount >= conversation.maxTurns;
+  $("chatSend").disabled = unavailable;
+  document.querySelectorAll("[data-question]").forEach(button => { button.disabled = unavailable; });
 }
 
 function renderConversationList() {
@@ -440,6 +448,7 @@ async function selectConversation(id, expectedVersion = state.assistantLoadVersi
     const index = state.assistantConversations.findIndex((item) => item.id === id);
     if (index >= 0) state.assistantConversations[index] = detail.conversation;
     renderConversationList(); updateConversationHeader(detail.conversation); $("chatMessages").replaceChildren();
+    if ($("conversationHistory")) $("conversationHistory").open = false;
     if (!detail.messages.length) { renderAssistantWelcome(); return; }
     detail.messages.forEach((message) => message.role === "user" ? appendUserMessage(message.content) : appendAssistantMessage({ ...message, answer: message.content }));
   } catch (error) { appendAssistantMessage({ title: "对话加载失败", answer: error.message }); }
@@ -453,13 +462,22 @@ function parseSseBlock(block) {
 
 async function askQuestion(question) {
   const value = String(question || "").trim();
-  if (!value || state.chatStreaming || !state.currentConversationId) return;
+  if (!value) return;
+  if (state.chatStreaming || !state.currentConversationId) {
+    setDigitalAvatarState("error", state.chatStreaming ? "我正在回答上一句话，请稍等。" : "对话还未连接，请点击顶部的重试连接。");
+    return;
+  }
   let modelSettings;
   try { modelSettings = activeAssistantModelSettings(); }
-  catch (error) { $("modelSettingsPanel").open = true; setStatus($("modelSettingsStatus"), error.message, "error"); return; }
+  catch (error) { switchTab("workspace"); $("advancedSettings").open = true; $("modelSettingsPanel").open = true; setStatus($("modelSettingsStatus"), error.message, "error"); return; }
   const active = state.assistantConversations.find((item) => item.id === state.currentConversationId);
   if (active && active.turnCount >= active.maxTurns) { appendAssistantMessage({ title: "本对话已满", answer: "每个对话最多 100 轮，请点击“新对话”继续。" }); return; }
-  appendUserMessage(value); $("chatInput").value = ""; state.chatStreaming = true; $("chatSend").disabled = true;
+  cancelDigitalRecording(false);
+  stopDigitalPlayback(false);
+  digitalAvatar.transcript.textContent = `您说：${value}`;
+  appendUserMessage(value); $("chatInput").value = ""; state.chatStreaming = true;
+  updateConversationHeader(active);
+  setDigitalAvatarState("thinking", "让我想一想。");
   const placeholder = document.createElement("article"); placeholder.className = "message assistant-message";
   const title = document.createElement("h3"); title.textContent = "正在准备回答…";
   const progress = document.createElement("section"); progress.className = "stream-progress"; progress.setAttribute("aria-live", "polite");
@@ -527,8 +545,8 @@ async function askQuestion(question) {
       if (done) break;
     }
     if (!completed) throw new Error("流式连接提前结束，请稍后重试");
-  } catch (error) { appendAssistantMessage({ title: "回答中断", answer: error.message }, placeholder); }
-  finally { state.chatStreaming = false; const current = state.assistantConversations.find((item) => item.id === state.currentConversationId); updateConversationHeader(current); }
+  } catch (error) { appendAssistantMessage({ title: "回答中断", answer: "连接中断了，请重试。" }, placeholder); setDigitalAvatarState("error", "回答暂时中断，您可以重试或继续输入。"); }
+  finally { state.chatStreaming = false; window.YiShengWake?.activityChanged(); const current = state.assistantConversations.find((item) => item.id === state.currentConversationId); updateConversationHeader(current); }
 }
 
 function updateAuthUi() {
@@ -544,6 +562,10 @@ function updateAuthUi() {
   document.querySelectorAll(".admin-only").forEach((item) => {
     item.hidden = state.role !== "ADMIN";
   });
+  if (loggedIn && window.yishengReturnToRecords) {
+    window.yishengReturnToRecords = false;
+    switchTab("workspace");
+  }
   if (loggedIn) {
     loadHistory();
     loadProfile();
@@ -650,6 +672,7 @@ function updateSelectedImage() {
 }
 
 async function startRecording() {
+  if (state.audioContext || state.screeningOpening) return;
   if (!$("consentCheckbox").checked) {
     setStatus($("screeningStatus"), "请先阅读并勾选知情同意。", "error");
     return;
@@ -658,8 +681,17 @@ async function startRecording() {
     setStatus($("screeningStatus"), "当前浏览器不支持录音，请上传 PCM WAV 文件。", "error");
     return;
   }
+  cancelDigitalRecording(false);
+  stopDigitalPlayback(false);
+  const session = (state.recordingSession || 0) + 1;
+  state.recordingSession = session;
+  state.screeningOpening = true;
+  window.YiShengWake?.activityChanged();
+  $("startRecording").disabled = true;
   try {
-    state.microphoneCapture = await window.YiShengAudio.openMicrophone(YISHENG_CONFIG);
+    const capture = await window.YiShengAudio.openMicrophone(YISHENG_CONFIG);
+    if (session !== state.recordingSession) { await capture.release(); return; }
+    state.microphoneCapture = capture;
     state.stream = state.microphoneCapture.stream;
     state.audioContext = new AudioContext();
     state.sourceNode = state.audioContext.createMediaStreamSource(state.stream);
@@ -683,6 +715,10 @@ async function startRecording() {
     if (state.audioContext && state.audioContext.state !== "closed") await state.audioContext.close();
     state.audioContext = null;
     setStatus($("screeningStatus"), `无法使用麦克风：${error.message}`, "error");
+  } finally {
+    state.screeningOpening = false;
+    window.YiShengWake?.activityChanged();
+    $("startRecording").disabled = Boolean(state.audioContext);
   }
 }
 
@@ -692,26 +728,42 @@ function updateRecordingTime() {
 }
 
 async function stopRecording() {
-  if (!state.audioContext) return;
-  window.clearInterval(state.timer);
-  state.durationSeconds = Math.max(1, Math.round((Date.now() - state.recordingStartedAt) / 1000));
-  state.processorNode.disconnect();
-  state.sourceNode.disconnect();
-  await state.microphoneCapture?.release();
-  state.microphoneCapture = null;
-  const sampleRate = state.audioContext.sampleRate;
-  await state.audioContext.close();
-  const samples = mergeAudioChunks(state.chunks);
-  state.audioBlob = encodeWav(samples, sampleRate);
-  state.audioFile = null;
-  showPreview(state.audioBlob);
-  $("startRecording").disabled = false;
+  if (!state.audioContext || state.recordingStopping) return;
+  state.recordingStopping = true;
   $("stopRecording").disabled = true;
-  $("uploadAudio").disabled = false;
-  $("recordingIndicator").classList.remove("recording");
-  $("recordingText").textContent = "录音完成，可以试听和上传";
-  setStatus($("screeningStatus"), `录音完成，共 ${state.durationSeconds} 秒。`, "success");
-  state.audioContext = null;
+  window.clearInterval(state.timer);
+  const context = state.audioContext;
+  const capture = state.microphoneCapture;
+  let completed = false;
+  try {
+    state.durationSeconds = Math.max(1, Math.round((Date.now() - state.recordingStartedAt) / 1000));
+    state.processorNode.disconnect();
+    state.sourceNode.disconnect();
+    const samples = mergeAudioChunks(state.chunks);
+    if (!samples.length) throw new Error("没有录到有效声音，请重新录音。");
+    state.audioBlob = encodeWav(samples, context.sampleRate);
+    state.audioFile = null;
+    showPreview(state.audioBlob);
+    $("uploadAudio").disabled = false;
+    completed = true;
+  } catch (error) {
+    setStatus($("screeningStatus"), error.message || "未能保存录音，请重新录音。", "error");
+    $("recordingText").textContent = "请重新录音";
+  } finally {
+    await capture?.release().catch(() => {});
+    if (context.state !== "closed") await context.close().catch(() => {});
+    state.audioContext = state.microphoneCapture = state.processorNode = state.sourceNode = null;
+    state.recordingStopping = false;
+    window.YiShengWake?.activityChanged();
+    $("startRecording").disabled = false;
+    $("stopRecording").disabled = true;
+    $("recordingIndicator").classList.remove("recording");
+  }
+  if (completed) {
+    $("recordingText").textContent = "录音完成，可以试听";
+    setStatus($("screeningStatus"), `录音完成，共 ${state.durationSeconds} 秒。`, "success");
+    window.YiShengScreening?.recorded();
+  }
 }
 
 function mergeAudioChunks(chunks) {
@@ -789,6 +841,7 @@ async function selectAudioFile() {
   showPreview(file);
   $("uploadAudio").disabled = false;
   setStatus($("screeningStatus"), `已选择 ${file.name}。`, "success");
+  window.YiShengScreening?.recorded();
 }
 
 async function uploadAudio() {
@@ -813,7 +866,8 @@ async function uploadAudio() {
   form.append("taskType", "NATURAL_SPEECH");
   try {
     await api("/audio/upload", { method: "POST", body: form }, true);
-    setStatus($("screeningStatus"), "上传成功。请在历史录音中开始风险分析。", "success");
+    setStatus($("screeningStatus"), "录音已保存。请点击这段录音旁的“开始分析”查看结果。", "success");
+    window.YiShengScreening?.show(3);
     await loadHistory();
     await refreshAudioSelectors();
   } catch (error) {
@@ -843,7 +897,7 @@ async function loadHistory() {
       row.className = "audio-row";
       const info = document.createElement("div");
       const name = document.createElement("strong");
-      name.textContent = record.filePath;
+      name.textContent = `语音观察 · ${imageLabel(record.imageName)}`;
       const meta = document.createElement("small");
       meta.textContent = `${record.duration ?? 0} 秒 · ${record.uploadTime || "时间未知"} · ${imageLabel(record.imageName)}`;
       info.append(name, meta);
@@ -851,7 +905,7 @@ async function loadHistory() {
       actions.className = "button-row";
       actions.append(
         createButton("播放", "secondary-button", () => playUserAudio(record.filePath)),
-        createButton("风险分析", "secondary-button", (event) => runScreening(record.filePath, event.currentTarget)),
+        createButton("开始分析", "secondary-button", (event) => runScreening(record.filePath, event.currentTarget)),
         createButton("删除录音", "danger-button", (event) => deleteAudio(record.filePath, event.currentTarget))
       );
       row.append(info, actions);
@@ -907,6 +961,8 @@ async function runScreening(audioName, button) {
   setStatus($("screeningStatus"), "正在提交后台筛查任务...");
   try {
     const task = await submitScreeningTask(audioName);
+    state.activeWizardTaskId = task.taskId;
+    window.YiShengScreening?.show(3);
     setStatus($("screeningStatus"), task.message || "任务已进入后台，可以安全退出页面。", "success");
     await loadScreeningTasks();
     startScreeningPolling();
@@ -929,6 +985,7 @@ function renderList(id, items, emptyText) {
 }
 
 function renderResult(result) {
+  window.YiShengScreening?.show(3);
   const levelLabels = { LOW: "较低", ELEVATED: "升高", HIGH: "较高", INCONCLUSIVE: "无法判定" };
   const level = result.riskLevel || "INCONCLUSIVE";
   const completed = result.screeningStatus === "COMPLETED";
@@ -1160,6 +1217,7 @@ async function loadScreeningTasks() {
   const container = $("screeningTaskTable");
   try {
     const tasks = await api("/api/v1/screenings?page=0&size=20", {}, true);
+    window.YiShengScreening?.tasks(Array.isArray(tasks) ? tasks : []);
     if (!Array.isArray(tasks) || tasks.length === 0) {
       renderEmpty(container, "暂无后台筛查任务。");
       return [];
@@ -1722,11 +1780,6 @@ function bindEvents() {
       primaryTabs[targetIndex].click();
     });
   });
-  $("fontToggle").addEventListener("click", () => {
-    const enabled = document.body.classList.toggle("large-text");
-    $("fontToggle").setAttribute("aria-pressed", String(enabled));
-    $("fontToggle").textContent = enabled ? "恢复字号" : "放大文字";
-  });
   $("chatForm").addEventListener("submit", (event) => {
     event.preventDefault();
     primeDigitalAudio();
@@ -1871,12 +1924,15 @@ function scheduleAvatarBlink() {
 
 function setDigitalAvatarState(name, message) {
   if (!digitalAvatar.stage) return;
-  const labels = { idle: "待机中", listening: "正在聆听", thinking: "正在思考", speaking: "正在回答", error: "需要您的帮助" };
+  const labels = { idle: "我在这里", listening: "我在听", thinking: "让我想一想", speaking: "正在为您朗读", error: "我们再试一次" };
   digitalAvatar.stage.dataset.avatarState = name;
   digitalAvatar.stage.setAttribute("aria-label", `女性数字人忆声姐姐，当前${labels[name] || labels.idle}`);
   digitalAvatar.stateText.textContent = labels[name] || labels.idle;
   syncAvatarMotion(name);
   if (message) digitalAvatar.status.textContent = message;
+  if ($("digitalStopPlayback")) $("digitalStopPlayback").hidden = name !== "speaking" && !digitalSpeechAbortController;
+  if ($("digitalRecovery")) $("digitalRecovery").hidden = name !== "error";
+  window.YiShengWake?.activityChanged();
 }
 
 function browserSpeak(text) {
@@ -1997,19 +2053,23 @@ async function speakRealtime(text) {
   const playChunk = (speech) => new Promise((resolve) => {
     if (session !== digitalSpeechSession) { resolve(false); return; }
     const audio = digitalAvatar.audio;
+    const finish = (value) => { controller.signal.removeEventListener("abort", cancelled); resolve(value); };
+    const cancelled = () => finish(false);
+    controller.signal.addEventListener("abort", cancelled, { once: true });
     audio.src = `/assistant/digital-human/speech/${encodeURIComponent(speech.id)}/audio`;
     audio.controls = false;
     audio.hidden = true;
     audio.onplay = () => {
-      if (session === digitalSpeechSession) setDigitalAvatarState("speaking", "忆声姐姐正在为您朗读。 ");
+      if (session === digitalSpeechSession) setDigitalAvatarState("speaking", "忆声姐姐正在为您朗读。");
     };
-    audio.onended = () => resolve(true);
-    audio.onerror = () => resolve(false);
+    audio.onended = () => finish(true);
+    audio.onerror = () => finish(false);
     audio.play().catch(() => {
+      if (session !== digitalSpeechSession) { finish(false); return; }
       audio.controls = true;
       audio.hidden = false;
-      setDigitalAvatarState("idle", "语音已生成，请点击人物下方的播放按钮。 ");
-      resolve(null);
+      setDigitalAvatarState("idle", "语音已生成，请点击人物下方的播放按钮。");
+      finish(null);
     });
   });
 
@@ -2108,6 +2168,7 @@ async function renderDigitalHumanVideo(text) {
 function digitalSpeak(text) {
   const value = String(text || "").trim();
   if (!value) return;
+  digitalAvatar.transcript.textContent = value;
   speakRealtime(value).then((spoken) => {
     if (!spoken) browserSpeak(value);
   }).catch(() => browserSpeak(value));
@@ -2115,6 +2176,7 @@ function digitalSpeak(text) {
 
 function openDigitalPanel(target, focusId) {
   switchTab(target);
+  if (target === "chat") return;
   window.setTimeout(() => {
     const element = $(focusId);
     element?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -2127,15 +2189,15 @@ function dispatchDigitalCommand(rawText) {
   if (!text) return;
   digitalAvatar.transcript.textContent = `您说：“${text}”`;
   if (/停止(录音|说话|采集)/.test(text)) {
-    if (state.audioContext) { stopRecording(); setDigitalAvatarState("thinking", "录音已停止，您可以试听并上传分析。"); }
-    else { setDigitalAvatarState("idle", "现在没有正在进行的录音。 "); }
+    if (state.audioContext) stopRecording();
+    stopDigitalPlayback();
     return;
   }
   if (/(开始|打开|进行).*(录音|筛查|检测|采集)/.test(text)) {
-    openDigitalPanel("screening", "consentCheckbox");
+    openDigitalPanel("screening", state.token ? "consentCheckbox" : "username");
     if (!state.token) { setDigitalAvatarState("idle", "请先登录；登录后请阅读并勾选知情同意，再开始录音。"); }
     else if (!$("consentCheckbox").checked) { setDigitalAvatarState("idle", "请先阅读并勾选知情同意，然后点击开始录音。 "); }
-    else { startRecording(); setDigitalAvatarState("listening", "正在采集筛查录音，请根据图片自然讲述。 "); }
+    else { window.YiShengScreening?.show(1); startRecording(); setDigitalAvatarState("listening", "请根据图片自然讲述。 "); }
     return;
   }
   if (/(报告|记录|历史|结果)/.test(text)) {
@@ -2152,159 +2214,248 @@ function dispatchDigitalCommand(rawText) {
   }
   openDigitalPanel("chat", "chatInput");
   if (!state.currentConversationId) {
-    setDigitalAvatarState("thinking", "正在准备对话，请稍候再说一次。 ");
+    $("chatInput").value = text;
+    setDigitalAvatarState("error", "连接还未就绪，您的话已保留在输入框中。请重试连接。 ");
     return;
   }
   setDigitalAvatarState("thinking", "我正在理解您的问题。 ");
   askQuestion(text);
 }
 
+let digitalVoiceSession = 0;
+let digitalVoiceOpening = false;
+let digitalVoiceAbortController = null;
+let digitalVoiceMeter = null;
+let lastDigitalVoice = null;
+let digitalVoiceEndpoint = null;
+let digitalVoiceAutoSubmit = false;
+
+function stopDigitalPlayback(announce = true) {
+  ++digitalSpeechSession;
+  digitalSpeechAbortController?.abort();
+  digitalSpeechAbortController = null;
+  stopDigitalAudio();
+  window.speechSynthesis?.cancel();
+  if (digitalAvatar.video) {
+    digitalAvatar.video.onended = digitalAvatar.video.onerror = null;
+    digitalAvatar.video.pause();
+    digitalAvatar.video.removeAttribute("src");
+    digitalAvatar.video.load();
+    digitalAvatar.video.hidden = true;
+    digitalAvatar.portrait.hidden = false;
+  }
+  setDigitalAvatarState("idle", announce ? "已停止播放，我在这里。" : "我在这里。");
+}
+
 function setDigitalVoiceButton(mode) {
-  const label = $("digitalListenLabel");
-  if (!digitalAvatar.listenButton || !label) return;
   const recording = mode === "recording";
   digitalAvatar.listenButton.classList.toggle("listening", recording);
   digitalAvatar.listenButton.setAttribute("aria-pressed", String(recording));
-  digitalAvatar.listenButton.disabled = mode === "submitting";
-  label.textContent = recording ? "提交语音" : mode === "submitting" ? "正在转写…" : "开始说话";
+  digitalAvatar.listenButton.disabled = mode === "requesting" || mode === "submitting";
+  $("digitalListenLabel").textContent = recording ? "结束并发送" : mode === "submitting" ? "正在转写…" : mode === "requesting" ? "正在打开麦克风…" : "开始说话";
+  $("digitalCancelRecording").hidden = mode === "idle";
+  $("digitalVoiceFeedback").hidden = !recording;
+  window.YiShengWake?.activityChanged();
 }
 
 function preferredConversationAudioType() {
   if (!("MediaRecorder" in window)) return "";
   return ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"]
-    .find((type) => MediaRecorder.isTypeSupported(type)) || "";
+    .find(type => MediaRecorder.isTypeSupported(type)) || "";
 }
 
 function conversationAudioExtension(mimeType) {
-  if (mimeType.includes("ogg")) return "ogg";
-  if (mimeType.includes("mp4")) return "m4a";
-  return "webm";
+  return mimeType.includes("ogg") ? "ogg" : mimeType.includes("mp4") ? "m4a" : "webm";
+}
+
+function stopDigitalVoiceMeter() {
+  if (!digitalVoiceMeter) return;
+  window.clearInterval(digitalVoiceMeter.timer);
+  digitalVoiceMeter.source?.disconnect();
+  digitalVoiceMeter.context?.close().catch(() => {});
+  digitalVoiceMeter = null;
+  $("digitalVoiceLevel").value = 0;
+}
+
+function startDigitalVoiceMeter(stream) {
+  stopDigitalVoiceMeter();
+  let context, source, analyser, samples;
+  try {
+    context = new AudioContext();
+    source = context.createMediaStreamSource(stream);
+    analyser = context.createAnalyser();
+    analyser.fftSize = 256;
+    samples = new Uint8Array(analyser.fftSize);
+    source.connect(analyser);
+    context.resume().catch(() => {});
+  } catch (_) { /* The recording and timer remain usable without a meter. */ }
+  const tick = () => {
+    const seconds = Math.floor((Date.now() - digitalVoiceStartedAt) / 1000);
+    $("digitalRecordingTime").textContent = `${String(Math.floor(seconds / 60)).padStart(2,"0")}:${String(seconds % 60).padStart(2,"0")}`;
+    if (analyser) {
+      analyser.getByteTimeDomainData(samples);
+      const rms = Math.sqrt(samples.reduce((sum, v) => sum + ((v - 128) / 128) ** 2, 0) / samples.length);
+      $("digitalVoiceLevel").value = Math.min(100, Math.round(rms * 250));
+      const action = digitalVoiceEndpoint?.update(rms, performance.now());
+      if (action === "submit") submitCurrentDigitalVoice();
+      else if (action === "cancel") {
+        cancelDigitalRecording(false);
+        setDigitalAvatarState("idle", "没有听到您说话。我在这里，您可以再次叫“小忆小忆”。");
+      }
+    }
+  };
+  tick();
+  digitalVoiceMeter = { context, source, timer: window.setInterval(tick, 100) };
+  return Boolean(analyser);
 }
 
 function releaseDigitalVoiceStream() {
   if (digitalVoiceLimitTimer) window.clearTimeout(digitalVoiceLimitTimer);
   digitalVoiceLimitTimer = null;
-  digitalVoiceStream?.getTracks().forEach((track) => track.stop());
+  stopDigitalVoiceMeter();
+  digitalVoiceStream?.getTracks().forEach(track => track.stop());
   digitalVoiceCapture?.release().catch(() => {});
-  digitalVoiceCapture = null;
-  digitalVoiceStream = null;
-  digitalVoiceRecorder = null;
+  digitalVoiceCapture = digitalVoiceStream = digitalVoiceRecorder = null;
+  digitalVoiceEndpoint = null;
+  digitalVoiceAutoSubmit = false;
 }
 
-async function submitDigitalVoice(blob, mimeType) {
+function cancelDigitalRecording(announce = true) {
+  ++digitalVoiceSession;
+  digitalVoiceAbortController?.abort();
+  digitalVoiceAbortController = null;
+  if (digitalVoiceRecorder) {
+    digitalVoiceRecorder.onstop = digitalVoiceRecorder.ondataavailable = digitalVoiceRecorder.onerror = null;
+    if (digitalVoiceRecorder.state !== "inactive") digitalVoiceRecorder.stop();
+  }
+  releaseDigitalVoiceStream();
+  digitalVoiceChunks = [];
+  digitalVoiceOpening = digitalVoiceSubmitting = false;
+  lastDigitalVoice = null;
+  setDigitalVoiceButton("idle");
+  if (announce) setDigitalAvatarState("idle", "已取消录音，您可以重新开始。");
+}
+
+async function submitDigitalVoice(blob, mimeType, session = digitalVoiceSession) {
+  if (session !== digitalVoiceSession) return;
+  releaseDigitalVoiceStream();
   if (!blob?.size) {
-    releaseDigitalVoiceStream();
     setDigitalVoiceButton("idle");
-    setDigitalAvatarState("error", "没有录到声音，请重新尝试。");
+    setDigitalAvatarState("error", "没有录到声音，请重试，或改用文字。");
     return;
   }
+  lastDigitalVoice = { blob, mimeType };
+  const controller = new AbortController();
+  digitalVoiceAbortController = controller;
   digitalVoiceSubmitting = true;
   setDigitalVoiceButton("submitting");
-  setDigitalAvatarState("thinking", "录音已提交，正在使用本地语音模型转写。 ");
+  setDigitalAvatarState("thinking", "正在听取您的话，请稍等。");
+  const timeout = window.setTimeout(() => controller.abort(), 45000);
   const form = new FormData();
   form.append("file", blob, `conversation.${conversationAudioExtension(mimeType)}`);
   try {
-    const response = await fetch("/assistant/speech/transcribe", {
-      method: "POST",
-      headers: assistantHeaders(),
-      body: form
-    });
+    const response = await fetch("/assistant/speech/transcribe", { method: "POST", headers: assistantHeaders(), body: form, signal: controller.signal });
     const payload = await readResponse(response);
+    if (session !== digitalVoiceSession) return;
     const transcription = String(payload?.transcription || "").trim();
-    if (!transcription) throw new Error("没有识别到有效语音");
-    digitalAvatar.transcript.textContent = `您说：“${transcription}”`;
+    if (!transcription) throw new Error("没有听清您的话");
+    lastDigitalVoice = null;
+    digitalAvatar.transcript.textContent = `您说：${transcription}`;
     dispatchDigitalCommand(transcription);
   } catch (error) {
-    setDigitalAvatarState("error", `语音转写失败：${error.message}`);
+    if (session === digitalVoiceSession) setDigitalAvatarState("error", error.name === "AbortError" ? "等候时间较长，您可以重试这段录音，或改用文字。" : "暂时没有听清，您可以重试这段录音，或改用文字。");
   } finally {
-    digitalVoiceSubmitting = false;
-    releaseDigitalVoiceStream();
-    setDigitalVoiceButton("idle");
+    window.clearTimeout(timeout);
+    if (session === digitalVoiceSession) {
+      digitalVoiceSubmitting = false;
+      digitalVoiceAbortController = null;
+      setDigitalVoiceButton("idle");
+    }
   }
 }
 
 function submitCurrentDigitalVoice() {
-  if (!digitalVoiceRecorder || digitalVoiceRecorder.state === "inactive") return;
-  const elapsed = Date.now() - digitalVoiceStartedAt;
-  if (elapsed < 500) {
-    setDigitalAvatarState("listening", "录音时间太短，请说完后再点击提交。 ");
+  if (!digitalVoiceRecorder || digitalVoiceRecorder.state !== "recording") return;
+  if (Date.now() - digitalVoiceStartedAt < 500) {
+    setDigitalAvatarState("listening", "我在听，说完后再点击结束并发送。");
     return;
   }
   setDigitalVoiceButton("submitting");
   digitalVoiceRecorder.stop();
 }
 
-async function startDigitalListening() {
-  if (digitalVoiceSubmitting) return;
-  if (digitalVoiceRecorder?.state === "recording") {
-    submitCurrentDigitalVoice();
-    return;
-  }
+async function startDigitalListening(options = {}) {
+  if (digitalVoiceOpening || digitalVoiceSubmitting || state.chatStreaming) return;
+  if (digitalVoiceRecorder?.state === "recording") { submitCurrentDigitalVoice(); return; }
   if (!navigator.mediaDevices?.getUserMedia || !("MediaRecorder" in window)) {
-    setDigitalAvatarState("error", "当前浏览器不支持本地录音，请使用文字输入。");
-    return;
+    setDigitalAvatarState("error", "当前浏览器无法录音，请改用文字。"); return;
   }
+  if (state.audioContext) await stopRecording();
+  const session = ++digitalVoiceSession;
+  lastDigitalVoice = null;
+  digitalVoiceOpening = true;
+  stopDigitalPlayback(false);
+  setDigitalVoiceButton("requesting");
+  setDigitalAvatarState("listening", "正在打开麦克风，请稍等。");
   try {
-    ++digitalSpeechSession;
-    digitalSpeechAbortController?.abort();
-    stopDigitalAudio();
-    window.speechSynthesis?.cancel();
-    digitalVoiceCapture = await window.YiShengAudio.openMicrophone(YISHENG_CONFIG);
-    const stream = digitalVoiceCapture.stream;
+    const capture = await window.YiShengAudio.openMicrophone(YISHENG_CONFIG);
+    if (session !== digitalVoiceSession) { await capture.release(); return; }
+    digitalVoiceCapture = capture;
+    const stream = capture.stream;
     const requestedType = preferredConversationAudioType();
     const recorder = requestedType ? new MediaRecorder(stream, { mimeType: requestedType }) : new MediaRecorder(stream);
     digitalVoiceStream = stream;
     digitalVoiceRecorder = recorder;
     digitalVoiceChunks = [];
     digitalVoiceStartedAt = Date.now();
-    recorder.ondataavailable = (event) => {
-      if (event.data?.size) digitalVoiceChunks.push(event.data);
-    };
+    digitalVoiceAutoSubmit = Boolean(options.autoSubmit);
+    digitalVoiceEndpoint = digitalVoiceAutoSubmit ? new window.YiShengVoiceEndpoint({ threshold: YISHENG_CONFIG.wakeVoiceThreshold, silenceMs: YISHENG_CONFIG.wakeSilenceMs }) : null;
+    recorder.ondataavailable = event => { if (session === digitalVoiceSession && event.data?.size) digitalVoiceChunks.push(event.data); };
     recorder.onerror = () => {
-      releaseDigitalVoiceStream();
-      setDigitalVoiceButton("idle");
-      setDigitalAvatarState("error", "录音发生错误，请检查麦克风后重试。");
+      if (session !== digitalVoiceSession) return;
+      cancelDigitalRecording(false);
+      setDigitalAvatarState("error", "录音中断，请检查麦克风后重试，或改用文字。");
     };
     recorder.onstop = () => {
-      const mimeType = recorder.mimeType || requestedType || "audio/webm";
-      const blob = new Blob(digitalVoiceChunks, { type: mimeType });
+      if (session !== digitalVoiceSession) return;
+      const type = recorder.mimeType || requestedType || "audio/webm";
+      const blob = new Blob(digitalVoiceChunks, { type });
       digitalVoiceChunks = [];
-      submitDigitalVoice(blob, mimeType);
+      submitDigitalVoice(blob, type, session);
     };
     recorder.start(1000);
+    digitalVoiceOpening = false;
+    const meterReady = startDigitalVoiceMeter(stream);
+    if (digitalVoiceAutoSubmit && !meterReady) {
+      digitalVoiceAutoSubmit = false;
+      digitalVoiceEndpoint = null;
+    }
     setDigitalVoiceButton("recording");
-    setDigitalAvatarState("listening", "我在听。您可以一直说，说完后点击“提交语音”。 ");
-    digitalAvatar.transcript.textContent = "正在录音，语音只会发送到本机转写服务。";
-    // Avoid unbounded in-memory recording if the page is left unattended.
-    digitalVoiceLimitTimer = window.setTimeout(() => {
-      if (digitalVoiceRecorder?.state === "recording") {
-        setDigitalAvatarState("listening", "录音已达到两分钟，请点击“提交语音”。 ");
-      }
-    }, 120000);
-  } catch (error) {
+    setDigitalAvatarState("listening", digitalVoiceAutoSubmit ? "我在，您说。说完停顿后，我会自动发送。" : "我在听，说完后点击“结束并发送”。");
+    digitalAvatar.transcript.textContent = "";
+    digitalVoiceLimitTimer = window.setTimeout(submitCurrentDigitalVoice, digitalVoiceAutoSubmit ? 45000 : 120000);
+  } catch (_) {
+    if (session !== digitalVoiceSession) return;
+    digitalVoiceOpening = false;
     releaseDigitalVoiceStream();
     setDigitalVoiceButton("idle");
-    const denied = error?.name === "NotAllowedError" || error?.name === "SecurityError";
-    setDigitalAvatarState("error", denied
-      ? "麦克风权限未开启，请允许此页面使用麦克风后重试。"
-      : `无法开始录音：${error.message || "请检查麦克风设备"}`);
+    setDigitalAvatarState("error", "麦克风暂不可用，请检查麦克风权限后重试，或改用文字。");
   }
 }
 
-$("digitalListen").addEventListener("click", () => {
+$("digitalListen").addEventListener("click", () => { primeDigitalAudio(); startDigitalListening(); });
+$("digitalCancelRecording").addEventListener("click", () => cancelDigitalRecording());
+$("digitalStopPlayback").addEventListener("click", () => stopDigitalPlayback());
+$("digitalVoiceRetry").addEventListener("click", () => {
   primeDigitalAudio();
-  startDigitalListening();
+  if (lastDigitalVoice) submitDigitalVoice(lastDigitalVoice.blob, lastDigitalVoice.mimeType, ++digitalVoiceSession);
+  else startDigitalListening();
 });
-$("digitalScreening").addEventListener("click", () => dispatchDigitalCommand("开始录音筛查"));
-$("digitalReports").addEventListener("click", () => dispatchDigitalCommand("查看报告"));
-$("digitalTextForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  primeDigitalAudio();
-  const input = $("digitalTextInput");
-  const value = input.value.trim();
-  if (!value) return;
-  input.value = "";
-  dispatchDigitalCommand(value);
+$("digitalUseText").addEventListener("click", () => { cancelDigitalRecording(false); setDigitalAvatarState("idle", "可以在右侧输入想说的话。"); $("chatInput").focus({ preventScroll: true }); });
+$("digitalScreening").addEventListener("click", () => {
+  switchTab("screening");
+  window.YiShengScreening?.show(0);
+  if (!state.token) $("username").focus();
 });
 
 Object.values(AVATAR_FRAMES).forEach((src) => {
@@ -2330,6 +2481,7 @@ let emotionStream = null;
 let emotionTimer = null;
 let emotionRunning = false;
 let emotionRequestActive = false;
+let emotionRequestController = null;
 const emotionFilter = new window.YiShengEmotionFilter();
 let emotionTrackedBox = null;
 let emotionDisplayBox = null;
@@ -2522,6 +2674,7 @@ async function analyzeEmotionFrame() {
   if (!emotionRunning || emotionRequestActive || !sourceWidth || !sourceHeight) return;
   emotionRequestActive = true;
   const session = emotionSession;
+  const startedAt = performance.now();
   try {
     const targetWidth = Math.min(640, sourceWidth);
     const targetHeight = Math.max(64, Math.round(sourceHeight * targetWidth / sourceWidth));
@@ -2530,8 +2683,10 @@ async function analyzeEmotionFrame() {
     emotionCaptureContext.drawImage(emotionFrameSource, 0, 0, targetWidth, targetHeight);
     const image = await canvasToJpeg(emotionCaptureCanvas);
     if (!image) throw new Error("无法生成摄像头画面");
+    if (!emotionRunning || session !== emotionSession) return;
 
     const controller = new AbortController();
+    emotionRequestController = controller;
     const timeout = window.setTimeout(() => controller.abort(), 4500);
     let response;
     try {
@@ -2544,6 +2699,7 @@ async function analyzeEmotionFrame() {
       });
     } finally {
       window.clearTimeout(timeout);
+      if (emotionRequestController === controller) emotionRequestController = null;
     }
     if (!response.ok) throw new Error(`视觉服务返回 ${response.status}`);
     const result = await response.json();
@@ -2557,7 +2713,9 @@ async function analyzeEmotionFrame() {
   } finally {
     if (session === emotionSession) emotionRequestActive = false;
     if (emotionRunning && session === emotionSession) {
-      emotionTimer = window.setTimeout(analyzeEmotionFrame, Math.max(250, Number(YISHENG_CONFIG.emotionIntervalMs) || 500));
+      const interval = Math.max(200, Number(YISHENG_CONFIG.emotionIntervalMs) || 250);
+      const remaining = interval - (performance.now() - startedAt);
+      emotionTimer = window.setTimeout(analyzeEmotionFrame, Math.max(50, remaining));
     }
   }
 }
@@ -2629,7 +2787,7 @@ async function startEmotionRecognition() {
     emotionTrackedBox = null;
     emotionDisplayBox = null;
     emotionVision.preview.dataset.active = "true";
-    emotionVision.toggle.textContent = "关闭情绪感知";
+    emotionVision.toggle.textContent = "暂停观察";
     setEmotionConnection("connected", "摄像头已连接");
     analyzeEmotionFrame();
   } catch (error) {
@@ -2644,6 +2802,8 @@ async function startEmotionRecognition() {
 
 function stopEmotionRecognition() {
   emotionSession += 1;
+  emotionRequestController?.abort();
+  emotionRequestController = null;
   emotionFilter.reset();
   emotionTrackedBox = null;
   emotionDisplayBox = null;
@@ -2659,7 +2819,7 @@ function stopEmotionRecognition() {
   resetEmotionCompanionEpisode();
   emotionVision.preview.dataset.active = "false";
   delete emotionVision.preview.dataset.source;
-  emotionVision.toggle.textContent = "开启情绪感知";
+  emotionVision.toggle.textContent = "开启观察";
   emotionVision.label.textContent = "等待开启";
   emotionVision.confidence.textContent = "--";
   document.querySelectorAll("[data-emotion]").forEach(chip => chip.classList.remove("active"));

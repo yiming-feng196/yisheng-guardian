@@ -30,7 +30,7 @@ class StaticAppTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsByteArray();
         String html = new String(htmlBytes, StandardCharsets.UTF_8);
-        assertTrue(html.contains("忆声守护"));
+        assertTrue(html.contains("忆声陪伴"));
         assertTrue(html.contains("不能诊断、排除或治疗阿尔茨海默病"));
         assertTrue(html.contains("看图说话"));
         assertTrue(html.contains("回答模型"));

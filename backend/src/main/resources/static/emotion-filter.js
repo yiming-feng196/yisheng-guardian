@@ -3,8 +3,8 @@
 // A clock-based filter, so stability does not depend on camera/inference FPS.
 class YiShengEmotionFilter {
   constructor(options = {}) {
-    this.options = { timeConstantMs: 1600, initialHoldMs: 900, switchHoldMs: 1600,
-      minimumDisplayMs: 3000, missingGraceMs: 1200, resetGapMs: 2200,
+    this.options = { timeConstantMs: 450, initialHoldMs: 250, switchHoldMs: 500,
+      minimumDisplayMs: 1200, missingGraceMs: 1200, resetGapMs: 2200,
       confidenceFloor: 0.3, majority: 0.6, ...options };
     this.reset();
   }

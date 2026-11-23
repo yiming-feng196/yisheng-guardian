@@ -88,3 +88,27 @@ paplay --device=yisheng_speaker ~/Recordings/new-recording-clean.wav
 `parecord` 保存的是未做网页增益处理的有效单声道音频。网页中的“开始说话”
 和筛查“开始录音”会自动应用上述处理。不要同时用 `hw:1,0` 独占设备，
 以免与网页的 PulseAudio 录放冲突。
+
+
+## 小忆小忆：后台语音唤醒
+
+`yisheng-wake.service` 在 Jetson 本机运行离线 Vosk 中文识别。连续呼唤“小忆小忆”后，保持打开的网页自动进入陪伴对话并开始录音；约 1.8 秒停顿后自动发送。8 秒未听到有效讲话时退出本轮，单轮最长 45 秒。原有手动录音仍按按钮提交，认知观察录音不使用自动停顿提交。
+
+网页提供“开启唤醒 / 关闭唤醒”。开关保存在 `~/.config/yisheng-companion/wake.json`，重启后恢复。环境音和识别中的文本只在内存中处理，不保存，也不持续发送给转写服务。唤醒后的一轮对话沿用原有本机转写接口。此功能识别通用唤醒词，不是声纹验证。
+
+后台通过 PulseAudio 的 `yisheng_microphone` 左声道源采集 16 kHz 单声道 PCM；不修改默认输入输出。Vosk 0.3.45 与 srt 3.5.3 安装在 `.runtime/wake-python/`，模型为 `models/vosk-model-small-cn-0.22/`。JetPack 4 的系统 libstdc++ 版本过旧，应用使用 conda-forge 的 `libstdcxx-ng 9.5.0 hf8676aaa_17`、`libgcc-ng 9.5.0 h3e7ed6a_19` aarch64 包，解压到 `.runtime/wake-cpp/`，只通过该服务的 `LD_LIBRARY_PATH` 加载；系统库保持原版本。
+
+原始资源：Vosk Python 包来自 PyPI，模型来自 https://alphacephei.com/vosk/models/vosk-model-small-cn-0.22.zip ，C++ 运行库来自 conda-forge 的公开软件包仓库。保留软件包中的许可证。该设备无公网 DNS，资源经工作站下载并传入，在设备上离线安装。
+
+`frontend_server.py` 将同源 `/wake-api/` 代理到 Jetson 的 `127.0.0.1:8095`。服务只开放状态、开关和忙碌租约接口，不提供录音上传或识别文本查询。网页每 500 ms 更新租约并读取唤醒事件；录音、转写、回答和播音期间暂停唤醒采集，避免回声和重复触发。页面第一次连接、后台重启与过期事件均不会自动打开录音。网页须保持打开；设备上的 Chromium 会按现有自启动配置启动。
+
+部署时复制 `wake_service.py` 到 `~/yisheng-guardian/`，安装本目录的 `yisheng-wake.service` 到 `~/.config/systemd/user/`，确认上述模型及隔离运行库可用，然后执行：
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now yisheng-wake
+systemctl --user restart yisheng-frontend
+curl http://127.0.0.1:8080/wake-api/status
+```
+
+测试：`python3 -m unittest discover -s deploy/jetson/tests -p test_wake_service.py`，`node --test deploy/jetson/tests/voice-endpoint.test.cjs`。真实麦克风远场效果仍受距离、环境和发音影响；实际使用时喊完唤醒词，看到“我在，您说”后开始讲话。
