@@ -1,0 +1,8 @@
+.steps { display: flex; justify-content: space-between; margin: 30rpx 0; }
+.step { flex: 1; text-align: center; color: #53635b; font-size: .86em; }
+.step-number { width: 58rpx; height: 58rpx; margin: 0 auto 10rpx; line-height: 58rpx; border-radius: 50%; background: #e3eae0; }
+.current { color: #125744; font-weight: 650; }
+.current .step-number { color: #fff; background: #125744; }
+.consent { display: flex; align-items: flex-start; }
+.consent checkbox { flex-shrink: 0; margin-right: 12rpx; }
+.task-image { width: 100%; border-radius: 18rpx; display: block; }

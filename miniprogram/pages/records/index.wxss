@@ -1,0 +1,4 @@
+.record { width: 100%; color: #203c30; text-align: left; font-weight: normal; }
+.record .row { align-items: flex-start; flex-wrap: wrap; }
+.record .badge { margin-bottom: 16rpx; }
+.record-action { color: #125744; font-weight: 600; margin-top: 22rpx; }

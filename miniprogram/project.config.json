@@ -1,0 +1,23 @@
+{
+  "appid": "wx23c148b666ca9b93",
+  "projectname": "yisheng-companion-miniprogram",
+  "description": "忆声陪伴手机端公共工程骨架",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "./",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "urlCheck": true
+  },
+  "packOptions": {
+    "ignore": [
+      { "type": "folder", "value": "tests" },
+      { "type": "folder", "value": "scripts" },
+      { "type": "file", "value": "README.md" },
+      { "type": "file", "value": "CONTRIBUTING.md" }
+    ],
+    "include": []
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "desc": "开发原型不进行搜索索引。",
+  "rules": [{ "action": "disallow", "page": "*" }]
+}

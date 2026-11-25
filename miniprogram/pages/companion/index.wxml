@@ -1,0 +1,29 @@
+<view class="page companion-page {{largeText ? 'large' : ''}}">
+  <environment-notice mode="{{mode}}" />
+  <view class="hero">
+    <image class="brand-logo" src="/assets/logo.png" mode="aspectFit" />
+    <view class="hero-copy">
+      <view class="page-title">今天想聊些什么？</view>
+      <view class="note">陪您聊聊生活、心情与记忆</view>
+    </view>
+  </view>
+  <view class="quick-topics">
+    <button class="topic" bindtap="onQuickTopic" data-message="今天有点累，想找人聊聊。" disabled="{{sending}}">聊聊今天</button>
+    <button class="topic" bindtap="onQuickTopic" data-message="给我讲一个温暖的小故事吧。" disabled="{{sending}}">听个故事</button>
+  </view>
+  <scroll-view class="messages" scroll-y scroll-into-view="{{scrollTarget}}" scroll-with-animation aria-label="聊天内容">
+    <view wx:for="{{messages}}" wx:key="id" id="{{item.id}}" class="message {{item.role}} {{item.error ? 'failed' : ''}}">
+      <view wx:if="{{item.role === 'assistant'}}" class="message-author">小忆</view>
+      <text selectable>{{item.content}}</text>
+    </view>
+    <view wx:if="{{sending}}" class="thinking">让我想一想…</view>
+  </scroll-view>
+  <view class="composer">
+    <button class="secondary-button small-button voice-button" bindtap="showVoicePlan">语音交流 · 待接入</button>
+    <view class="input-row">
+      <textarea class="field chat-input" value="{{input}}" maxlength="500" placeholder="输入想说的话…" bindinput="onInput" disabled="{{sending}}" auto-height confirm-type="send" bindconfirm="sendMessage" />
+      <button class="primary-button small-button send-button" bindtap="sendMessage" loading="{{sending}}" disabled="{{sending || !input}}">发送</button>
+    </view>
+    <view class="note composer-note">{{mode === 'live' ? '已接入单轮文字问答；连续会话和语音待迁移。' : '当前展示演示回复，可在“我的”中配置真实接口。'}}</view>
+  </view>
+</view>

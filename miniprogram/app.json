@@ -1,0 +1,31 @@
+{
+  "pages": [
+    "pages/companion/index",
+    "pages/observation/index",
+    "pages/records/index",
+    "pages/profile/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "忆声陪伴",
+    "navigationBarBackgroundColor": "#f5f8f3",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f8f3",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#53635b",
+    "selectedColor": "#125744",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/companion/index", "text": "陪伴" },
+      { "pagePath": "pages/observation/index", "text": "观察" },
+      { "pagePath": "pages/records/index", "text": "记录" },
+      { "pagePath": "pages/profile/index", "text": "我的" }
+    ]
+  },
+  "networkTimeout": { "request": 60000, "uploadFile": 60000, "downloadFile": 60000 },
+  "usingComponents": { "environment-notice": "/components/environment-notice/index" },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

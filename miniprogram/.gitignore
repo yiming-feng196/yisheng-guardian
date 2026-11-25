@@ -1,0 +1,6 @@
+# Per-developer tool preferences and generated dependencies.
+project.private.config.json
+node_modules/
+miniprogram_npm/
+config/local.js
+*.log

@@ -1,0 +1,21 @@
+.companion-page { display: flex; flex-direction: column; height: 100%; padding-bottom: 16rpx; }
+.hero { display: flex; align-items: center; margin: 0 0 22rpx; }
+.brand-logo { width: 104rpx; height: 104rpx; border-radius: 26rpx; flex-shrink: 0; margin-right: 20rpx; }
+.hero-copy { min-width: 0; }
+.hero .page-title { font-size: 1.25em; }
+.quick-topics { display: flex; margin-bottom: 20rpx; }
+.topic { color: #125744; background: #fff; border: 1rpx solid #d4e2d5; border-radius: 40rpx; padding: 14rpx 24rpx; font-size: .94em; }
+.topic + .topic { margin-left: 16rpx; }
+.messages { flex: 1; min-height: 160rpx; height: 0; }
+.message { max-width: 94%; margin-bottom: 22rpx; padding: 24rpx; border-radius: 24rpx; white-space: pre-wrap; word-break: break-all; }
+.assistant { background: #fff; border: 1rpx solid #dae5da; }
+.user { margin-left: auto; background: #125744; color: white; }
+.failed { background: #fff0ed; color: #9d342b; }
+.message-author { font-size: .9em; font-weight: 650; margin-bottom: 10rpx; }
+.thinking { padding: 10rpx 12rpx 24rpx; color: #456151; }
+.composer { flex-shrink: 0; padding-top: 16rpx; }
+.voice-button { width: 100%; margin-bottom: 16rpx; }
+.input-row { display: flex; align-items: flex-end; }
+.chat-input { flex: 1; min-height: 88rpx; max-height: 160rpx; }
+.send-button { margin-left: 14rpx; flex-shrink: 0; min-height: 88rpx; }
+.composer-note { margin-top: 12rpx; font-size: .84em; }

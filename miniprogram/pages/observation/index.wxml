@@ -1,0 +1,38 @@
+<view class="page {{largeText ? 'large' : ''}}">
+  <environment-notice mode="{{mode}}" />
+  <view class="page-title">一步一步，轻松讲述</view>
+  <view class="subtitle">观察流程骨架 · 录音及分析尚未接入</view>
+  <view class="steps">
+    <view wx:for="{{steps}}" wx:key="*this" class="step {{index === step ? 'current' : ''}}"><view class="step-number">{{index + 1}}</view><view>{{item}}</view></view>
+  </view>
+  <view wx:if="{{step === 0}}" class="card">
+    <view class="section-title">先了解这次观察</view>
+    <view>看图讲述有助于记录表达过程，观察信息不能替代专业诊断。</view>
+    <view class="note spaced">当前只演示页面流程，不会调用麦克风、上传音频或生成健康评估。真实功能接入时，需要使用后端的正式知情同意版本。</view>
+    <checkbox-group bindchange="onConsentChange" class="spaced">
+      <label class="consent"><checkbox value="consent" checked="{{consent}}" color="#125744" /><text>我已了解，继续体验流程示例</text></label>
+    </checkbox-group>
+  </view>
+  <view wx:elif="{{step === 1}}" class="card">
+    <view class="section-title">看看图片，准备讲述</view>
+    <image class="task-image" src="/assets/observation.jpg" mode="widthFix" />
+    <view class="note spaced">可以说说图中有哪些人，他们在做什么，以及你注意到的细节。</view>
+    <button class="secondary-button spaced" bindtap="prepareSample">{{mode === 'demo' ? '使用流程示例（无录音）' : '录音与上传 · 待接入'}}</button>
+    <view wx:if="{{sampleReady}}" class="status">已选择示例占位，没有采集音频。</view>
+  </view>
+  <view wx:elif="{{step === 2}}" class="card">
+    <view class="section-title">确认录音的位置</view>
+    <view>后续将在这里展示录音时长、试听与重新录制操作。</view>
+    <view class="status">当前为流程示例，没有可试听或提交的录音文件。</view>
+  </view>
+  <view wx:else class="card">
+    <view class="section-title">流程示例已走完</view>
+    <view>这里预留任务进度与观察报告，当前未创建任务或生成真实结果。</view>
+    <button class="secondary-button spaced" bindtap="openRecords">查看记录页面</button>
+  </view>
+  <view class="button-row">
+    <button wx:if="{{step > 0 && step < 3}}" class="secondary-button" bindtap="previousStep">上一步</button>
+    <button wx:if="{{step < 3}}" class="primary-button" bindtap="nextStep" disabled="{{(step === 0 && !consent) || (step === 1 && !sampleReady)}}">{{step === 2 ? '演示结果页面' : '下一步'}}</button>
+    <button wx:else class="primary-button" bindtap="restart">重新体验</button>
+  </view>
+</view>

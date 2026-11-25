@@ -1,0 +1,27 @@
+<view class="page {{largeText ? 'large' : ''}}">
+  <environment-notice mode="{{mode}}" />
+  <view class="page-title">我的与设置</view>
+  <view class="subtitle">忆声陪伴 · 手机端开发原型</view>
+  <view class="card">
+    <view class="section-title">开发环境</view>
+    <view class="row"><view>接口联调模式</view><switch checked="{{mode === 'live'}}" bindchange="onModeChange" color="#125744" disabled="{{busy}}" /></view>
+    <view class="note spaced">关闭时使用明确标注的演示内容；开启后，文字问答和记录列表连接真实后端。保存后生效。</view>
+    <label class="field-label" for="backend-address">后端地址</label>
+    <input id="backend-address" class="field" value="{{apiBaseUrl}}" bindinput="onBaseUrl" placeholder="例如 http://192.168.1.100:8080" disabled="{{busy}}" />
+    <view class="note spaced">请填写工作站在手机可达网络中的地址。示例 IP 需要替换；手机上的 127.0.0.1 不会指向工作站。</view>
+    <view class="row divider"><view>大字模式</view><switch checked="{{largeText}}" bindchange="onTextChange" color="#125744" disabled="{{busy}}" /></view>
+    <view class="button-row"><button class="secondary-button" bindtap="saveConfig" disabled="{{busy}}">保存设置</button><button class="primary-button" bindtap="testConnection" loading="{{busy}}" disabled="{{busy}}">检查连接</button></view>
+    <view wx:if="{{status}}" class="status {{statusError ? 'error' : ''}}" role="status">{{status}}</view>
+  </view>
+  <view class="card">
+    <view class="section-title">项目账号</view>
+    <view wx:if="{{mode === 'demo'}}" class="note">演示模式不验证账号。切换到接口联调模式后，可以使用原网页的账号密码登录。</view>
+    <block wx:elif="{{loggedInUser}}"><view>当前账号：{{loggedInUser}}</view><button class="secondary-button spaced" bindtap="signOut" disabled="{{busy}}">退出当前设备</button></block>
+    <block wx:else>
+      <label class="field-label" for="username">账号</label><input id="username" class="field" value="{{username}}" bindinput="onUsername" placeholder="原项目账号" disabled="{{busy}}" maxlength="100" />
+      <label class="field-label" for="password">密码</label><input id="password" class="field" value="{{password}}" bindinput="onPassword" placeholder="请输入密码" password disabled="{{busy}}" maxlength="128" />
+      <button class="primary-button spaced" bindtap="signIn" loading="{{busy}}" disabled="{{busy}}">登录</button>
+    </block>
+  </view>
+  <view class="card"><view class="section-title">当前版本</view><view>公共骨架 V0.1.0</view><view class="note spaced">用于团队并行开发。录音、朗读、连续会话、真实观察任务和完整报告页正在等待迁移。人物图形为项目生成的品牌标识。</view></view>
+</view>

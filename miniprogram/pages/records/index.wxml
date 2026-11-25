@@ -1,0 +1,16 @@
+<view class="page {{largeText ? 'large' : ''}}">
+  <environment-notice mode="{{mode}}" />
+  <view class="page-title">我的记录</view>
+  <view class="subtitle">{{mode === 'demo' ? '这里展示记录页面的示例内容' : '读取当前账号的语音观察任务'}}</view>
+  <view wx:if="{{loading}}" class="card empty">正在读取记录…</view>
+  <view wx:elif="{{error}}" class="card">
+    <view class="status error">{{error}}</view>
+    <view class="button-row"><button class="secondary-button" bindtap="loadRecords">重试</button><button class="primary-button" bindtap="openProfile">账号与连接设置</button></view>
+  </view>
+  <view wx:elif="{{!records.length}}" class="card empty"><view class="empty-title">还没有观察记录</view><view class="note">完成一次真实观察后，可以在这里查看任务。</view></view>
+  <button wx:for="{{records}}" wx:key="id" class="card record" bindtap="showRecord" data-index="{{index}}">
+    <view class="row"><view class="section-title">{{item.title}}</view><text class="badge">{{item.status}}</text></view>
+    <view class="note">{{item.description}}</view>
+    <view class="record-action">查看详情</view>
+  </button>
+</view>
