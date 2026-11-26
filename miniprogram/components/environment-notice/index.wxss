@@ -1,2 +1,6 @@
-.notice { padding: 16rpx 20rpx; margin-bottom: 24rpx; border-radius: 18rpx; background: #fff3d9; color: #68491a; font-size: 28rpx; line-height: 1.5; }
-.live { background: #e5f1e8; color: #125744; }
+.notice { display:flex; align-items:center; padding:16rpx 20rpx; margin-bottom:20rpx; border-radius:20rpx; background:rgba(232,234,233,.82); color:#555e58; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; font-size:24rpx; line-height:1.6; }
+.notice-dot { flex-shrink:0; width:10rpx; height:10rpx; margin-right:12rpx; border-radius:50%; background:#747c76; }
+.notice-copy { min-width:0; }
+.notice-title { font-weight:600; }
+.live { background:#e3eee7; color:#176b52; }
+.live .notice-dot { background:#176b52; }

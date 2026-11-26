@@ -29,5 +29,6 @@ Page({
     if (!record) return;
     wx.showModal({ title: record.title, content: record.report || record.description || '该任务尚无可展示的报告。', showCancel: false });
   },
-  openProfile() { wx.switchTab({ url: '/pages/profile/index' }); }
+  openProfile() { wx.switchTab({ url: '/pages/profile/index' }); },
+  openObservation() { wx.switchTab({ url: '/pages/observation/index' }); }
 });

@@ -1,1 +1,12 @@
-/* This page uses the shared field, card and button styles in app.wxss. */
+.profile-page { background:linear-gradient(160deg,#e9f0ec 0%,#f2f2f7 420rpx); }
+.profile-card { display:flex; align-items:center; padding:28rpx; margin:28rpx 0 24rpx; border-radius:32rpx; }
+.profile-avatar { flex-shrink:0; width:112rpx; height:112rpx; margin-right:24rpx; border-radius:30rpx; background:#fff; }
+.profile-name { font-size:1.16em; font-weight:650; line-height:1.4; word-break:break-word; }
+.profile-card .badge { margin-left:12rpx; }
+.connection-fields { padding:0 28rpx 28rpx; border-top:1rpx solid #e5e5ea; }
+.connection-fields .field { font-size:.9em; }
+.account-card { margin-bottom:0; }
+.account-placeholder { display:flex; align-items:flex-start; }
+.version { color:#63636b; font-size:.8em; margin-left:18rpx; }
+.large .profile-card { flex-wrap:wrap; }
+.large .profile-card .badge { margin-top:12rpx; }

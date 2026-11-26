@@ -173,3 +173,36 @@ test('live records require a real login instead of showing sample records', asyn
   await assert.rejects(state.load('services/api.js').listRecords(), /登录/);
   assert.equal(state.requests.length, 0);
 });
+
+test('a reply arriving while avatar chat is collapsed is preserved when reopened', async (t) => {
+  const state = setup(t);
+  state.load('config/env.js').saveSettings({ mode: 'live', apiBaseUrl: 'https://example.com' });
+  const page = state.page('companion');
+  page.onShow();
+  page.setData({ input: '今天想分享一件小事' });
+  const pending = page.sendMessage();
+  assert.equal(page.data.chatOpen, true);
+  page.closeChat();
+  state.requests[0].success({ statusCode: 200, data: { answer: '我在这里，您慢慢说。' } });
+  await pending;
+  assert.equal(page.data.chatOpen, false);
+  page.openChat();
+  assert.equal(page.data.messages.at(-1).content, '我在这里，您慢慢说。');
+  assert.equal(page.data.sending, false);
+  assert.equal(state.app.globalData.chat.messages.length, 3);
+});
+
+test('large text persists across tabs without saving unfinished connection edits', (t) => {
+  const state = setup(t);
+  const env = state.load('config/env.js');
+  env.saveSettings({ mode: 'live', apiBaseUrl: 'https://saved.example.com', largeText: false });
+  const profile = state.page('profile');
+  profile.onShow();
+  profile.setData({ mode: 'demo', apiBaseUrl: 'unfinished address' });
+  profile.onTextChange({ detail: { value: true } });
+  assert.deepEqual(env.getSettings(), { mode: 'live', apiBaseUrl: 'https://saved.example.com', largeText: true });
+  const companion = state.page('companion');
+  companion.onShow();
+  assert.equal(companion.data.largeText, true);
+  assert.equal(state.requests.length, 0);
+});

@@ -14,7 +14,7 @@ Page({
   onConsentChange(event) { this.setData({ consent: event.detail.value.indexOf('consent') !== -1 }); },
   prepareSample() {
     if (this.data.mode !== 'demo') {
-      wx.showModal({ title: '录音与上传待接入', content: '本骨架未实现真实录音、上传或观察任务。队友 B 可从本页接入现有后端接口；当前不会生成观察报告。', showCancel: false });
+      wx.showModal({ title: '录音与上传尚未开放', content: '当前仅提供观察流程体验，不会调用麦克风、上传音频或生成观察报告。您可以先返回演示模式，了解完整步骤。', showCancel: false });
       return;
     }
     this.setData({ sampleReady: true });

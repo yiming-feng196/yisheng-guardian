@@ -1,3 +1,1 @@
-<view class="notice {{mode === 'live' ? 'live' : ''}}" role="status">
-  {{mode === 'live' ? '接口联调模式 · 当前功能接入情况以页面说明为准' : '演示模式 · 示例内容不是真实 AI 回答或观察结果'}}
-</view>
+<view class="notice {{mode === 'live' ? 'live' : ''}}" role="status"><view class="notice-dot"></view><view class="notice-copy"><text class="notice-title">{{mode === 'live' ? '真实接口模式' : '演示模式'}}</text><text>{{mode === 'live' ? ' · 可用功能以页面说明为准' : ' · 示例不代表 AI 回答或观察结果'}}</text></view></view>

@@ -1,16 +1,17 @@
-<view class="page {{largeText ? 'large' : ''}}">
+<view class="page records-page {{largeText ? 'large' : ''}}">
+  <view class="page-header"><view class="header-copy"><view class="eyebrow">每一次表达，都值得留存</view><view class="page-title">观察记录</view><view class="subtitle">{{mode === 'demo' ? '先看看，记录将如何呈现。' : '在这里，回顾您的语音观察任务。'}}</view></view></view>
   <environment-notice mode="{{mode}}" />
-  <view class="page-title">我的记录</view>
-  <view class="subtitle">{{mode === 'demo' ? '这里展示记录页面的示例内容' : '读取当前账号的语音观察任务'}}</view>
-  <view wx:if="{{loading}}" class="card empty">正在读取记录…</view>
-  <view wx:elif="{{error}}" class="card">
-    <view class="status error">{{error}}</view>
-    <view class="button-row"><button class="secondary-button" bindtap="loadRecords">重试</button><button class="primary-button" bindtap="openProfile">账号与连接设置</button></view>
+  <view class="records-summary"><view class="summary-icon"><image src="/assets/icons/records-active.png" mode="aspectFit" /></view><view class="row-copy"><view class="summary-title">{{mode === 'demo' ? '记录页面体验' : '我的语音观察'}}</view><view class="note">{{mode === 'demo' ? '以下为示例内容，不代表健康结果' : '仅展示当前登录账号的观察任务'}}</view></view></view>
+  <view class="section-heading"><text class="section-heading-title">{{mode === 'demo' ? '示例记录' : '全部记录'}}</text><text class="section-caption">下拉可刷新</text></view>
+  <view wx:if="{{loading}}" class="group loading-records" role="status"><view class="loading-row"><view class="skeleton-icon"></view><view class="skeleton-copy"><view class="skeleton-line"></view><view class="skeleton-line short"></view></view></view><view class="loading-caption">正在读取记录…</view></view>
+  <view wx:elif="{{error}}" class="card empty"><image class="empty-icon" src="/assets/icons/connection.png" mode="aspectFit" /><view class="empty-title">暂时无法读取记录</view><view class="status error" selectable>{{error}}</view><view class="button-row"><button class="secondary-button" hover-class="pressable" hover-start-time="0" bindtap="loadRecords">重试</button><button class="primary-button" hover-class="pressable" hover-start-time="0" bindtap="openProfile">账号与连接</button></view></view>
+  <view wx:elif="{{!records.length}}" class="card empty"><image class="empty-icon" src="/assets/icons/records-active.png" mode="aspectFit" /><view class="empty-title">故事，等待开始</view><view class="note">还没有观察记录。<br />完成一次真实观察后，可在这里查看任务。</view><button class="secondary-button spaced" hover-class="pressable" hover-start-time="0" bindtap="openObservation">了解认知观察</button></view>
+  <view wx:else class="group record-list">
+    <button wx:for="{{records}}" wx:key="id" class="record" hover-class="pressable" hover-start-time="0" bindtap="showRecord" data-index="{{index}}" aria-label="{{item.title}}，{{item.status}}，查看详情">
+      <view class="row-icon"><image src="/assets/icons/document.png" mode="aspectFit" /></view>
+      <view class="record-copy"><view class="record-title">{{item.title}}</view><view class="record-description">{{item.description}}</view><text class="badge neutral">{{item.status}}</text></view>
+      <image class="chevron" src="/assets/icons/chevron.png" mode="aspectFit" />
+    </button>
   </view>
-  <view wx:elif="{{!records.length}}" class="card empty"><view class="empty-title">还没有观察记录</view><view class="note">完成一次真实观察后，可以在这里查看任务。</view></view>
-  <button wx:for="{{records}}" wx:key="id" class="card record" bindtap="showRecord" data-index="{{index}}">
-    <view class="row"><view class="section-title">{{item.title}}</view><text class="badge">{{item.status}}</text></view>
-    <view class="note">{{item.description}}</view>
-    <view class="record-action">查看详情</view>
-  </button>
+  <view class="page-end">{{mode === 'demo' ? '示例记录仅帮助您了解使用方式。' : '观察信息仅供参考，不能替代专业诊断。'}}</view>
 </view>

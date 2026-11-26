@@ -13,7 +13,12 @@ Page({
   onUsername(event) { this.setData({ username: event.detail.value }); },
   onPassword(event) { this.setData({ password: event.detail.value }); },
   onModeChange(event) { this.setData({ mode: event.detail.value ? 'live' : 'demo', status: '' }); },
-  onTextChange(event) { this.setData({ largeText: event.detail.value }); },
+  onTextChange(event) {
+    const largeText = event.detail.value;
+    // Apply a reading preference immediately without saving unfinished connection fields.
+    saveSettings(Object.assign({}, getSettings(), { largeText }));
+    this.setData({ largeText });
+  },
   saveConfig() {
     if (this.data.busy) return false;
     try {
