@@ -1,8 +1,8 @@
 .profile-page { background:#f2f2f7; }
-.profile-card { display:flex; align-items:center; padding:16rpx 0 36rpx; }
-.profile-avatar { flex:none; width:108rpx; height:108rpx; margin-right:24rpx; border-radius:28rpx; background:#fff; }
+.profile-card { display:flex; align-items:center; padding:12rpx 0 24rpx; }
+.profile-avatar { flex:none; width:88rpx; height:88rpx; margin-right:20rpx; border-radius:24rpx; background:#fff; }
 .profile-name { font-size:1.12em; font-weight:600; line-height:1.4; word-break:break-word; }
-.settings-row { min-height:56px; }
+.settings-row { min-height:48px; }
 .connection-fields { padding:0 28rpx 28rpx; border-top:1rpx solid #e5e5ea; }
 .connection-fields .field { font-size:.9em; }
 .chevron.expanded { transform:rotate(90deg); }

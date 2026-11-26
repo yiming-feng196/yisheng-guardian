@@ -2,11 +2,11 @@
 .summary-icon { display:flex; align-items:center; justify-content:center; width:92rpx; height:92rpx; margin-right:24rpx; border-radius:26rpx; background:rgba(255,255,255,.65); flex-shrink:0; }
 .summary-icon image { width:52rpx; height:52rpx; }
 .summary-title { color:#254b38; font-size:1em; font-weight:600; margin-bottom:8rpx; }
-.record { display:flex; align-items:center; width:100%; padding:28rpx; color:#1c1c1e; background:#fff; text-align:left; font-weight:normal; border-radius:0; }
+.record { display:flex; align-items:center; width:100%; padding:24rpx; color:#1c1c1e; background:#fff; text-align:left; font-weight:normal; border-radius:0; }
 .record+.record { border-top:1rpx solid #e5e5ea; }
 .record-copy { flex:1; min-width:0; }
 .record-title { font-size:1em; font-weight:550; line-height:1.5; }
-.record-description { margin:10rpx 0 14rpx; color:#63636b; font-size:.8em; line-height:1.6; word-break:break-word; }
+.record-description { margin:8rpx 0 12rpx; color:#63636b; font-size:.86em; line-height:1.5; word-break:break-word; }
 .record .row-icon { align-self:flex-start; margin-top:2rpx; }
 .loading-records { padding:28rpx; }
 .loading-row { display:flex; align-items:center; }
