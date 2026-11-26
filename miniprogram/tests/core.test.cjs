@@ -136,7 +136,7 @@ test('an old chat response cannot overwrite a new environment', async (t) => {
   assert.equal(page.data.sending, true);
   env.saveSettings({ mode: 'live', apiBaseUrl: 'https://b.example.com' });
   page.onShow();
-  state.requests[0].success({ statusCode: 200, data: { answer: '旧服务器的回答' } });
+  state.requests.find((request) => request.url.endsWith('/assistant/chat')).success({ statusCode: 200, data: { answer: '旧服务器的回答' } });
   await pending;
   assert.equal(page.data.sending, false);
   assert.equal(page.data.messages.some((item) => item.content.includes('旧服务器')), false);
@@ -183,11 +183,12 @@ test('a reply arriving while avatar chat is collapsed is preserved when reopened
   const pending = page.sendMessage();
   assert.equal(page.data.chatOpen, true);
   page.closeChat();
-  state.requests[0].success({ statusCode: 200, data: { answer: '我在这里，您慢慢说。' } });
+  state.requests.find((request) => request.url.endsWith('/assistant/chat')).success({ statusCode: 200, data: { answer: '我在这里，您慢慢说。' } });
   await pending;
   assert.equal(page.data.chatOpen, false);
   page.openChat();
   assert.equal(page.data.messages.at(-1).content, '我在这里，您慢慢说。');
+  assert.equal(page.data.connectionLabel, '已连接');
   assert.equal(page.data.sending, false);
   assert.equal(state.app.globalData.chat.messages.length, 3);
 });
@@ -204,5 +205,77 @@ test('large text persists across tabs without saving unfinished connection edits
   const companion = state.page('companion');
   companion.onShow();
   assert.equal(companion.data.largeText, true);
-  assert.equal(state.requests.length, 0);
+  assert.equal(state.requests.length, 1);
+  assert.match(state.requests[0].url, /\/actuator\/health$/);
+});
+
+test('local deployment initializes devtools once and preserves an explicit later demo choice', (t) => {
+  const state = setup(t);
+  wx.getDeviceInfo = () => ({ platform: 'devtools' });
+  const env = state.load('config/env.js');
+  assert.equal(env.applyDeploymentDefaults(), true);
+  assert.equal(env.getSettings().apiBaseUrl, 'http://127.0.0.1:8080');
+  assert.equal(env.getSettings().mode, 'live');
+  env.saveSettings({ mode: 'demo', apiBaseUrl: 'http://127.0.0.1:8080' });
+  assert.equal(env.applyDeploymentDefaults(), false);
+  assert.equal(env.getSettings().mode, 'demo');
+});
+
+test('a phone is never configured with the devtools loopback address', (t) => {
+  const state = setup(t);
+  state.load('config/deployment.js').deviceBaseUrl = '';
+  wx.getDeviceInfo = () => ({ platform: 'ios' });
+  const env = state.load('config/env.js');
+  assert.equal(env.applyDeploymentDefaults(), false);
+  assert.equal(env.getSettings().apiBaseUrl, '');
+});
+
+test('deployment bootstrap preserves an existing custom server', (t) => {
+  const state = setup(t);
+  wx.getDeviceInfo = () => ({ platform: 'devtools' });
+  const env = state.load('config/env.js');
+  env.saveSettings({ mode: 'live', apiBaseUrl: 'https://existing.example.com', largeText: true });
+  env.applyDeploymentDefaults();
+  assert.deepEqual(env.getSettings(), { mode: 'live', apiBaseUrl: 'https://existing.example.com', largeText: true });
+});
+
+test('an explicit local deployment migrates an old server once while preserving reading preferences', (t) => {
+  const state = setup(t);
+  wx.getDeviceInfo = () => ({ platform: 'devtools' });
+  state.load('config/deployment.js').forceLocal = true;
+  const env = state.load('config/env.js');
+  env.saveSettings({ mode: 'demo', apiBaseUrl: 'https://old.example.com', largeText: true });
+  env.applyDeploymentDefaults();
+  assert.deepEqual(env.getSettings(), { mode: 'live', apiBaseUrl: 'http://127.0.0.1:8080', largeText: true });
+  env.saveSettings({ mode: 'demo', apiBaseUrl: 'http://127.0.0.1:8080', largeText: true });
+  env.applyDeploymentDefaults();
+  assert.equal(env.getSettings().mode, 'demo');
+});
+
+test('a health response alone cannot identify an unrelated backend as connected', async (t) => {
+  const state = setup(t, (options) => options.success({ statusCode: 200, data: options.url.endsWith('/actuator/health') ? { status: 'UP' } : { service: 'another-backend' } }));
+  state.load('config/env.js').saveSettings({ mode: 'live', apiBaseUrl: 'https://example.com' });
+  await assert.rejects(state.load('services/api.js').getBackendStatus(), /后端版本不匹配/);
+});
+
+test('a late connection check cannot replace the status of a newly selected backend', async (t) => {
+  const state = setup(t);
+  const env = state.load('config/env.js');
+  env.saveSettings({ mode: 'live', apiBaseUrl: 'https://old.example.com' });
+  const page = state.page('companion');
+  page.setData({ mode: 'live' });
+  const oldCheck = page.refreshConnection();
+  state.requests[0].success({ statusCode: 200, data: { status: 'UP' } });
+  await new Promise((resolve) => setImmediate(resolve));
+  const oldStatus = state.requests.find((request) => request.url === 'https://old.example.com/assistant/status');
+  env.saveSettings({ mode: 'live', apiBaseUrl: 'https://new.example.com' });
+  const newCheck = page.refreshConnection();
+  state.requests.find((request) => request.url === 'https://new.example.com/actuator/health').success({ statusCode: 200, data: { status: 'UP' } });
+  await new Promise((resolve) => setImmediate(resolve));
+  state.requests.find((request) => request.url === 'https://new.example.com/assistant/status').success({ statusCode: 200, data: { service: 'yisheng-backend', modelConfigured: true } });
+  await newCheck;
+  oldStatus.success({ statusCode: 200, data: { service: 'yisheng-backend', modelConfigured: false } });
+  await oldCheck;
+  assert.equal(page.data.connectionLabel, '已连接');
+  assert.equal(page.data.modelConfigured, true);
 });

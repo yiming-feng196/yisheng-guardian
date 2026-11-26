@@ -1,4 +1,4 @@
-const { getSettings } = require('./config/env');
+const { getSettings, applyDeploymentDefaults } = require('./config/env');
 
 App({
   globalData: {
@@ -6,6 +6,7 @@ App({
     chat: null
   },
   onLaunch() {
+    applyDeploymentDefaults();
     getSettings();
   }
 });

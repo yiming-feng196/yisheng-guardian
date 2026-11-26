@@ -14,6 +14,10 @@
 
 ## 一键启动
 
+### Windows 小程序本机联调
+
+运行 `start-local.cmd`，使用独立的 `local-native` 配置启动 Spring Boot、H2 文件数据库和本机 Redis，并生成小程序开发地址。模型凭据保存在本机 `.env`。详见 [本机开发部署](docs/local-native-development.md)。
+
 ### Docker（Windows、macOS、Linux）
 
 已提供包含 MySQL、Redis、RabbitMQ、Python 筛查服务和 Spring Boot 后端的完整 Compose 配置：

@@ -15,11 +15,11 @@ function chat(message) {
   if (getSettings().mode === 'demo') {
     return Promise.resolve({
       title: '小忆',
-      answer: '这是界面演示回复，尚未调用 AI 服务。你刚才输入的是：“' + value + '”。在“我的”中配置后端并切换到接口联调模式后，即可体验真实问答。'
+      answer: '这是界面演示回复，尚未调用 AI。连接真实服务后，小忆才能继续和您聊天。'
     });
   }
   // A single-turn interface establishes connectivity before the SSE migration.
-  return request({ path: '/assistant/chat', method: 'POST', auth: false, data: { message: value } }).then((result) => {
+  return request({ path: '/assistant/chat', method: 'POST', auth: false, timeout: 120000, data: { message: value } }).then((result) => {
     if (!result || typeof result.answer !== 'string' || !result.answer.trim()) throw new Error('后端未返回有效回答');
     return result;
   });
@@ -53,4 +53,13 @@ function listRecords() {
   });
 }
 
-module.exports = { checkConnection, chat, login, listRecords };
+function getBackendStatus() {
+  return checkConnection().then(() => request({ path: '/assistant/status', auth: false, timeout: 8000 })).then((result) => {
+    if (!result || result.service !== 'yisheng-backend' || typeof result.modelConfigured !== 'boolean') {
+      throw new Error('服务已响应，但后端版本不匹配，请更新本机后端');
+    }
+    return result;
+  });
+}
+
+module.exports = { checkConnection, getBackendStatus, chat, login, listRecords };

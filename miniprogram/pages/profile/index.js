@@ -1,14 +1,16 @@
 const { getSettings, saveSettings, environmentKey } = require('../../config/env');
-const { checkConnection, login } = require('../../services/api');
+const { getBackendStatus, login } = require('../../services/api');
 const { getSession, clearSession } = require('../../services/session');
 
 Page({
-  data: { mode: 'demo', largeText: false, apiBaseUrl: '', username: '', password: '', loggedInUser: '', status: '', statusError: false, busy: false },
+  data: { mode: 'demo', largeText: false, apiBaseUrl: '', username: '', password: '', loggedInUser: '', status: '', statusError: false, busy: false, connectionExpanded: false },
   onShow() {
     const config = getSettings();
     const session = config.mode === 'live' ? getSession() : null;
-    this.setData({ mode: config.mode, largeText: config.largeText, apiBaseUrl: config.apiBaseUrl, loggedInUser: session ? session.username : '', password: '', status: '' });
+    this.setData({ mode: config.mode, largeText: config.largeText, apiBaseUrl: config.apiBaseUrl, loggedInUser: session ? session.username : '', password: '', status: '', connectionExpanded: !config.apiBaseUrl });
   },
+  toggleConnection() { this.setData({ connectionExpanded: !this.data.connectionExpanded }); },
+  showAbout() { wx.showModal({ title: '忆声陪伴', content: 'V0.1.0 · 支持文字陪伴与记录查询。语音、数字人视频和真实录音观察尚未开放。', showCancel: false }); },
   onBaseUrl(event) { this.setData({ apiBaseUrl: event.detail.value }); },
   onUsername(event) { this.setData({ username: event.detail.value }); },
   onPassword(event) { this.setData({ password: event.detail.value }); },
@@ -26,7 +28,7 @@ Page({
       const config = saveSettings(this.data);
       if (before !== environmentKey()) getApp().globalData.chat = null;
       const session = config.mode === 'live' ? getSession() : null;
-      this.setData({ apiBaseUrl: config.apiBaseUrl, loggedInUser: session ? session.username : '', password: '', status: '设置已保存；其他页面会在打开时使用新配置。', statusError: false });
+      this.setData({ apiBaseUrl: config.apiBaseUrl, loggedInUser: session ? session.username : '', password: '', status: '设置已保存', statusError: false });
       return true;
     } catch (error) {
       this.setData({ status: error.message, statusError: true }); return false;
@@ -36,8 +38,8 @@ Page({
     if (!this.saveConfig()) return;
     this.setData({ busy: true, status: '正在检测后端连接…', statusError: false });
     try {
-      await checkConnection();
-      this.setData({ status: '后端健康检查通过。语音和模型服务需要在功能接入后分别验证。', statusError: false });
+      const result = await getBackendStatus();
+      this.setData({ status: result.modelConfigured ? '后端连接正常，已配置对话模型。' : '后端连接正常。当前使用本地知识库，自由聊天需要在后端配置模型密钥。', statusError: false });
     } catch (error) { this.setData({ status: error.message, statusError: true }); }
     finally { this.setData({ busy: false }); }
   },
@@ -55,6 +57,6 @@ Page({
   signOut() {
     if (this.data.busy) return;
     clearSession();
-    this.setData({ loggedInUser: '', password: '', status: '已清除本设备当前后端的登录凭证。', statusError: false });
+    this.setData({ loggedInUser: '', password: '', status: '已退出登录', statusError: false });
   }
 });

@@ -1,7 +1,7 @@
 /* Shared iOS-inspired tokens; WeChat owns the navigation and safe-area insets. */
 page { height:100%; background:#f2f2f7; color:#1c1c1e; font:34rpx/1.55 -apple-system,BlinkMacSystemFont,"Helvetica Neue","PingFang SC",sans-serif; -webkit-text-size-adjust:100%; }
 view,scroll-view,textarea,input,button { box-sizing:border-box; }
-button { margin:0; font-size:inherit; line-height:1.45; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; transition:transform 120ms cubic-bezier(.23,1,.32,1),opacity 120ms ease-out; }
+button { width:auto; max-width:100%; margin:0; font-size:inherit; line-height:1.45; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; transition:transform 120ms cubic-bezier(.23,1,.32,1),opacity 120ms ease-out; }
 button::after { border:0; }
 button[disabled] { opacity:.42; }
 button:not([disabled]):active,.pressable { transform:scale(.98); opacity:.8; }
@@ -31,7 +31,7 @@ button:not([disabled]):active,.pressable { transform:scale(.98); opacity:.8; }
 .row-icon.orange { background:#fff2e6; }
 .row-icon.purple { background:#f2edfc; }
 .chevron { flex-shrink:0; width:28rpx; height:28rpx; margin-left:16rpx; }
-.primary-button,.secondary-button { display:flex; align-items:center; justify-content:center; padding:24rpx 28rpx; min-height:48px; border-radius:26rpx; font-weight:600; }
+.primary-button,.secondary-button { display:flex; align-items:center; justify-content:center; width:100%; padding:24rpx 28rpx; min-height:48px; border-radius:26rpx; font-size:1em; font-weight:600; }
 .primary-button { color:#fff; background:#176b52; }
 .secondary-button { color:#176b52; background:#e9f3ee; }
 .small-button { min-height:88rpx; padding:18rpx 24rpx; font-size:.92em; }

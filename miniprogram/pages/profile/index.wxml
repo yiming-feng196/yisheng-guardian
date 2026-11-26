@@ -1,23 +1,22 @@
 <view class="page profile-page {{largeText ? 'large' : ''}}">
-  <view class="page-header"><view class="header-copy"><view class="eyebrow">让陪伴，更合心意</view><view class="page-title">我的</view></view></view>
-  <view class="profile-card glass"><image class="profile-avatar" src="/assets/logo.png" mode="aspectFit" /><view class="row-copy"><view class="profile-name">{{loggedInUser || '欢迎来到忆声'}}</view><view class="row-detail">{{loggedInUser ? '很高兴，又见到您。' : '陪伴，从每一次倾听开始。'}}</view></view><text class="badge neutral">{{loggedInUser ? '已登录' : '访客'}}</text></view>
-  <environment-notice mode="{{mode}}" />
-  <view class="section-heading"><text class="section-heading-title">使用偏好</text></view>
-  <view class="group"><view class="group-row"><view class="row-icon blue"><image src="/assets/icons/text-size.png" mode="aspectFit" /></view><view class="row-copy"><view class="row-title">大字模式</view><view class="row-detail">字更大一点，看得更轻松</view></view><switch checked="{{largeText}}" bindchange="onTextChange" color="#176b52" disabled="{{busy}}" aria-label="大字模式" /></view></view>
-  <view class="section-heading"><text class="section-heading-title">服务连接</text><text class="section-caption">保存后生效</text></view>
-  <view class="group connection-group">
-    <view class="group-row"><view class="row-icon"><image src="/assets/icons/connection.png" mode="aspectFit" /></view><view class="row-copy"><view class="row-title">连接真实服务</view><view class="row-detail">{{mode === 'live' ? '使用您配置的后端' : '当前使用演示内容'}}</view></view><switch checked="{{mode === 'live'}}" bindchange="onModeChange" color="#176b52" disabled="{{busy}}" aria-label="连接真实服务" /></view>
-    <view class="connection-fields"><label class="field-label" for="backend-address">后端地址</label><input id="backend-address" class="field" value="{{apiBaseUrl}}" bindinput="onBaseUrl" placeholder="例如 http://192.168.1.100:8080" placeholder-class="placeholder" disabled="{{busy}}" aria-label="后端地址" /><view class="note spaced">请填写手机能访问的服务器地址。手机上的 127.0.0.1 指向手机本身。</view><view class="button-row"><button class="secondary-button" hover-class="pressable" hover-start-time="0" bindtap="saveConfig" disabled="{{busy}}">保存设置</button><button class="primary-button" hover-class="pressable" hover-start-time="0" bindtap="testConnection" loading="{{busy}}" disabled="{{busy}}">检查连接</button></view><view wx:if="{{status}}" class="status {{statusError ? 'error' : ''}}" role="status"><text selectable>{{status}}</text></view></view>
+  <view class="page-header"><view class="page-title">我的</view></view>
+  <view class="profile-card"><image class="profile-avatar" src="/assets/logo.png" mode="aspectFit" /><view class="row-copy"><view class="profile-name">{{loggedInUser || '忆声陪伴'}}</view><view class="row-detail">{{loggedInUser ? '欢迎回来' : '登录后查看您的观察记录'}}</view></view></view>
+  <view class="group">
+    <view class="group-row"><view class="row-copy"><view class="row-title">大字模式</view></view><switch checked="{{largeText}}" bindchange="onTextChange" color="#176b52" disabled="{{busy}}" aria-label="大字模式" /></view>
+    <view class="group-row settings-row" role="button" tabindex="0" bindtap="toggleConnection" aria-expanded="{{connectionExpanded}}"><view class="row-copy"><view class="row-title">服务连接</view><view class="row-detail">{{mode === 'live' ? '已配置服务器' : '演示模式'}}</view></view><image class="chevron {{connectionExpanded ? 'expanded' : ''}}" src="/assets/icons/chevron.png" mode="aspectFit" /></view>
+    <view wx:if="{{connectionExpanded}}" class="connection-fields">
+      <view class="row spaced"><text>真实服务</text><switch checked="{{mode === 'live'}}" bindchange="onModeChange" color="#176b52" disabled="{{busy}}" aria-label="连接真实服务" /></view>
+      <label class="field-label" for="backend-address">服务器地址</label><input id="backend-address" class="field" value="{{apiBaseUrl}}" bindinput="onBaseUrl" placeholder="http://电脑IP:8080" placeholder-class="placeholder" disabled="{{busy}}" aria-label="服务器地址" />
+      <view class="button-row"><button size="mini" class="secondary-button" style="width:48%;min-width:0;max-width:48%;" hover-class="pressable" hover-start-time="0" bindtap="saveConfig" disabled="{{busy}}">保存</button><button size="mini" class="primary-button" style="width:48%;min-width:0;max-width:48%;" hover-class="pressable" hover-start-time="0" bindtap="testConnection" loading="{{busy}}" disabled="{{busy}}">测试连接</button></view>
+      <view class="note spaced">手机请使用电脑的局域网地址。</view>
+    </view>
   </view>
-  <view class="group-footer">演示模式不发送聊天、登录或记录请求。“检查连接”会单独访问填写的服务器。</view>
-  <view class="section-heading"><text class="section-heading-title">我的账号</text></view>
+  <view class="section-heading"><text class="section-heading-title">账号</text></view>
   <view class="card account-card">
-    <view wx:if="{{mode === 'demo'}}" class="account-placeholder"><view class="row-icon purple"><image src="/assets/icons/profile-active.png" mode="aspectFit" /></view><view class="row-copy"><view class="row-title">连接后，继续您的故事</view><view class="row-detail">保存真实服务配置后，可用原项目账号登录并查看观察记录。</view></view></view>
-    <block wx:elif="{{loggedInUser}}"><view class="row-title">当前账号：{{loggedInUser}}</view><button class="secondary-button spaced" hover-class="pressable" hover-start-time="0" bindtap="signOut" disabled="{{busy}}">退出当前设备</button></block>
-    <block wx:else><view class="note">使用原网页的账号密码登录</view><label class="field-label" for="username">账号</label><input id="username" class="field" value="{{username}}" bindinput="onUsername" placeholder="请输入账号" placeholder-class="placeholder" disabled="{{busy}}" maxlength="100" /><label class="field-label" for="password">密码</label><input id="password" class="field" value="{{password}}" bindinput="onPassword" placeholder="请输入密码" placeholder-class="placeholder" password disabled="{{busy}}" maxlength="128" /><button class="primary-button spaced" hover-class="pressable" hover-start-time="0" bindtap="signIn" loading="{{busy}}" disabled="{{busy}}">登录</button></block>
+    <view wx:if="{{mode === 'demo'}}" class="note">连接真实服务后即可登录。</view>
+    <block wx:elif="{{loggedInUser}}"><view class="row-title">{{loggedInUser}}</view><button size="mini" class="secondary-button spaced" hover-class="pressable" hover-start-time="0" bindtap="signOut" disabled="{{busy}}">退出登录</button></block>
+    <block wx:else><label class="field-label account-first-label" for="username">账号</label><input id="username" class="field" value="{{username}}" bindinput="onUsername" placeholder="请输入账号" placeholder-class="placeholder" disabled="{{busy}}" maxlength="100" /><label class="field-label" for="password">密码</label><input id="password" class="field" value="{{password}}" bindinput="onPassword" placeholder="请输入密码" placeholder-class="placeholder" password disabled="{{busy}}" maxlength="128" /><button size="mini" class="primary-button spaced" hover-class="pressable" hover-start-time="0" bindtap="signIn" loading="{{busy}}" disabled="{{busy}}">登录</button></block>
   </view>
-  <view class="section-heading"><text class="section-heading-title">关于忆声</text></view>
-  <view class="group"><view class="group-row"><view class="row-icon orange"><image src="/assets/icons/heart.png" mode="aspectFit" /></view><view class="row-copy"><view class="row-title">忆声陪伴</view><view class="row-detail">认真倾听，温暖相伴</view></view><text class="version">V0.1.0</text></view></view>
-  <view class="group-footer">当前支持演示体验与真实单轮文字问答。语音、连续会话、数字人视频和完整观察流程尚未开放。</view>
-  <view class="page-end">为日常陪伴而设计</view>
+  <view wx:if="{{status}}" class="status {{statusError ? 'error' : ''}}" role="status"><text selectable>{{status}}</text></view>
+  <view class="about-row" role="button" tabindex="0" bindtap="showAbout"><text>关于忆声</text><text>V0.1.0</text></view>
 </view>

@@ -1,8 +1,8 @@
 const { getSettings, environmentKey } = require('../../config/env');
-const { chat } = require('../../services/api');
+const { chat, getBackendStatus } = require('../../services/api');
 
 Page({
-  data: { mode: 'demo', largeText: false, input: '', messages: [], sending: false, scrollTarget: '', chatOpen: false, inputFocused: false },
+  data: { mode: 'demo', largeText: false, input: '', messages: [], sending: false, scrollTarget: '', chatOpen: false, inputFocused: false, connection: 'demo', connectionLabel: '演示', modelConfigured: null },
   onShow() {
     const config = getSettings();
     const key = environmentKey();
@@ -16,8 +16,32 @@ Page({
       }];
       this.setData({ messages, input: '', sending: false, scrollTarget: '', chatOpen: false, inputFocused: false });
     }
+    this.refreshConnection();
   },
-  onUnload() { this._requestId = (this._requestId || 0) + 1; },
+  onUnload() {
+    this._requestId = (this._requestId || 0) + 1;
+    this._connectionVersion = (this._connectionVersion || 0) + 1;
+  },
+  async refreshConnection() {
+    const version = (this._connectionVersion || 0) + 1;
+    this._connectionVersion = version;
+    const key = environmentKey();
+    if (this.data.mode !== 'live') {
+      this.setData({ connection: 'demo', connectionLabel: '演示', modelConfigured: null });
+      return;
+    }
+    this.setData({ connection: 'checking', connectionLabel: '连接中', modelConfigured: null });
+    try {
+      const result = await getBackendStatus();
+      if (version !== this._connectionVersion || key !== environmentKey()) return;
+      this.setData({ connection: 'connected', connectionLabel: result.modelConfigured ? '已连接' : '知识库', modelConfigured: result.modelConfigured });
+      if (!result.modelConfigured && this.data.messages.length === 1 && this.data.messages[0].id === 'greeting') {
+        this.setData({ messages: [{ id: 'greeting', role: 'assistant', content: '本机后端已连接。当前可查询认知健康知识；自由聊天需要在后端配置模型服务。' }] });
+      }
+    } catch (_) {
+      if (version === this._connectionVersion && key === environmentKey()) this.setData({ connection: 'unavailable', connectionLabel: '未连接' });
+    }
+  },
   onInput(event) { this.setData({ input: event.detail.value }); },
   openChat() { this.setData({ chatOpen: true }); },
   closeChat() {
@@ -46,8 +70,9 @@ Page({
       const result = await chat(value);
       if (requestId !== this._requestId || key !== environmentKey()) return;
       const replyId = id + '-reply';
-      const next = messages.concat({ id: replyId, role: 'assistant', content: result.answer });
-      this.setData({ messages: next, scrollTarget: replyId });
+      const next = messages.concat({ id: replyId, role: 'assistant', content: result.answer, notice: result.medicalDisclaimer || '' });
+      this._connectionVersion = (this._connectionVersion || 0) + 1;
+      this.setData({ messages: next, scrollTarget: replyId, connection: 'connected', connectionLabel: this.data.modelConfigured === false ? '知识库' : '已连接' });
       getApp().globalData.chat = { key, messages: next };
     } catch (error) {
       if (requestId !== this._requestId || key !== environmentKey()) return;
@@ -55,8 +80,5 @@ Page({
     } finally {
       if (requestId === this._requestId && key === environmentKey()) this.setData({ sending: false });
     }
-  },
-  showVoicePlan() {
-    wx.showModal({ title: '语音交流尚未开放', content: '您可以先输入文字，或点选“聊聊今天”和“听个故事”。当前不会使用麦克风或播放数字人视频。', showCancel: false });
   }
 });
