@@ -260,4 +260,7 @@ button[disabled] {
   padding-right: max(16px, 32rpx);
 }
 
-button.btn{width:100%!important;min-width:0}
+button.btn {
+  width: 100% !important;
+  min-width: 0;
+}

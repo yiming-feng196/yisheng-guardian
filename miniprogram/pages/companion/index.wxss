@@ -268,6 +268,20 @@
   }
 }
 
-.human-stage{transition:flex-grow 280ms ease,flex-basis 280ms ease,max-height 280ms ease}
-.chat-host{transition:flex-grow 300ms ease,height 300ms ease}
-@media(prefers-reduced-motion:reduce){.human-stage,.chat-host{transition:none}}
+.human-stage {
+  transition:
+    flex-grow 280ms ease,
+    flex-basis 280ms ease,
+    max-height 280ms ease;
+}
+.chat-host {
+  transition:
+    flex-grow 300ms ease,
+    height 300ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .human-stage,
+  .chat-host {
+    transition: none;
+  }
+}

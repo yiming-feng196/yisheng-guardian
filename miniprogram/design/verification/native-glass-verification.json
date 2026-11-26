@@ -5,7 +5,7 @@
     {
       "name": "native text input → Spring Boot → real model reply",
       "passed": true,
-      "answerCharacters": 30
+      "answerCharacters": 33
     },
     {
       "name": "collapse and reopen preserves conversation",

@@ -46,4 +46,8 @@
   height: 38rpx;
 }
 
-.heading-aside{position:absolute;right:0;top:0}
+.heading-aside {
+  position: absolute;
+  right: 0;
+  top: 0;
+}

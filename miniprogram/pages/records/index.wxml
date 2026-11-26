@@ -76,7 +76,7 @@
         wx:for="{{records}}"
         wx:key="id"
         class="record-card glass-surface"
-          size="mini"
+        size="mini"
         data-index="{{index}}"
         bindtap="showRecord"
         hover-class="pressed"

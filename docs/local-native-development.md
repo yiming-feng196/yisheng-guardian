@@ -17,6 +17,8 @@
 - 停止：`powershell -NoProfile -ExecutionPolicy Bypass -File .\stop-local.ps1`。仅操作此项目记录的进程。
 - 后端源码变更后：先停止，再执行 `start-local.cmd -Build`。
 - 健康检查：`GET /actuator/health`；服务能力：`GET /assistant/status`；真实问答：`POST /assistant/chat`，JSON 为 `{ "message": "你好" }`。
-- 首次部署没有原 MySQL 中的账号或记录，可通过现有 Web 前端注册账号。
+- 首次部署没有原 MySQL 中的账号或记录，可通过小程序“我的 → 登录/注册”或现有 Web 前端注册账号。
 
 工具首次缺失时会由 `scripts/bootstrap-local-tools.py` 下载并校验。JDK 来源为 Amazon Corretto，Maven 来源为 Apache，Redis Windows 本地开发构建来源为 redis-windows 项目；实际文件地址与校验值记录在 `.runtime/native-tools/tools-lock.json`。
+
+手机地址、微信请求错误和注册的详细操作见 [手机连接与账号注册](mobile-connect-and-register.md)。

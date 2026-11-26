@@ -45,6 +45,34 @@ function login(username, password) {
   }).then((token) => saveSession(username.trim(), token, config.apiBaseUrl));
 }
 
+function register(username, password) {
+  if (getSettings().mode === 'demo') {
+    return Promise.reject(new Error('演示服务不能创建账号，请先连接真实服务'));
+  }
+  const name = String(username || '').trim();
+  const secret = String(password || '');
+  if (!name || name.length > 64) return Promise.reject(new Error('请填写 1–64 字的账号'));
+  if (secret.length < 8 || secret.length > 64 || !secret.trim()) {
+    return Promise.reject(new Error('注册密码需要 8–64 位'));
+  }
+  let byteLength = 0;
+  for (const character of secret) {
+    const code = character.codePointAt(0);
+    byteLength += code < 0x80 ? 1 : code < 0x800 ? 2 : code < 0x10000 ? 3 : 4;
+  }
+  if (byteLength > 72) return Promise.reject(new Error('密码过长，请减少汉字或表情后重试'));
+  return request({
+    path: '/user/register',
+    method: 'POST',
+    auth: false,
+    data: { username: name, password: secret }
+  }).then((result) => {
+    if (typeof result === 'string' && result.trim() === '注册成功') return { username: name };
+    if (typeof result === 'string' && result.trim()) throw new Error(result.trim());
+    throw new Error('服务器未确认注册成功，请稍后重试');
+  });
+}
+
 function listRecords() {
   if (getSettings().mode === 'demo') {
     return Promise.resolve([
@@ -91,4 +119,4 @@ function getBackendStatus() {
     });
 }
 
-module.exports = { checkConnection, getBackendStatus, chat, login, listRecords };
+module.exports = { checkConnection, getBackendStatus, chat, login, register, listRecords };

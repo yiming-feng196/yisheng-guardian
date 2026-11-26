@@ -22,43 +22,66 @@
         {{loggedInUser ? '已登录 · 个人观察档案' : '登录后查看您的观察记录'}}
       </text>
     </view>
-    <button
-      wx:if="{{!loggedInUser && savedMode === 'live'}}"
-      class="account-login"
-      size="mini"
-      bindtap="toggleLogin"
-    >
-      {{loginExpanded ? '收起' : '登录'}}
+    <button wx:if="{{!loggedInUser}}" class="account-login" size="mini" bindtap="toggleLogin">
+      {{loginExpanded ? '收起' : '登录/注册'}}
     </button>
   </view>
-  <view
-    wx:if="{{loginExpanded && !loggedInUser && savedMode === 'live'}}"
-    class="login-card glass-surface"
-  >
-    <text class="title">账号登录</text>
-    <text class="secondary login-explanation">使用已有项目账号与密码</text>
+  <view wx:if="{{loginExpanded && !loggedInUser}}" class="login-card glass-surface">
+    <view class="auth-segment" aria-role="group" aria-label="账号操作">
+      <button
+        class="auth-option {{authMode === 'login' ? 'auth-option--selected' : ''}}"
+        data-mode="login"
+        disabled="{{busy}}"
+        aria-pressed="{{authMode === 'login'}}"
+        bindtap="onAuthMode"
+      >
+        账号登录
+      </button>
+      <button
+        class="auth-option {{authMode === 'register' ? 'auth-option--selected' : ''}}"
+        data-mode="register"
+        disabled="{{busy}}"
+        aria-pressed="{{authMode === 'register'}}"
+        bindtap="onAuthMode"
+      >
+        注册账号
+      </button>
+    </view>
+    <text class="secondary login-explanation">
+      {{authMode === 'register' ? '创建账号后，可保存和查看您的观察记录。' :
+      '使用已有项目账号与密码。'}}
+    </text>
+    <view wx:if="{{savedMode !== 'live'}}" class="auth-environment">
+      <text class="secondary">登录和注册需要连接真实服务。</text>
+      <button class="btn btn-secondary section-gap" bindtap="openConnection">去连接服务</button>
+    </view>
     <text class="form-label">账号</text>
     <input
+      id="auth-username"
       class="field"
       value="{{username}}"
       disabled="{{busy}}"
       placeholder="请输入账号"
       placeholder-class="input-placeholder"
       bindinput="onUsername"
-      maxlength="80"
+      maxlength="64"
+      aria-label="账号"
     />
     <text class="form-label">密码</text>
     <view class="password-field">
       <input
+        id="auth-password"
         class="field"
         value="{{password}}"
         password="{{!passwordVisible}}"
         disabled="{{busy}}"
-        placeholder="请输入密码"
+        placeholder="{{authMode === 'register' ? '设置 8–64 位密码' : '请输入密码'}}"
         placeholder-class="input-placeholder"
         bindinput="onPassword"
-        bindconfirm="signIn"
+        bindconfirm="submitAuth"
         confirm-type="done"
+        maxlength="{{authMode === 'register' ? 64 : 140}}"
+        aria-label="密码"
       />
       <button
         class="password-toggle"
@@ -69,16 +92,40 @@
         {{passwordVisible ? '隐藏' : '显示'}}
       </button>
     </view>
+    <block wx:if="{{authMode === 'register'}}">
+      <text class="form-label">确认密码</text>
+      <input
+        id="auth-confirm"
+        class="field"
+        value="{{confirmPassword}}"
+        password="{{true}}"
+        disabled="{{busy}}"
+        placeholder="请再次输入密码"
+        placeholder-class="input-placeholder"
+        bindinput="onConfirmPassword"
+        bindconfirm="submitAuth"
+        confirm-type="done"
+        maxlength="64"
+        aria-label="确认密码"
+      />
+    </block>
+    <text
+      wx:if="{{status && statusArea === 'auth'}}"
+      class="inline-feedback {{statusError ? 'text-error' : ''}}"
+      aria-role="status"
+    >
+      {{status}}
+    </text>
     <button
       class="btn btn-primary section-gap"
       loading="{{busy}}"
-      disabled="{{busy}}"
-      bindtap="signIn"
+      disabled="{{busy || savedMode !== 'live'}}"
+      bindtap="submitAuth"
     >
-      登录
+      {{authMode === 'register' ? '创建账号' : '登录'}}
     </button>
   </view>
-  <view class="settings-group glass-surface">
+  <view id="connection-settings" class="settings-group glass-surface">
     <setting-row icon="text-size" label="大字模式" detail="放大文字，便于阅读。">
       <switch
         checked="{{largeText}}"
@@ -112,7 +159,41 @@
       <text class="secondary service-explanation">
         真实服务支持文字问答与已有记录查询。录音与认知分析尚未开放。
       </text>
+      <text class="secondary connection-guidance">{{connectionHint}}</text>
+      <button
+        wx:if="{{deviceBaseUrl}}"
+        class="btn btn-secondary"
+        disabled="{{busy}}"
+        bindtap="useDeviceAddress"
+      >
+        连接本机调试服务
+      </button>
+      <text wx:if="{{deviceBaseUrl}}" class="secondary device-address" selectable="{{true}}">
+        手机地址：{{deviceBaseUrl}}
+      </text>
       <button class="btn btn-secondary" disabled="{{busy}}" bindtap="saveConfig">保存设置</button>
+      <button
+        wx:if="{{apiBaseUrl}}"
+        class="btn btn-plain section-gap"
+        disabled="{{busy}}"
+        bindtap="copyHealthUrl"
+      >
+        复制浏览器检测地址
+      </button>
+      <text
+        wx:if="{{status && statusArea === 'connection'}}"
+        class="inline-feedback {{statusError ? 'text-error' : ''}}"
+        aria-role="status"
+      >
+        {{status}}
+      </text>
+      <text
+        wx:if="{{connectionErrorDetail}}"
+        class="secondary connection-native-error"
+        selectable="{{true}}"
+      >
+        微信返回：{{connectionErrorDetail}}
+      </text>
     </view>
     <view class="setting-divider"></view>
     <setting-row
@@ -159,7 +240,7 @@
     />
   </view>
   <text
-    wx:if="{{status}}"
+    wx:if="{{status && !(loginExpanded && statusArea === 'auth') && !(connectionExpanded && statusArea === 'connection')}}"
     class="profile-feedback glass-surface {{statusError ? 'text-error' : 'text-green'}}"
     aria-role="status"
   >
@@ -182,7 +263,7 @@
     content="忆声智护 V{{version}}
 温柔陪伴，记录点滴。
 
-当前支持文字问答与已有观察记录查询。数字人为静态形象；语音、实时 3D 和真实录音观察尚未开放。"
+当前支持账号注册、登录、文字问答与已有观察记录查询。数字人为静态形象；语音、实时 3D 和真实录音观察尚未开放。"
     bindclose="closeAbout"
     bindconfirm="closeAbout"
   />

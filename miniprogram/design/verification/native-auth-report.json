@@ -1,0 +1,28 @@
+{
+  "runtime": "WeChat DevTools native mini-program",
+  "checks": [
+    {
+      "name": "visible registration form and mismatched passwords rejected before submission",
+      "passed": true
+    },
+    {
+      "name": "switching forms clears both password inputs",
+      "passed": true
+    },
+    {
+      "name": "local Wi-Fi endpoint button saves and verifies real backend",
+      "passed": true
+    },
+    {
+      "name": "demo mode retains account entry and requires real service for submission",
+      "passed": true
+    }
+  ],
+  "screens": [
+    "native-profile.png",
+    "native-register-validation.png",
+    "native-phone-connection.png",
+    "native-demo-account-entry.png"
+  ],
+  "errors": []
+}

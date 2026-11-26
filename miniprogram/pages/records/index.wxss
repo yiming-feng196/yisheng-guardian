@@ -142,4 +142,11 @@
   }
 }
 
-button.record-card{display:flex!important;width:100%!important;max-width:none!important;height:auto!important;padding:28rpx 24rpx!important;margin:0!important}
+button.record-card {
+  display: flex !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  padding: 28rpx 24rpx !important;
+  margin: 0 !important;
+}

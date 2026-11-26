@@ -525,3 +525,146 @@ test('the future digital renderer pauses on hide and disposes on replacement', (
   viewport.attachRenderer(null);
   assert.deepEqual(calls, ['mount', 'thinking', 'pause', 'resume', 'dispose']);
 });
+
+test('registration validates locally and demo mode never creates an account', async (t) => {
+  const state = setup(t),
+    api = state.load('services/api.js');
+  await assert.rejects(api.register('new-user', 'a-password'), /演示/);
+  state.load('config/env.js').saveSettings({ mode: 'live', apiBaseUrl: 'https://example.com' });
+  await assert.rejects(api.register('', 'a-password'), /账号/);
+  await assert.rejects(api.register('a'.repeat(65), 'a-password'), /账号/);
+  await assert.rejects(api.register('new-user', 'short'), /8–64/);
+  await assert.rejects(api.register('new-user', '密'.repeat(25)), /密码过长/);
+  assert.equal(state.requests.length, 0);
+});
+
+test('registration uses the existing public endpoint and never saves a registration response as a token', async (t) => {
+  const state = setup(t, (o) => o.success({ statusCode: 200, data: '注册成功' }));
+  state.load('config/env.js').saveSettings({ mode: 'live', apiBaseUrl: 'https://example.com' });
+  const result = await state.load('services/api.js').register(' new-user ', 'a-password');
+  assert.equal(state.requests[0].url, 'https://example.com/user/register');
+  assert.equal(state.requests[0].method, 'POST');
+  assert.deepEqual(state.requests[0].data, { username: 'new-user', password: 'a-password' });
+  assert.equal(state.requests[0].header.Authorization, undefined);
+  assert.deepEqual(result, { username: 'new-user' });
+  assert.equal(state.load('services/session.js').getSession(), null);
+  assert.equal(JSON.stringify([...state.storage.values()]).includes('a-password'), false);
+});
+
+test('HTTP 200 registration failures are not displayed as success', async (t) => {
+  const state = setup(t, (o) => o.success({ statusCode: 200, data: '用户名已存在' }));
+  state.load('config/env.js').saveSettings({ mode: 'live', apiBaseUrl: 'https://example.com' });
+  const api = state.load('services/api.js');
+  await assert.rejects(api.register('existing', 'a-password'), /用户名已存在/);
+  wx.request = (o) => o.success({ statusCode: 200, data: { unexpected: true } });
+  await assert.rejects(api.register('new-user', 'a-password'), /未确认注册成功/);
+});
+
+test('registration confirmation gates the request and successful registration clears both secrets', async (t) => {
+  const state = setup(t, (o) => o.success({ statusCode: 200, data: '注册成功' }));
+  const env = state.load('config/env.js');
+  env.saveSettings({ mode: 'live', apiBaseUrl: 'https://example.com' });
+  const p = state.page('profile');
+  p.onShow();
+  p.onAuthMode({ currentTarget: { dataset: { mode: 'register' } } });
+  p.setData({ username: 'new-user', password: 'a-password', confirmPassword: 'different' });
+  await p.submitAuth();
+  assert.equal(state.requests.length, 0);
+  assert.match(p.data.status, /不一致/);
+  p.setData({ confirmPassword: 'a-password' });
+  await p.submitAuth();
+  assert.equal(state.requests[0].data.password, 'a-password');
+  assert.equal(p.data.password, '');
+  assert.equal(p.data.confirmPassword, '');
+  assert.equal(p.data.authMode, 'login');
+  assert.equal(p.data.loggedInUser, '');
+  assert.match(p.data.status, /注册成功/);
+  assert.equal(p.data.statusArea, 'auth');
+  assert.equal(JSON.stringify([...state.storage.values()]).includes('a-password'), false);
+});
+
+test('account controls remain reachable in demo mode and switching forms clears secrets', (t) => {
+  const state = setup(t),
+    p = state.page('profile');
+  p.onShow();
+  p.toggleLogin();
+  assert.equal(p.data.loginExpanded, true);
+  p.setData({ password: 'not-persisted', confirmPassword: 'not-persisted', passwordVisible: true });
+  p.onAuthMode({ currentTarget: { dataset: { mode: 'register' } } });
+  assert.equal(p.data.password, '');
+  assert.equal(p.data.confirmPassword, '');
+  assert.equal(p.data.passwordVisible, false);
+});
+
+test('late account or connection responses do not replace a newly selected environment', async (t) => {
+  const state = setup(t),
+    env = state.load('config/env.js');
+  env.saveSettings({ mode: 'live', apiBaseUrl: 'https://old.example.com' });
+  const p = state.page('profile');
+  p.onShow();
+  p.setData({ username: 'old-account', password: 'a-password' });
+  const pending = p.signIn();
+  env.saveSettings({ mode: 'live', apiBaseUrl: 'https://new.example.com' });
+  p.onShow();
+  state.requests[0].success({ statusCode: 200, data: 'aaa.bbb.ccc' });
+  await pending;
+  assert.equal(p.data.loggedInUser, '');
+  assert.equal(p.data.busy, false);
+  assert.equal(p.data.apiBaseUrl, 'https://new.example.com');
+  assert.equal(state.load('services/session.js').getSession('https://new.example.com'), null);
+});
+
+test('a real phone refuses loopback without making a doomed request', async (t) => {
+  const state = setup(t);
+  wx.getDeviceInfo = () => ({ platform: 'ios' });
+  state.load('config/env.js').saveSettings({ mode: 'live', apiBaseUrl: 'http://127.0.0.1:8080' });
+  await assert.rejects(
+    state.load('services/api.js').getBackendStatus(),
+    (e) => e.code === 'DEVICE_LOOPBACK' && /手机自身/.test(e.message)
+  );
+  assert.equal(state.requests.length, 0);
+});
+
+test('WeChat domain, TLS and network failures produce distinct actionable messages', async (t) => {
+  const state = setup(t);
+  state
+    .load('config/env.js')
+    .saveSettings({ mode: 'live', apiBaseUrl: 'http://192.168.1.10:8080' });
+  const api = state.load('services/api.js');
+  for (const [native, code] of [
+    ['request:fail url not in domain list', 'DOMAIN_NOT_ALLOWED'],
+    ['request:fail ssl certificate error', 'TLS_ERROR'],
+    ['request:fail timeout', 'NETWORK_TIMEOUT']
+  ]) {
+    wx.request = (o) => o.fail({ errMsg: native });
+    await assert.rejects(
+      api.getBackendStatus(),
+      (e) => e.code === code && e.nativeMessage === native
+    );
+  }
+});
+
+test('local address action preserves preferences and the diagnostic copy uses the selected server', async (t) => {
+  const state = setup(t, (o) =>
+    o.success({
+      statusCode: 200,
+      data: o.url.endsWith('/actuator/health')
+        ? { status: 'UP' }
+        : { service: 'yisheng-backend', modelConfigured: true }
+    })
+  );
+  state.load('config/deployment.js').deviceBaseUrl = 'http://192.168.1.10:8080';
+  state.load('config/env.js').saveSettings({ mode: 'demo', largeText: true });
+  const p = state.page('profile');
+  p.onShow();
+  await p.useDeviceAddress();
+  assert.equal(p.data.connectionTestLabel, '连接成功');
+  assert.equal(state.load('config/env.js').getSettings().largeText, true);
+  let copied;
+  wx.setClipboardData = (o) => {
+    copied = o.data;
+    o.success();
+  };
+  p.copyHealthUrl();
+  assert.equal(copied, 'http://192.168.1.10:8080/actuator/health');
+});

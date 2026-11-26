@@ -1,0 +1,41 @@
+{
+  "backend": "local Spring Boot via current Wi-Fi address",
+  "checks": [
+    "health and backend identity",
+    "registration persisted",
+    "duplicate username rejected",
+    "no registration token",
+    "password inputs cleared",
+    "login succeeded",
+    "USER role",
+    "authenticated empty records"
+  ],
+  "createdLocalTestAccount": true,
+  "passwordOrTokenStoredInReport": false,
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/actuator/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/status"
+    },
+    {
+      "method": "POST",
+      "path": "/user/register"
+    },
+    {
+      "method": "POST",
+      "path": "/user/register"
+    },
+    {
+      "method": "POST",
+      "path": "/user/login"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/screenings"
+    }
+  ]
+}

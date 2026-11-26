@@ -60,6 +60,10 @@
       {
         "type": "folder",
         "value": "ui-qa"
+      },
+      {
+        "type": "file",
+        "value": "MOBILE_SETUP.md"
       }
     ],
     "include": []
