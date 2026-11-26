@@ -1,22 +1,199 @@
-<view class="page profile-page {{largeText ? 'large' : ''}}">
-  <view class="page-header"><view class="page-title">我的</view></view>
-  <view class="profile-card"><image class="profile-avatar" src="/assets/logo.png" mode="aspectFit" /><view class="row-copy"><view class="profile-name">{{loggedInUser || '忆声陪伴'}}</view><view class="row-detail">{{loggedInUser ? '欢迎回来' : '登录后查看您的观察记录'}}</view></view></view>
-  <view class="group">
-    <view class="group-row"><view class="row-copy"><view class="row-title">大字模式</view></view><switch checked="{{largeText}}" bindchange="onTextChange" color="#176b52" disabled="{{busy}}" aria-label="大字模式" /></view>
-    <view class="group-row settings-row" role="button" tabindex="0" bindtap="toggleConnection" aria-expanded="{{connectionExpanded}}"><view class="row-copy"><view class="row-title">服务连接</view><view class="row-detail">{{mode === 'live' ? '已配置服务器' : '演示模式'}}</view></view><image class="chevron {{connectionExpanded ? 'expanded' : ''}}" src="/assets/icons/chevron.png" mode="aspectFit" /></view>
-    <view wx:if="{{connectionExpanded}}" class="connection-fields">
-      <view class="row spaced"><text>真实服务</text><switch checked="{{mode === 'live'}}" bindchange="onModeChange" color="#176b52" disabled="{{busy}}" aria-label="连接真实服务" /></view>
-      <label class="field-label" for="backend-address">服务器地址</label><input id="backend-address" class="field" value="{{apiBaseUrl}}" bindinput="onBaseUrl" placeholder="http://电脑IP:8080" placeholder-class="placeholder" disabled="{{busy}}" aria-label="服务器地址" />
-      <view class="button-row"><button size="mini" class="secondary-button" style="width:48%;min-width:0;max-width:48%;" hover-class="pressable" hover-start-time="0" bindtap="saveConfig" disabled="{{busy}}">保存</button><button size="mini" class="primary-button" style="width:48%;min-width:0;max-width:48%;" hover-class="pressable" hover-start-time="0" bindtap="testConnection" loading="{{busy}}" disabled="{{busy}}">测试连接</button></view>
-      <view class="note spaced">手机请使用电脑的局域网地址。</view>
+<view
+  class="page profile screen-enter {{largeText ? 'large' : ''}}"
+  style="--nav-space:{{navSpace}}px"
+>
+  <view class="scene-background">
+    <image
+      class="scene-background-art"
+      src="/assets/scene-atmosphere.png"
+      mode="scaleToFill"
+      aria-hidden="true"
+    />
+  </view>
+  <image class="ginkgo" src="/assets/ginkgo-glass.png" mode="aspectFit" aria-hidden="true" />
+  <page-header title="我的" />
+  <view class="account">
+    <view class="account-avatar">
+      <image src="/assets/icons/profile-active.png" mode="aspectFit" />
     </view>
+    <view class="account-copy">
+      <text class="account-name">{{loggedInUser || '欢迎使用忆声智护'}}</text>
+      <text class="account-detail">
+        {{loggedInUser ? '已登录 · 个人观察档案' : '登录后查看您的观察记录'}}
+      </text>
+    </view>
+    <button
+      wx:if="{{!loggedInUser && savedMode === 'live'}}"
+      class="account-login"
+      size="mini"
+      bindtap="toggleLogin"
+    >
+      {{loginExpanded ? '收起' : '登录'}}
+    </button>
   </view>
-  <view class="section-heading"><text class="section-heading-title">账号</text></view>
-  <view class="card account-card">
-    <view wx:if="{{mode === 'demo'}}" class="note">连接真实服务后即可登录。</view>
-    <block wx:elif="{{loggedInUser}}"><view class="row-title">{{loggedInUser}}</view><button size="mini" class="secondary-button spaced" hover-class="pressable" hover-start-time="0" bindtap="signOut" disabled="{{busy}}">退出登录</button></block>
-    <block wx:else><label class="field-label account-first-label" for="username">账号</label><input id="username" class="field" value="{{username}}" bindinput="onUsername" placeholder="请输入账号" placeholder-class="placeholder" disabled="{{busy}}" maxlength="100" /><label class="field-label" for="password">密码</label><input id="password" class="field" value="{{password}}" bindinput="onPassword" placeholder="请输入密码" placeholder-class="placeholder" password disabled="{{busy}}" maxlength="128" /><button size="mini" class="primary-button spaced" hover-class="pressable" hover-start-time="0" bindtap="signIn" loading="{{busy}}" disabled="{{busy}}">登录</button></block>
+  <view
+    wx:if="{{loginExpanded && !loggedInUser && savedMode === 'live'}}"
+    class="login-card glass-surface"
+  >
+    <text class="title">账号登录</text>
+    <text class="secondary login-explanation">使用已有项目账号与密码</text>
+    <text class="form-label">账号</text>
+    <input
+      class="field"
+      value="{{username}}"
+      disabled="{{busy}}"
+      placeholder="请输入账号"
+      placeholder-class="input-placeholder"
+      bindinput="onUsername"
+      maxlength="80"
+    />
+    <text class="form-label">密码</text>
+    <view class="password-field">
+      <input
+        class="field"
+        value="{{password}}"
+        password="{{!passwordVisible}}"
+        disabled="{{busy}}"
+        placeholder="请输入密码"
+        placeholder-class="input-placeholder"
+        bindinput="onPassword"
+        bindconfirm="signIn"
+        confirm-type="done"
+      />
+      <button
+        class="password-toggle"
+        size="mini"
+        aria-label="{{passwordVisible ? '隐藏密码' : '显示密码'}}"
+        bindtap="togglePassword"
+      >
+        {{passwordVisible ? '隐藏' : '显示'}}
+      </button>
+    </view>
+    <button
+      class="btn btn-primary section-gap"
+      loading="{{busy}}"
+      disabled="{{busy}}"
+      bindtap="signIn"
+    >
+      登录
+    </button>
   </view>
-  <view wx:if="{{status}}" class="status {{statusError ? 'error' : ''}}" role="status"><text selectable>{{status}}</text></view>
-  <view class="about-row" role="button" tabindex="0" bindtap="showAbout"><text>关于忆声</text><text>V0.1.0</text></view>
+  <view class="settings-group glass-surface">
+    <setting-row icon="text-size" label="大字模式" detail="放大文字，便于阅读。">
+      <switch
+        checked="{{largeText}}"
+        color="#168773"
+        disabled="{{busy}}"
+        bindchange="onTextChange"
+        aria-label="大字模式"
+      />
+    </setting-row>
+    <view class="setting-divider"></view>
+    <setting-row
+      icon="server"
+      label="服务连接"
+      detail="{{connectionSummary}}"
+      arrow="{{true}}"
+      expanded="{{connectionExpanded}}"
+      disabled="{{busy}}"
+      bindselect="toggleConnection"
+    />
+    <view wx:if="{{connectionExpanded}}" class="connection-details">
+      <text class="form-label">后端服务地址</text>
+      <input
+        class="field"
+        value="{{apiBaseUrl}}"
+        disabled="{{busy}}"
+        placeholder="https://您的服务地址"
+        placeholder-class="input-placeholder"
+        bindinput="onBaseUrl"
+        adjust-position="{{true}}"
+      />
+      <text class="secondary service-explanation">
+        真实服务支持文字问答与已有记录查询。录音与认知分析尚未开放。
+      </text>
+      <button class="btn btn-secondary" disabled="{{busy}}" bindtap="saveConfig">保存设置</button>
+    </view>
+    <view class="setting-divider"></view>
+    <setting-row
+      icon="layers"
+      label="服务模式"
+      detail="{{hasChanges ? '有更改待保存' : savedMode === 'demo' ? '当前使用演示服务' : '当前使用真实服务'}}"
+    />
+    <view class="mode-segment" aria-role="group" aria-label="服务模式">
+      <button
+        class="segment-option {{mode === 'demo' ? 'segment-option--selected' : ''}}"
+        data-mode="demo"
+        disabled="{{busy}}"
+        aria-pressed="{{mode === 'demo'}}"
+        bindtap="onModeSelect"
+      >
+        演示服务
+      </button>
+      <button
+        class="segment-option {{mode === 'live' ? 'segment-option--selected' : ''}}"
+        data-mode="live"
+        disabled="{{busy}}"
+        aria-pressed="{{mode === 'live'}}"
+        bindtap="onModeSelect"
+      >
+        真实服务
+      </button>
+    </view>
+    <view class="setting-divider"></view>
+    <setting-row
+      icon="wifi"
+      label="连接测试"
+      detail="{{connectionTestLabel}}"
+      arrow="{{true}}"
+      disabled="{{busy}}"
+      bindselect="testConnection"
+    />
+    <view class="setting-divider"></view>
+    <setting-row
+      icon="info"
+      label="关于忆声智护"
+      detail="版本 V{{version}}"
+      arrow="{{true}}"
+      bindselect="showAbout"
+    />
+  </view>
+  <text
+    wx:if="{{status}}"
+    class="profile-feedback glass-surface {{statusError ? 'text-error' : 'text-green'}}"
+    aria-role="status"
+  >
+    {{status}}
+  </text>
+
+  <button
+    wx:if="{{loggedInUser}}"
+    class="logout glass-surface"
+    disabled="{{busy}}"
+    bindtap="signOut"
+    hover-class="pressed"
+  >
+    <image src="/assets/icons/logout.png" mode="aspectFit" />
+    <text>退出登录</text>
+  </button>
+  <glass-modal
+    visible="{{aboutVisible}}"
+    title="关于忆声智护"
+    content="忆声智护 V{{version}}
+温柔陪伴，记录点滴。
+
+当前支持文字问答与已有观察记录查询。数字人为静态形象；语音、实时 3D 和真实录音观察尚未开放。"
+    bindclose="closeAbout"
+    bindconfirm="closeAbout"
+  />
+  <glass-modal
+    visible="{{logoutVisible}}"
+    title="退出当前账号？"
+    content="退出后，您可以重新登录查看观察记录。"
+    confirm-text="退出登录"
+    show-cancel="{{true}}"
+    danger="{{true}}"
+    bindclose="cancelSignOut"
+    bindconfirm="confirmSignOut"
+  />
 </view>

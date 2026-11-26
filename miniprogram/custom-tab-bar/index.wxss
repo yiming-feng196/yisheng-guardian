@@ -1,0 +1,74 @@
+.tab-dock {
+  position: fixed;
+  z-index: 90;
+  left: 20rpx;
+  right: 20rpx;
+  padding: 10rpx 12rpx;
+  border-radius: 44rpx;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.69), rgba(248, 247, 253, 0.53));
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 12rpx 44rpx rgba(84, 103, 144, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-sizing: border-box;
+}
+.tab-track {
+  display: flex;
+  position: relative;
+  isolation: isolate;
+}
+.tab-selection {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 25%;
+  border-radius: 34rpx;
+  background: linear-gradient(135deg, rgba(205, 237, 228, 0.72), rgba(218, 239, 233, 0.68));
+  transition: transform 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  z-index: -1;
+}
+.tab-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5rpx;
+  min-height: 110rpx;
+  padding: 10rpx 0;
+  margin: 0;
+  background: transparent;
+  color: #69768a;
+  font-size: max(12px, 24rpx);
+  font-weight: 500;
+  line-height: 1.35;
+  border: 0;
+  border-radius: 34rpx;
+  box-sizing: border-box;
+}
+.tab-item::after {
+  border: 0;
+}
+.tab-item image {
+  width: 46rpx;
+  height: 46rpx;
+}
+.tab-item--selected {
+  color: #146653;
+  font-weight: 600;
+}
+.tab-dock--large .tab-item {
+  font-size: max(15px, 30rpx);
+  min-height: 130rpx;
+}
+.tab-dock--large .tab-item image {
+  width: 52rpx;
+  height: 52rpx;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab-selection {
+    transition: none;
+  }
+}

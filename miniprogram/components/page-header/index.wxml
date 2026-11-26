@@ -1,0 +1,14 @@
+<view class="heading">
+  <view class="heading-copy">
+    <view class="heading-title">
+      <text>{{title}}</text>
+      <view wx:if="{{wave}}" class="brand-wave" aria-hidden="true">
+        <view></view>
+        <view></view>
+        <view></view>
+      </view>
+    </view>
+    <text wx:if="{{subtitle}}" class="heading-subtitle">{{subtitle}}</text>
+  </view>
+  <view class="heading-aside"><slot name="aside"></slot></view>
+</view>

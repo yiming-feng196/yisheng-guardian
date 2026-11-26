@@ -1,0 +1,310 @@
+{
+  "assets": [
+    {
+      "path": "assets/avatar-companion.png",
+      "bytes": 777754,
+      "sha256": "50812738502a6eb99defc98a2a8eb9cc3f17b02dd7af426c821abe7988ce280a",
+      "width": 680,
+      "height": 1020,
+      "mode": "RGBA",
+      "origin": "existing project asset"
+    },
+    {
+      "path": "assets/ginkgo-glass.png",
+      "bytes": 23727,
+      "sha256": "8e45ca929f53f12572686ff6cde311b20e9973536a3e1a9944fbffbae51be086",
+      "width": 315,
+      "height": 345,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/arrow-right-white.png",
+      "bytes": 869,
+      "sha256": "3685e11a1c4237d26dd90fc1fe25e196a827194371b73399251b0bc78a45429d",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/arrow-right.png",
+      "bytes": 1827,
+      "sha256": "4db17fd065bf3cd1bb9481f9ebb5e24d649a5212980d2c70bc86e29ef8ac2c8a",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/arrow-up.png",
+      "bytes": 896,
+      "sha256": "443434e73f000512c581b96b9b019163f81f27e2a82eb0b6a370cd37f517a53a",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/book.png",
+      "bytes": 2960,
+      "sha256": "b925aff0965920e490be05dcb4768d446ba5485e7ba0881a91905a4dad73f0bc",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/check-circle.png",
+      "bytes": 5866,
+      "sha256": "53c2cdf5177461a5d53aa4efe016c92112cbc9e33f06198ecfc52fa4550c9c11",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/chevron-down.png",
+      "bytes": 1703,
+      "sha256": "d257a829d96905e8469f5906176f67158a84c2b32bf4696472ef14b47ccedb2c",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/chevron.png",
+      "bytes": 1818,
+      "sha256": "3245ec4aa69951994a9ad57e1b4dde8adde66d59c1da102674842570f9a51797",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/companion-active.png",
+      "bytes": 3768,
+      "sha256": "382b0cefc038d1426e19a80dd0f843fcef3b6c8c75619f6d68a6ccd02a359645",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/companion.png",
+      "bytes": 4017,
+      "sha256": "f0ce59ba03db59e672f40121d719963ef595d1fd26c1a768381026b071bab710",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/connection.png",
+      "bytes": 4274,
+      "sha256": "9068aab9cf962847def34ac32577c4bd0f456efbd49f99b2f94a16afd62b355d",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/document.png",
+      "bytes": 2275,
+      "sha256": "7b2656abdad42555b6af640c27917d622c73f1520dd780420b34e8ab871970cf",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/heart.png",
+      "bytes": 4786,
+      "sha256": "9cd5bdef5725c85291ce2d5a161886c97538497967f1e719f034af8a82cef323",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/info.png",
+      "bytes": 1841,
+      "sha256": "61f412b648755333735c30e982f80018aca490d8b475c9becdc38205c43edf77",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/layers.png",
+      "bytes": 1511,
+      "sha256": "cf518534be28cfcb69f862cd7b59cd31ad6e552b8f2aa7ded05b87f0e644f3a0",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/leaf.png",
+      "bytes": 1641,
+      "sha256": "d90069e1f25c39633fdb8f503867b3938d4a1d45c57d33748ea90bec85c0fbba",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/logout.png",
+      "bytes": 768,
+      "sha256": "7627ae877255fa7d8abd764a0c2c157374aba3900a8481acb5b93fc6c5a281d7",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/microphone.png",
+      "bytes": 3932,
+      "sha256": "e74cf9b883a22870a98c81eaec8b324cc9c6a84247a3a161e10bf49a254228c0",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/observation-active.png",
+      "bytes": 3514,
+      "sha256": "8f9b45aaf4ac32bf6e568df599df2c06ca68a55f41ee8fa9368433f7bc920655",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/observation.png",
+      "bytes": 3757,
+      "sha256": "3371b2cd2c84af1a2f10a532cb51e22d601e73941160b41a324dfeb3b375782c",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/profile-active.png",
+      "bytes": 3624,
+      "sha256": "e1c8bec6016b1c5dccb2e43c27b886a535a0514b5b3df76f4824386ebd86fcf6",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/profile.png",
+      "bytes": 3906,
+      "sha256": "37cf5c3a37f2d14eb793ba803f3c377409c91a2b758f6d00abd9256102cfa70c",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/records-active.png",
+      "bytes": 2275,
+      "sha256": "7b2656abdad42555b6af640c27917d622c73f1520dd780420b34e8ab871970cf",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/records.png",
+      "bytes": 2416,
+      "sha256": "21f12fbd04891fd768f8a32c72058a5a4ad5ef355c0f871bea034a37215e7985",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/server.png",
+      "bytes": 1151,
+      "sha256": "03aad9704e91367b0c47eb02656faa2f99f3b69c156a4bd54ee2f35d77e29e93",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/settings.png",
+      "bytes": 2974,
+      "sha256": "4dfc612809f73bd1e81774156d2607b817db5b10a8e9c5f7f3585fd6270c5dcf",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/sun.png",
+      "bytes": 4963,
+      "sha256": "cb81d28617ae3c86c0c72105cea4e5c48443186cf8d2c331f1b5b86edb27a362",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/text-size.png",
+      "bytes": 3461,
+      "sha256": "d9d61215018225f102231e28d9f9d0a02d796e5bc55c971f89e195b080a24151",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/icons/wifi.png",
+      "bytes": 1452,
+      "sha256": "129e50277e593e40418daece8c56a407663e713f41024f2732e7cf01f8b8f61d",
+      "width": 81,
+      "height": 81,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    },
+    {
+      "path": "assets/illustrations/observation-glass.png",
+      "bytes": 201000,
+      "sha256": "935d4bfbf67b7407b1f69e2bb66fad2cc08d347bbd6f027fe29c5fc613ed30c4",
+      "width": 640,
+      "height": 480,
+      "mode": "RGBA",
+      "origin": "imagegen; see design/IMAGEGEN_PROMPT.txt"
+    },
+    {
+      "path": "assets/logo.png",
+      "bytes": 5192,
+      "sha256": "8f77c708ca28fcf376bf7b0fa0229b2c5dfc80cd49030a0bc78fd3750bcd4930",
+      "width": 256,
+      "height": 256,
+      "mode": "P",
+      "origin": "existing project asset"
+    },
+    {
+      "path": "assets/observation.jpg",
+      "bytes": 165993,
+      "sha256": "825315b28ac0fd52973f975dfdf87b1e062231472c2a29bdd97b3ecb60d10692",
+      "width": 1442,
+      "height": 1079,
+      "mode": "RGB",
+      "origin": "existing project asset"
+    },
+    {
+      "path": "assets/scene-atmosphere.png",
+      "bytes": 80200,
+      "sha256": "c9463c01e9bd37fa1fcce501a46a17b49bf6f2357f9422b0993f8be5307089ad",
+      "width": 600,
+      "height": 1200,
+      "mode": "RGBA",
+      "origin": "code-drawn UI asset; editable sources in design/ or scripts/"
+    }
+  ]
+}

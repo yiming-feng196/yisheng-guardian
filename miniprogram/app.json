@@ -6,26 +6,61 @@
     "pages/profile/index"
   ],
   "window": {
-    "navigationBarTitleText": "忆声陪伴",
-    "navigationBarBackgroundColor": "#f2f2f7",
+    "navigationBarTitleText": "忆声智护",
+    "navigationBarBackgroundColor": "#DCE6F5",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#f2f2f7",
+    "backgroundColor": "#DCE6F5",
     "backgroundTextStyle": "dark"
   },
   "tabBar": {
-    "color": "#73737b",
-    "selectedColor": "#176b52",
-    "backgroundColor": "#ffffff",
+    "color": "#7C8597",
+    "selectedColor": "#168773",
+    "backgroundColor": "#DCE6F5",
     "borderStyle": "white",
     "list": [
-      { "pagePath": "pages/companion/index", "text": "陪伴", "iconPath": "assets/icons/companion.png", "selectedIconPath": "assets/icons/companion-active.png" },
-      { "pagePath": "pages/observation/index", "text": "观察", "iconPath": "assets/icons/observation.png", "selectedIconPath": "assets/icons/observation-active.png" },
-      { "pagePath": "pages/records/index", "text": "记录", "iconPath": "assets/icons/records.png", "selectedIconPath": "assets/icons/records-active.png" },
-      { "pagePath": "pages/profile/index", "text": "我的", "iconPath": "assets/icons/profile.png", "selectedIconPath": "assets/icons/profile-active.png" }
-    ]
+      {
+        "pagePath": "pages/companion/index",
+        "text": "陪伴",
+        "iconPath": "assets/icons/companion.png",
+        "selectedIconPath": "assets/icons/companion-active.png"
+      },
+      {
+        "pagePath": "pages/observation/index",
+        "text": "观察",
+        "iconPath": "assets/icons/observation.png",
+        "selectedIconPath": "assets/icons/observation-active.png"
+      },
+      {
+        "pagePath": "pages/records/index",
+        "text": "记录",
+        "iconPath": "assets/icons/records.png",
+        "selectedIconPath": "assets/icons/records-active.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "assets/icons/profile.png",
+        "selectedIconPath": "assets/icons/profile-active.png"
+      }
+    ],
+    "custom": true
   },
-  "networkTimeout": { "request": 120000, "uploadFile": 60000, "downloadFile": 60000 },
-  "usingComponents": { "environment-notice": "/components/environment-notice/index" },
+  "networkTimeout": {
+    "request": 120000,
+    "uploadFile": 60000,
+    "downloadFile": 60000
+  },
+  "usingComponents": {
+    "environment-notice": "/components/environment-notice/index",
+    "page-header": "/components/page-header/index",
+    "status-pill": "/components/status-pill/index",
+    "digital-human": "/components/digital-human/index",
+    "step-progress": "/components/step-progress/index",
+    "glass-modal": "/components/glass-modal/index",
+    "empty-state": "/components/empty-state/index",
+    "chat-panel": "/components/chat-panel/index",
+    "setting-row": "/components/setting-row/index"
+  },
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }

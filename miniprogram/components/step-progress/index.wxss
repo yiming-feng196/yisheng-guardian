@@ -1,0 +1,60 @@
+.steps {
+  display: flex;
+  align-items: flex-start;
+  padding: 28rpx 12rpx;
+  border-radius: 44rpx;
+  box-shadow: 0 12rpx 36rpx rgba(74, 93, 137, 0.05);
+}
+.step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  min-width: 0;
+  color: #69768a;
+}
+.step-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60rpx;
+  height: 60rpx;
+  margin: 0 auto 12rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  font-size: var(--font-body);
+  box-sizing: border-box;
+}
+.step-label {
+  font-size: var(--font-status);
+  line-height: 1.4;
+  display: block;
+  padding: 0 4rpx;
+}
+.step--current .step-node {
+  background: linear-gradient(140deg, #8acbbb, #168773);
+  color: #fff;
+  box-shadow: 0 4rpx 14rpx rgba(22, 135, 115, 0.14);
+}
+.step--current,
+.step--done {
+  color: #146653;
+  font-weight: 600;
+}
+.step--done .step-node {
+  background: rgba(218, 239, 233, 0.86);
+}
+.step-line {
+  position: absolute;
+  top: 28rpx;
+  left: calc(50% + 36rpx);
+  width: calc(100% - 72rpx);
+  height: 4rpx;
+  border-radius: 4rpx;
+  background: rgba(124, 145, 182, 0.23);
+}
+.step--done .step-line {
+  background: #83c5b5;
+}

@@ -1,17 +1,145 @@
-.records-summary { display:flex; align-items:center; padding:28rpx; margin-top:26rpx; border-radius:30rpx; background:#e4eee8; }
-.summary-icon { display:flex; align-items:center; justify-content:center; width:92rpx; height:92rpx; margin-right:24rpx; border-radius:26rpx; background:rgba(255,255,255,.65); flex-shrink:0; }
-.summary-icon image { width:52rpx; height:52rpx; }
-.summary-title { color:#254b38; font-size:1em; font-weight:600; margin-bottom:8rpx; }
-.record { display:flex; align-items:center; width:100%; padding:24rpx; color:#1c1c1e; background:#fff; text-align:left; font-weight:normal; border-radius:0; }
-.record+.record { border-top:1rpx solid #e5e5ea; }
-.record-copy { flex:1; min-width:0; }
-.record-title { font-size:1em; font-weight:550; line-height:1.5; }
-.record-description { margin:8rpx 0 12rpx; color:#63636b; font-size:.86em; line-height:1.5; word-break:break-word; }
-.record .row-icon { align-self:flex-start; margin-top:2rpx; }
-.loading-records { padding:28rpx; }
-.loading-row { display:flex; align-items:center; }
-.skeleton-icon { width:64rpx; height:64rpx; border-radius:18rpx; background:#eeeef3; }
-.skeleton-copy { flex:1; padding-left:24rpx; }
-.skeleton-line { width:75%; height:24rpx; border-radius:8rpx; background:#eeeef3; }
-.skeleton-line.short { width:48%; margin-top:18rpx; height:18rpx; }
-.loading-caption { margin-top:20rpx; color:#63636b; font-size:.8em; }
+.records .ginkgo {
+  right: 34rpx;
+  top: 0;
+  width: 180rpx;
+  height: 220rpx;
+}
+.records-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  margin-bottom: 28rpx;
+}
+.refresh-button {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+  min-height: 44px;
+  font-size: var(--font-secondary) !important;
+  padding: 16rpx 24rpx !important;
+  line-height: 1.4;
+  margin: 0 !important;
+  color: #146653;
+  flex: none;
+}
+.record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22rpx;
+}
+.record-card {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  text-align: left;
+  padding: 28rpx 24rpx;
+  margin: 0;
+  width: 100%;
+  border-radius: 40rpx;
+  color: #142536;
+  line-height: 1.4;
+}
+.record-symbol {
+  width: 86rpx;
+  height: 102rpx;
+  border-radius: 26rpx;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.6), rgba(218, 239, 233, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.record-symbol image {
+  width: 48rpx;
+  height: 48rpx;
+}
+.record-copy {
+  flex: 1;
+  min-width: 0;
+}
+.record-title {
+  display: block;
+  font-size: var(--font-body);
+  font-weight: 600;
+  line-height: 1.45;
+}
+.record-time {
+  display: block;
+  font-size: var(--font-secondary);
+  color: #586779;
+  margin-top: 8rpx;
+}
+.record-status {
+  margin-top: 12rpx;
+}
+.record-arrow {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  color: #586779;
+  flex: none;
+}
+.record-arrow text {
+  font-size: var(--font-status);
+}
+.record-arrow image {
+  width: 26rpx;
+  height: 26rpx;
+}
+.record-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  padding: 32rpx;
+  border-radius: 40rpx;
+  margin-bottom: 24rpx;
+  height: 190rpx;
+}
+.skeleton-symbol {
+  width: 90rpx;
+  height: 110rpx;
+  background: rgba(179, 197, 221, 0.22);
+  border-radius: 24rpx;
+}
+.skeleton-copy {
+  flex: 1;
+}
+.skeleton-copy view {
+  height: 18rpx;
+  width: 80%;
+  border-radius: 10rpx;
+  background: rgba(179, 197, 221, 0.25);
+  margin: 14rpx 0;
+}
+.skeleton-copy view:nth-child(2) {
+  width: 60%;
+}
+.skeleton-copy view:nth-child(3) {
+  width: 40%;
+}
+.large .record-card {
+  flex-wrap: wrap;
+}
+.large .record-arrow {
+  margin-left: auto;
+  padding-left: 110rpx;
+}
+.large .records-toolbar {
+  flex-wrap: wrap;
+}
+@media (max-width: 350px) {
+  .record-card {
+    gap: 16rpx;
+  }
+  .record-symbol {
+    width: 64rpx;
+    height: 90rpx;
+  }
+  .record-arrow text {
+    display: none;
+  }
+}
+
+button.record-card{display:flex!important;width:100%!important;max-width:none!important;height:auto!important;padding:28rpx 24rpx!important;margin:0!important}

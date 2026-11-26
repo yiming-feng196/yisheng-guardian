@@ -1,1 +1,6 @@
-{ "navigationBarTitleText": "忆声陪伴", "navigationBarBackgroundColor": "#f1f5f2", "disableScroll": true }
+{
+  "navigationBarTitleText": "忆声智护",
+  "navigationBarBackgroundColor": "#DCE6F5",
+  "disableScroll": true,
+  "backgroundColor": "#DCE6F5"
+}

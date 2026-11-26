@@ -1,0 +1,37 @@
+.state {
+  text-align: center;
+  padding: 64rpx 36rpx;
+  border-radius: 48rpx;
+}
+.state-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120rpx;
+  height: 120rpx;
+  margin: 0 auto 28rpx;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 36rpx;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.6), rgba(218, 239, 233, 0.7));
+}
+.state-symbol image {
+  width: 64rpx;
+  height: 64rpx;
+}
+.state-title {
+  display: block;
+  font-size: var(--font-card);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.state-message {
+  display: block;
+  margin: 16rpx 0 32rpx;
+  font-size: var(--font-secondary);
+  color: #586779;
+  line-height: 1.65;
+}
+.state .btn {
+  margin: 0 auto;
+  min-width: 260rpx;
+}

@@ -1,0 +1,20 @@
+<view class="human-space {{compact ? 'human-space--compact' : ''}}">
+  <view class="human-halo" aria-hidden="true"></view>
+  <image
+    wx:if="{{!imageFailed}}"
+    class="human-portrait"
+    src="{{src}}"
+    mode="aspectFit"
+    aria-label="数字伙伴小忆，当前为静态形象"
+    binderror="imageError"
+  />
+  <view wx:else class="human-fallback">
+    <image src="/assets/logo.png" mode="aspectFit" />
+    <text>小忆在这里</text>
+  </view>
+  <view class="human-fade" aria-hidden="true"></view>
+  <view wx:if="{{state === 'thinking'}}" class="human-hint" aria-role="status">
+    <view class="thinking-dot"></view>
+    <text>小忆正在思考</text>
+  </view>
+</view>

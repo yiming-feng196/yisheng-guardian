@@ -1,0 +1,58 @@
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 22rpx;
+  padding: 28rpx 0;
+  min-height: 128rpx;
+}
+.setting-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  flex: none;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 24rpx;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.65), rgba(228, 238, 249, 0.6));
+}
+.setting-symbol image {
+  width: 42rpx;
+  height: 42rpx;
+}
+.setting-copy {
+  flex: 1;
+  min-width: 0;
+}
+.setting-label {
+  display: block;
+  font-size: var(--font-body);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.setting-detail {
+  display: block;
+  color: #586779;
+  font-size: var(--font-secondary);
+  line-height: 1.5;
+  margin-top: 8rpx;
+}
+.setting-control {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+.setting-chevron {
+  width: 28rpx;
+  height: 28rpx;
+  margin: 8rpx;
+  transition: transform 220ms ease;
+}
+.setting-chevron--open {
+  transform: rotate(90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .setting-chevron {
+    transition: none;
+  }
+}

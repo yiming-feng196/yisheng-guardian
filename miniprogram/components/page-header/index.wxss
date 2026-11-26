@@ -1,0 +1,49 @@
+.heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  position: relative;
+  z-index: 1;
+  margin: 16rpx 0 36rpx;
+}
+.heading-copy {
+  flex: 1;
+  min-width: 0;
+}
+.heading-title {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  font-size: var(--font-title);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -1rpx;
+}
+.heading-subtitle {
+  display: block;
+  color: var(--text-secondary);
+  font-size: var(--font-secondary);
+  line-height: 1.55;
+  margin-top: 12rpx;
+}
+.heading-aside {
+  flex: none;
+  padding-top: 8rpx;
+}
+.brand-wave {
+  display: flex;
+  gap: 7rpx;
+  align-items: center;
+  height: 42rpx;
+}
+.brand-wave view {
+  width: 8rpx;
+  height: 20rpx;
+  border-radius: 8rpx;
+  background: linear-gradient(#55b8ae, #96d7d1);
+}
+.brand-wave view:nth-child(2) {
+  height: 38rpx;
+}
+
+.heading-aside{position:absolute;right:0;top:0}

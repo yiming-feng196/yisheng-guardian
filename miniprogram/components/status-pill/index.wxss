@@ -1,0 +1,42 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 12rpx 20rpx;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  color: #586779;
+  font-size: var(--font-status);
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.pill-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.pill--success,
+.pill--connected {
+  color: #146653;
+  background: rgba(218, 239, 233, 0.72);
+}
+.pill--working,
+.pill--checking {
+  color: #3c6084;
+  background: rgba(228, 238, 249, 0.8);
+}
+.pill--warning,
+.pill--demo {
+  color: #805e38;
+  background: rgba(248, 247, 244, 0.65);
+}
+.pill--error,
+.pill--unavailable {
+  color: #a14141;
+  background: rgba(251, 234, 233, 0.75);
+}

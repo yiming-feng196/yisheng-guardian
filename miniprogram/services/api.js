@@ -19,25 +19,47 @@ function chat(message) {
     });
   }
   // A single-turn interface establishes connectivity before the SSE migration.
-  return request({ path: '/assistant/chat', method: 'POST', auth: false, timeout: 120000, data: { message: value } }).then((result) => {
-    if (!result || typeof result.answer !== 'string' || !result.answer.trim()) throw new Error('后端未返回有效回答');
+  return request({
+    path: '/assistant/chat',
+    method: 'POST',
+    auth: false,
+    timeout: 120000,
+    data: { message: value }
+  }).then((result) => {
+    if (!result || typeof result.answer !== 'string' || !result.answer.trim())
+      throw new Error('后端未返回有效回答');
     return result;
   });
 }
 
 function login(username, password) {
   const config = getSettings();
-  if (config.mode === 'demo') return Promise.reject(new Error('演示模式不会验证账号，请先切换到接口联调模式'));
+  if (config.mode === 'demo')
+    return Promise.reject(new Error('演示模式不会验证账号，请先切换到接口联调模式'));
   if (!username.trim() || !password) return Promise.reject(new Error('请填写账号和密码'));
-  return request({ path: '/user/login', method: 'POST', auth: false, data: { username: username.trim(), password } })
-    .then((token) => saveSession(username.trim(), token, config.apiBaseUrl));
+  return request({
+    path: '/user/login',
+    method: 'POST',
+    auth: false,
+    data: { username: username.trim(), password }
+  }).then((token) => saveSession(username.trim(), token, config.apiBaseUrl));
 }
 
 function listRecords() {
   if (getSettings().mode === 'demo') {
     return Promise.resolve([
-      { id: 'demo-1', title: '看图讲述流程示例', status: '演示数据', description: '展示任务与报告入口，不代表真实录音或观察结果。' },
-      { id: 'demo-2', title: '观察记录页面示例', status: '演示数据', description: '切换到接口联调模式后，这里读取当前登录账号的观察任务。' }
+      {
+        id: 'demo-1',
+        title: '看图讲述流程示例',
+        status: '演示数据',
+        description: '展示任务与报告入口，不代表真实录音或观察结果。'
+      },
+      {
+        id: 'demo-2',
+        title: '观察记录页面示例',
+        status: '演示数据',
+        description: '切换到接口联调模式后，这里读取当前登录账号的观察任务。'
+      }
     ]);
   }
   if (!getSession()) return Promise.reject(new Error('请先到“我的”登录现有项目账号'));
@@ -47,6 +69,7 @@ function listRecords() {
       id: item.taskId,
       title: '语音观察任务',
       status: item.status || '状态待确认',
+      createdAt: item.requestedAt || item.createdAt || '',
       description: item.message || item.createdAt || '',
       report: item.result && typeof item.result.report === 'string' ? item.result.report : ''
     }));
@@ -54,12 +77,18 @@ function listRecords() {
 }
 
 function getBackendStatus() {
-  return checkConnection().then(() => request({ path: '/assistant/status', auth: false, timeout: 8000 })).then((result) => {
-    if (!result || result.service !== 'yisheng-backend' || typeof result.modelConfigured !== 'boolean') {
-      throw new Error('服务已响应，但后端版本不匹配，请更新本机后端');
-    }
-    return result;
-  });
+  return checkConnection()
+    .then(() => request({ path: '/assistant/status', auth: false, timeout: 8000 }))
+    .then((result) => {
+      if (
+        !result ||
+        result.service !== 'yisheng-backend' ||
+        typeof result.modelConfigured !== 'boolean'
+      ) {
+        throw new Error('服务已响应，但后端版本不匹配，请更新本机后端');
+      }
+      return result;
+    });
 }
 
 module.exports = { checkConnection, getBackendStatus, chat, login, listRecords };

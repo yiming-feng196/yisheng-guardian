@@ -1,0 +1,8 @@
+Tool: image_gen.imagegen
+Date: 2026-11-26
+transparent_background: true
+No reference image was sent to the image generator. Existing portrait and logo were preserved.
+Prompt:
+Use case: stylized-concept. Create ONE isolated production UI illustration asset for a premium Chinese cognitive companion mini-program. No UI screenshot, no phone frame, no words, no numbers, no letters, no watermark. Subject: a softly tilted translucent frosted-glass picture frame containing a minimal landscape of pale ice-blue/lavender mountains, a small warm cream-peach sun, and a mint lake. In front of the frame is a small circular milky-glass microphone medallion with a simple white microphone glyph, next to a short pill of delicate white sound-wave bars; these are decorative objects, not a real recording display. A single fine translucent orbital glass ribbon loosely curves behind the frame. Everything sits on one very thin translucent oval glass plinth. Soft sculptural 3D product render, high-end matte translucent glass with diffuse refraction, subtle white edge highlights, almost shadowless studio lighting, airy and calm. Strict low-saturation palette: fog blue #DCE6F5, ice blue #E4EEF9, lavender #E5E5F5, cream #F8F7F4, tiny peach #F4E1DC accent. No dark edges, no strong shadows, no saturated purple, no metallic chrome. Composition: landscape 4:3, centered object group, all objects fully visible, generous transparent padding, real transparent background with preserved alpha, readable at 280px width. Asset will be layered over a pale blue frosted-glass app card. Render a polished individual asset, never an entire application page.
+Original: observation-glass-original.png
+Runtime: ../assets/illustrations/observation-glass.png (640 x 480 PNG, alpha preserved)

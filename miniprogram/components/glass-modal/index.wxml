@@ -1,0 +1,30 @@
+<view wx:if="{{visible}}" class="modal-layer" catchtouchmove="blockTouch">
+  <view class="modal-mask" bindtap="close"></view>
+  <view
+    class="modal-sheet glass-surface"
+    aria-role="dialog"
+    aria-modal="true"
+    aria-label="{{title}}"
+  >
+    <view class="modal-heading">
+      <text class="modal-title">{{title}}</text>
+      <button class="icon-button close-button" size="mini" aria-label="关闭弹窗" bindtap="close">
+        ×
+      </button>
+    </view>
+    <text wx:if="{{caption}}" class="modal-caption">{{caption}}</text>
+    <scroll-view class="modal-scroll" scroll-y="{{true}}">
+      <text class="modal-content" selectable="{{true}}">{{content}}</text>
+      <slot></slot>
+    </scroll-view>
+    <text wx:if="{{footnote}}" class="modal-footnote">{{footnote}}</text>
+    <view class="modal-actions">
+      <button wx:if="{{showCancel}}" class="btn btn-secondary" bindtap="close">
+        {{cancelText}}
+      </button>
+      <button class="btn {{danger ? 'btn-danger' : 'btn-primary'}}" bindtap="confirm">
+        {{confirmText}}
+      </button>
+    </view>
+  </view>
+</view>

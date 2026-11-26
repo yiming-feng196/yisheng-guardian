@@ -1,0 +1,61 @@
+<view class="chat-panel glass-surface glass-float {{expanded ? 'chat-panel--expanded' : ''}}">
+  <button
+    class="chat-handle"
+    aria-label="{{expanded ? '收起对话' : '展开对话'}}"
+    aria-expanded="{{expanded}}"
+    bindtap="toggle"
+  >
+    <view class="handle-mark {{expanded ? 'handle-mark--down' : ''}}"></view>
+    <text wx:if="{{expanded}}">与小忆的对话</text>
+  </button>
+  <scroll-view
+    wx:if="{{expanded}}"
+    class="chat-history"
+    scroll-y="{{true}}"
+    scroll-into-view="{{scrollTarget}}"
+    scroll-with-animation="{{true}}"
+  >
+    <text wx:if="{{mode === 'demo'}}" class="chat-mode">演示回复 · 未调用 AI</text>
+    <view
+      wx:for="{{messages}}"
+      wx:key="id"
+      id="{{item.id}}"
+      class="chat-message chat-message--{{item.role}}"
+    >
+      <text class="chat-bubble {{item.error ? 'chat-bubble--error' : ''}}" selectable="{{true}}">
+        {{item.content}}
+      </text>
+      <text wx:if="{{item.notice}}" class="chat-notice">{{item.notice}}</text>
+    </view>
+    <view wx:if="{{sending}}" id="chat-thinking" class="chat-thinking" aria-role="status">
+      小忆正在思考…
+    </view>
+  </scroll-view>
+  <view class="composer">
+    <input
+      class="composer-input"
+      value="{{value}}"
+      placeholder="和小忆说说话……"
+      placeholder-class="input-placeholder"
+      maxlength="500"
+      confirm-type="send"
+      adjust-position="{{false}}"
+      cursor-spacing="12"
+      bindinput="input"
+      bindfocus="focus"
+      bindblur="blur"
+      bindkeyboardheightchange="keyboard"
+      bindconfirm="send"
+    />
+    <button
+      class="send-button"
+      size="mini"
+      disabled="{{sending || !value}}"
+      loading="{{sending}}"
+      aria-label="发送消息"
+      bindtap="send"
+    >
+      <image wx:if="{{!sending}}" src="/assets/icons/arrow-up.png" mode="aspectFit" />
+    </button>
+  </view>
+</view>

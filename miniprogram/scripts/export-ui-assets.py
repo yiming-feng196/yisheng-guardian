@@ -10,7 +10,7 @@ import math
 ROOT = Path(__file__).resolve().parents[1]
 ICONS = ROOT / "assets" / "icons"
 ICONS.mkdir(exist_ok=True)
-GREEN, GRAY, WHITE = "#176b52", "#73737b", "#ffffff"
+GREEN, GRAY, WHITE = "#168773", "#7c8597", "#ffffff"
 SIZE, SCALE = 81, 12
 
 
@@ -78,7 +78,7 @@ for name in ("companion","observation","records","profile"):
     icon(name,GRAY).save(ICONS/f"{name}.png",optimize=True)
     icon(name,GREEN).save(ICONS/f"{name}-active.png",optimize=True)
 for name in ("document","microphone","sun","book","arrow-right","chevron-down","check-circle","connection","settings","text-size","heart"):
-    color = "#a46a24" if name == "sun" else "#6b6190" if name == "book" else GREEN
+    color = "#b98249" if name == "sun" else "#6489bf" if name == "book" else GREEN
     icon(name,color).save(ICONS/f"{name}.png",optimize=True)
 icon("chevron",GRAY).save(ICONS/"chevron.png",optimize=True)
 icon("arrow-up",WHITE).save(ICONS/"arrow-up.png",optimize=True)

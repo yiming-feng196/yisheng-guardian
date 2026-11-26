@@ -1,38 +1,98 @@
-<view class="page companion-page {{largeText ? 'large' : ''}}">
-  <view class="home-header">
-    <text class="companion-name">小忆</text>
-    <button size="mini" class="connection-label {{connection === 'unavailable' ? 'offline' : ''}}" style="width:auto;" hover-class="pressable" hover-start-time="0" bindtap="openProfile" aria-label="服务状态与设置"><view class="connection-dot"></view>{{connectionLabel}}</button>
+<view
+  class="page companion {{largeText ? 'large' : ''}} {{chatOpen ? 'chat-is-open' : ''}} {{keyboardHeight > 0 ? 'keyboard-open' : ''}}"
+  style="height:calc(100% - {{keyboardInset}}px);--nav-space:{{keyboardHeight > 0 ? 8 : navSpace}}px"
+>
+  <view class="scene-background">
+    <image
+      class="scene-background-art"
+      src="/assets/scene-atmosphere.png"
+      mode="scaleToFill"
+      aria-hidden="true"
+    />
   </view>
-  <view class="avatar-stage {{chatOpen ? 'with-chat' : ''}}">
-    <view class="ambient-light"></view>
-    <view class="avatar-touch" role="button" tabindex="0" bindtap="openChat" aria-label="和小忆开始聊天" aria-expanded="{{chatOpen}}">
-      <image class="avatar-portrait" src="/assets/avatar-companion.png" mode="aspectFit" />
-    </view>
-    <view wx:if="{{!chatOpen}}" class="greeting">
-      <view class="greeting-title">今天想聊些什么？</view>
-      <view class="greeting-detail">我在这里，听您慢慢说。</view>
-    </view>
-    <view class="chat-sheet glass {{chatOpen ? 'sheet-open' : ''}}" aria-hidden="{{!chatOpen}}">
-      <view class="sheet-heading" role="button" tabindex="0" bindtap="closeChat" aria-label="收起聊天"><text>和小忆聊聊</text><image src="/assets/icons/chevron-down.png" mode="aspectFit" /></view>
-      <scroll-view class="messages" scroll-y scroll-into-view="{{scrollTarget}}" aria-label="聊天内容">
-        <view wx:for="{{messages}}" wx:key="id" id="{{item.id}}" class="message-wrap {{item.role}}">
-          <view wx:if="{{item.role === 'assistant'}}" class="message-author">{{mode === 'demo' ? '小忆 · 演示回复' : '小忆'}}</view>
-          <view class="message {{item.error ? 'failed' : ''}}"><text selectable>{{item.content}}</text></view>
-          <view wx:if="{{item.notice}}" class="message-note"><text selectable>{{item.notice}}</text></view>
+  <image class="ginkgo" src="/assets/ginkgo-glass.png" mode="aspectFit" aria-hidden="true" />
+  <view class="identity">
+    <view class="identity-top">
+      <view class="identity-name">
+        <text>小忆</text>
+        <view class="name-wave" aria-hidden="true">
+          <view></view>
+          <view></view>
+          <view></view>
         </view>
-        <view wx:if="{{sending}}" class="thinking" role="status">正在回复…</view>
-        <view class="message-spacer"></view>
-      </scroll-view>
+      </view>
+      <button
+        class="connection-button"
+        size="mini"
+        aria-label="{{connectionLabel}}，打开服务设置"
+        bindtap="openProfile"
+      >
+        <status-pill label="{{connectionLabel}}" tone="{{connection}}" />
+      </button>
+    </view>
+    <text class="identity-subtitle">你的认知健康陪伴助手</text>
+  </view>
+  <view class="human-stage">
+    <digital-human
+      state="{{sending ? 'thinking' : inputFocused ? 'input' : replyPresented ? 'responding' : connection === 'unavailable' ? 'error' : 'idle'}}"
+      active="{{pageActive}}"
+      compact="{{chatOpen}}"
+    />
+  </view>
+  <view wx:if="{{!chatOpen}}" class="home-actions">
+    <view class="greeting glass-surface glass-float">
+      <view class="greeting-accent"></view>
+      <view>
+        <text class="greeting-title">今天想聊些什么？</text>
+        <text class="greeting-subtitle">我在这里，陪你聊天、讲故事。</text>
+      </view>
+    </view>
+    <view class="quick-topics">
+      <button
+        class="topic glass-surface"
+        data-message="想和你聊聊今天的生活。"
+        disabled="{{sending}}"
+        bindtap="onQuickTopic"
+        hover-class="pressed"
+      >
+        <image src="/assets/icons/companion-active.png" mode="aspectFit" />
+        <text>聊聊今天</text>
+      </button>
+      <button
+        class="topic glass-surface"
+        data-message="请给我讲一个温暖的小故事。"
+        disabled="{{sending}}"
+        bindtap="onQuickTopic"
+        hover-class="pressed"
+      >
+        <image src="/assets/icons/book.png" mode="aspectFit" />
+        <text>听个故事</text>
+      </button>
+      <button class="topic glass-surface" bindtap="openObservation" hover-class="pressed">
+        <image src="/assets/icons/leaf.png" mode="aspectFit" />
+        <text>认知小练习</text>
+      </button>
     </view>
   </view>
-  <view class="companion-dock">
-    <view wx:if="{{!chatOpen}}" class="quick-topics">
-      <button size="mini" class="topic" hover-class="pressable" hover-start-time="0" bindtap="onQuickTopic" data-message="今天想和你聊聊。" disabled="{{sending}}">聊聊今天</button>
-      <button size="mini" class="topic" hover-class="pressable" hover-start-time="0" bindtap="onQuickTopic" data-message="给我讲一个温暖的小故事吧。" disabled="{{sending}}">听个故事</button>
-    </view>
-    <view class="composer glass">
-      <view class="input-container"><input class="chat-input" value="{{input}}" maxlength="500" placeholder="和小忆说说话…" placeholder-class="chat-placeholder" bindinput="onInput" bindfocus="onInputFocus" bindblur="onInputBlur" focus="{{inputFocused}}" disabled="{{sending}}" adjust-position="{{true}}" cursor-spacing="24" confirm-type="send" bindconfirm="sendMessage" aria-label="输入聊天消息" /></view>
-      <button size="mini" type="primary" class="send-button" style="width:44px;min-width:44px;max-width:44px;height:44px;flex:none;" hover-class="pressable" hover-start-time="0" bindtap="sendMessage" loading="{{sending}}" disabled="{{sending || !input}}" aria-label="发送消息"><image wx:if="{{!sending}}" src="/assets/icons/arrow-up.png" mode="aspectFit" /></button>
-    </view>
+  <view class="chat-host">
+    <chat-panel
+      id="chat-panel"
+      expanded="{{chatOpen}}"
+      messages="{{messages}}"
+      value="{{input}}"
+      sending="{{sending}}"
+      scroll-target="{{scrollTarget}}"
+      mode="{{mode}}"
+      bindinput="onInput"
+      bindfocus="onInputFocus"
+      bindblur="onInputBlur"
+      bindkeyboard="onKeyboardHeight"
+      bindsend="sendMessage"
+      bindexpand="openChat"
+      bindcollapse="closeChat"
+    />
   </view>
+  <text wx:if="{{mode === 'demo' && !chatOpen}}" class="home-mode">
+    演示模式 · 静态形象与示例回复
+  </text>
 </view>

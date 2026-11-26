@@ -1,0 +1,45 @@
+{
+  "source": "Source-derived Chromium, 320×667. Not WeChat runtime.",
+  "report": [
+    {
+      "name": "companion",
+      "state": "narrow",
+      "horizontalOverflow": false,
+      "missingImages": [],
+      "errors": [],
+      "bodySize": "16px"
+    },
+    {
+      "name": "companion",
+      "state": "narrow-large",
+      "horizontalOverflow": false,
+      "missingImages": [],
+      "errors": [],
+      "bodySize": "20px"
+    },
+    {
+      "name": "observation",
+      "state": "narrow",
+      "horizontalOverflow": false,
+      "missingImages": [],
+      "errors": [],
+      "bodySize": "16px"
+    },
+    {
+      "name": "records",
+      "state": "narrow",
+      "horizontalOverflow": false,
+      "missingImages": [],
+      "errors": [],
+      "bodySize": "16px"
+    },
+    {
+      "name": "profile",
+      "state": "narrow",
+      "horizontalOverflow": false,
+      "missingImages": [],
+      "errors": [],
+      "bodySize": "16px"
+    }
+  ]
+}

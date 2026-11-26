@@ -1,0 +1,73 @@
+{
+  "runtime": "WeChat DevTools 2.02.2609250 / native mini-program / iPhone 16 simulator",
+  "project": "F:/yisheng-guardian-main/miniprogram",
+  "checks": [
+    {
+      "name": "native text input → Spring Boot → real model reply",
+      "passed": true,
+      "answerCharacters": 30
+    },
+    {
+      "name": "collapse and reopen preserves conversation",
+      "passed": true
+    },
+    {
+      "name": "synthetic 300px keyboard inset hides navigation",
+      "passed": true,
+      "synthetic": true
+    },
+    {
+      "name": "observation primary action fits above floating navigation",
+      "passed": true,
+      "width": 328,
+      "bottom": 603.1771240234375
+    },
+    {
+      "name": "live observation refuses fake recording or upload",
+      "passed": true
+    },
+    {
+      "name": "records login action opens the real account form",
+      "passed": true
+    },
+    {
+      "name": "native backend health and model status connection test",
+      "passed": true
+    },
+    {
+      "name": "large text persists between native pages",
+      "passed": true
+    },
+    {
+      "name": "record cards fill the native content width",
+      "passed": true,
+      "width": 361.3333435058594
+    },
+    {
+      "name": "glass report sheet displays labelled demo content",
+      "passed": true
+    },
+    {
+      "name": "all four demo observation steps complete without audio submission",
+      "passed": true
+    }
+  ],
+  "screens": [
+    "native-companion.png",
+    "native-companion-chat.png",
+    "native-companion-keyboard-layout.png",
+    "native-observation.png",
+    "native-records.png",
+    "native-profile.png",
+    "native-profile-about.png",
+    "native-companion-large.png",
+    "native-profile-large.png",
+    "native-records-demo.png",
+    "native-records-report.png",
+    "native-observation-consent.png",
+    "native-observation-picture.png",
+    "native-observation-confirm.png",
+    "native-observation-complete.png"
+  ],
+  "errors": []
+}

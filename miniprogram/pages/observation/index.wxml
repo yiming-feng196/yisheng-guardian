@@ -1,38 +1,114 @@
-<view class="page observation-page {{largeText ? 'large' : ''}}">
-  <view class="page-header"><view class="page-title">认知观察</view></view>
-  <environment-notice mode="{{mode}}" />
-  <view class="progress-card">
-    <view class="row"><text class="progress-label">第 {{step + 1}} 步，共 4 步</text><text class="badge">流程体验</text></view>
-    <view class="steps"><view wx:for="{{steps}}" wx:key="*this" class="step {{index === step ? 'current' : ''}} {{index < step ? 'complete' : ''}}"><view class="step-track"></view><text>{{item}}</text></view></view>
+<view
+  class="page observation screen-enter {{largeText ? 'large' : ''}}"
+  style="--nav-space:{{navSpace}}px"
+>
+  <view class="scene-background">
+    <image
+      class="scene-background-art"
+      src="/assets/scene-atmosphere.png"
+      mode="scaleToFill"
+      aria-hidden="true"
+    />
   </view>
-  <view wx:if="{{step === 0}}" class="card introduction">
-    <view class="observation-symbol"><image src="/assets/icons/observation-active.png" mode="aspectFit" /></view>
-    <view class="intro-title">从一张图片开始</view>
-    <view class="intro-copy">看看图片，说说您看到的故事。<br />不着急，也没有标准答案。</view>
-    <view class="info-note spaced">当前为流程体验，不会录音或生成健康评估。观察信息不能替代专业诊断。</view>
+  <image class="ginkgo" src="/assets/ginkgo-glass.png" mode="aspectFit" aria-hidden="true" />
+  <page-header title="认知观察" subtitle="看看图片，说说您看到的故事。" wave="{{true}}">
+    <status-pill slot="aside" label="流程体验" tone="demo" />
+  </page-header>
+  <step-progress steps="{{steps}}" current="{{step}}" />
+  <view class="observation-card glass-surface">
+    <block wx:if="{{step === 0}}">
+      <view class="observation-heading">
+        <view class="feature-symbol">
+          <image src="/assets/icons/observation-active.png" mode="aspectFit" />
+        </view>
+        <text class="title">从一张图片开始</text>
+      </view>
+      <text class="body-text intro-copy">看看图片，说说您看到的故事。不着急，也没有标准答案。</text>
+      <image
+        class="intro-illustration"
+        src="/assets/illustrations/observation-glass.png"
+        mode="aspectFit"
+        aria-label="磨砂玻璃相框主题插图"
+      />
+      <text class="secondary experience-note">当前为流程体验，不会录音或生成健康评估。</text>
+      <checkbox-group bindchange="onConsentChange">
+        <label class="consent-row">
+          <checkbox value="consent" checked="{{consent}}" color="#168773" />
+          <text>我已了解，继续体验流程示例。</text>
+        </label>
+      </checkbox-group>
+      <button
+        class="btn btn-primary"
+        disabled="{{!consent}}"
+        hover-class="pressed"
+        bindtap="nextStep"
+      >
+        开始体验
+        <image src="/assets/icons/arrow-right-white.png" mode="aspectFit" />
+      </button>
+    </block>
+    <block wx:elif="{{step === 1}}">
+      <text class="title">看图讲述</text>
+      <text class="body-text section-gap">请仔细看看这张图片，说说画面中发生了什么。</text>
+      <image
+        class="task-picture"
+        src="/assets/observation.jpg"
+        mode="widthFix"
+        aria-label="看图讲述任务图片"
+      />
+      <view wx:if="{{sampleReady}}" class="sample-selected">
+        <status-pill label="已选择流程示例" tone="success" />
+      </view>
+      <text class="secondary experience-note">此处不会启动麦克风，也不会上传录音。</text>
+      <button
+        class="btn {{sampleReady ? 'btn-secondary' : 'btn-primary'}}"
+        hover-class="pressed"
+        bindtap="prepareSample"
+      >
+        {{sampleReady ? '已选择流程示例' : '选择流程示例'}}
+      </button>
+      <view class="step-actions">
+        <button class="btn btn-secondary" bindtap="previousStep">上一步</button>
+        <button class="btn btn-primary" disabled="{{!sampleReady}}" bindtap="nextStep">
+          下一步
+        </button>
+      </view>
+    </block>
+    <block wx:elif="{{step === 2}}">
+      <text class="title">确认体验内容</text>
+      <view class="confirmation-symbol">
+        <image src="/assets/icons/document.png" mode="aspectFit" />
+      </view>
+      <text class="body-text">本次仅为流程体验，未采集真实录音。</text>
+      <text class="secondary experience-note">
+        真实录音开放后，可在这里试听、重新录制和确认提交。
+      </text>
+      <view class="audio-placeholder">
+        <text>暂无音频文件</text>
+        <text class="secondary">播放与提交将在录音功能开放后启用</text>
+      </view>
+      <view class="step-actions">
+        <button class="btn btn-secondary" bindtap="previousStep">返回看图</button>
+        <button class="btn btn-primary" bindtap="nextStep">完成体验</button>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="completion-symbol">
+        <image src="/assets/icons/check-circle.png" mode="aspectFit" />
+      </view>
+      <text class="title result-title">本次流程体验已完成</text>
+      <text class="body-text result-copy">当前未进行真实录音与认知分析。</text>
+      <text class="secondary experience-note">不会生成健康评分、风险等级或观察报告。</text>
+      <button class="btn btn-primary" bindtap="openCompanion">回到陪伴页</button>
+      <button class="btn btn-plain section-gap" bindtap="restart">重新体验</button>
+    </block>
   </view>
-  <view wx:elif="{{step === 1}}" class="card">
-    <view class="section-title">看看图片，准备讲述</view><view class="note spaced">图中有哪些人？他们在做什么？您可以从最先注意到的细节说起。</view>
-    <image class="task-image spaced" src="/assets/observation.jpg" mode="widthFix" />
-    <button size="mini" class="secondary-button spaced" hover-class="pressable" hover-start-time="0" bindtap="prepareSample">{{mode === 'demo' ? (sampleReady ? '已选择流程示例' : '选择流程示例（无录音）') : '录音与上传 · 尚未开放'}}</button>
-    <view wx:if="{{sampleReady}}" class="status">已选择示例占位，没有采集音频。</view>
-  </view>
-  <view wx:elif="{{step === 2}}" class="card empty">
-    <view class="recording-placeholder"><image src="/assets/icons/microphone.png" mode="aspectFit" /></view>
-    <view class="empty-title">这里将保留您的讲述</view><view class="note">录音时长、试听与重新录制将在接入后开放。</view><view class="status">当前为流程示例，没有可试听或提交的录音。</view>
-  </view>
-  <view wx:else class="card empty">
-    <image class="empty-icon" src="/assets/icons/check-circle.png" mode="aspectFit" />
-    <view class="empty-title">已完成流程体验</view><view class="note">您已了解观察步骤。<br />本次未创建任务，也未生成真实结果。</view>
-    <button size="mini" class="secondary-button spaced" hover-class="pressable" hover-start-time="0" bindtap="openRecords">看看记录页面</button>
-  </view>
-  <checkbox-group wx:if="{{step === 0}}" bindchange="onConsentChange" class="consent-group">
-    <label class="consent"><checkbox value="consent" checked="{{consent}}" color="#176b52" /><text>我已了解，继续体验流程示例</text></label>
-  </checkbox-group>
-  <view class="button-row">
-    <button size="mini" wx:if="{{step > 0 && step < 3}}" class="secondary-button" hover-class="pressable" hover-start-time="0" bindtap="previousStep">上一步</button>
-    <button size="mini" wx:if="{{step < 3}}" class="primary-button" hover-class="pressable" hover-start-time="0" bindtap="nextStep" disabled="{{(step === 0 && !consent) || (step === 1 && !sampleReady)}}">{{step === 0 ? '开始体验' : (step === 2 ? '查看流程结果' : '下一步')}}<image class="button-icon" src="/assets/icons/arrow-right-white.png" mode="aspectFit" /></button>
-    <button size="mini" wx:else class="primary-button" hover-class="pressable" hover-start-time="0" bindtap="restart">重新体验</button>
-  </view>
-  <view class="page-end">按照自己的节奏，随时可以停下来。</view>
+  <text class="page-note">观察信息仅供参考，不能替代专业诊断。</text>
+  <glass-modal
+    visible="{{noticeVisible}}"
+    title="录音与上传尚未开放"
+    content="当前仅提供观察流程体验，不会调用麦克风、上传音频或生成观察报告。您可以返回演示模式，了解完整步骤。"
+    bindclose="closeNotice"
+    bindconfirm="closeNotice"
+  />
 </view>

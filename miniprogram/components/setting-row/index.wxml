@@ -1,0 +1,24 @@
+<view
+  class="setting-row"
+  aria-role="{{arrow ? 'button' : 'text'}}"
+  aria-label="{{label}}，{{detail}}"
+  bindtap="select"
+>
+  <view class="setting-symbol">
+    <image src="/assets/icons/{{icon}}.png" mode="aspectFit" aria-hidden="true" />
+  </view>
+  <view class="setting-copy">
+    <text class="setting-label">{{label}}</text>
+    <text wx:if="{{detail}}" class="setting-detail">{{detail}}</text>
+  </view>
+  <view class="setting-control">
+    <slot></slot>
+    <image
+      wx:if="{{arrow}}"
+      class="setting-chevron {{expanded ? 'setting-chevron--open' : ''}}"
+      src="/assets/icons/chevron.png"
+      mode="aspectFit"
+      aria-hidden="true"
+    />
+  </view>
+</view>

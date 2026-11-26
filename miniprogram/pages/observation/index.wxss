@@ -1,24 +1,118 @@
-.progress-card { padding:22rpx 24rpx; margin-bottom:20rpx; border-radius:24rpx; background:#fff; }
-.progress-label { font-size:.84em; font-weight:600; }
-.steps { display:flex; margin-top:24rpx; }
-.step { flex:1; min-width:0; color:#63636b; font-size:.8em; text-align:center; }
-.step+.step { margin-left:12rpx; }
-.step-track { height:8rpx; margin-bottom:14rpx; border-radius:8rpx; background:#e9e9ee; }
-.current { color:#176b52; font-weight:600; }
-.current .step-track,.complete .step-track { background:#176b52; }
-.introduction { padding:28rpx 26rpx 24rpx; }
-.observation-symbol { display:flex; align-items:center; justify-content:center; width:80rpx; height:80rpx; margin-bottom:20rpx; border-radius:24rpx; background:#e9f3ee; }
-.observation-symbol image { width:44rpx; height:44rpx; }
-.intro-title { font-size:1.42em; line-height:1.35; font-weight:650; letter-spacing:-.03em; }
-.intro-copy { color:#63636b; margin-top:12rpx; font-size:.92em; line-height:1.55; }
-.intro-points { margin:30rpx 0; }
-.intro-point { display:flex; align-items:center; padding:16rpx 0; }
-.point-number { flex-shrink:0; display:flex; align-items:center; justify-content:center; width:56rpx; height:56rpx; margin-right:20rpx; border-radius:50%; color:#176b52; background:#edf5f0; font-size:.8em; font-weight:600; }
-.point-title { font-size:.94em; font-weight:500; }
-.info-note { padding:20rpx; border-radius:18rpx; background:#f5f5f9; color:#63636b; font-size:.86em; line-height:1.55; }
-.consent { display:flex; align-items:center; min-height:100rpx; padding:12rpx 4rpx; font-size:.86em; }
-.consent checkbox { flex-shrink:0; margin-right:14rpx; }
-.task-image { width:100%; border-radius:24rpx; display:block; }
-.recording-placeholder { display:flex; align-items:center; justify-content:center; width:144rpx; height:144rpx; margin:8rpx auto 32rpx; border-radius:50%; background:#e9f3ee; }
-.recording-placeholder image { width:64rpx; height:64rpx; }
-.large .step { font-size:.75em; }
+.observation-mode {
+  margin: -12rpx 0 28rpx;
+}
+.observation-card {
+  margin-top: 28rpx;
+  border-radius: 50rpx;
+  padding: 36rpx 32rpx;
+}
+.observation-heading {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.feature-symbol {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(218, 239, 233, 0.75);
+  flex: none;
+}
+.feature-symbol image {
+  width: 38rpx;
+  height: 38rpx;
+}
+.intro-copy {
+  margin-top: 20rpx;
+}
+.intro-illustration {
+  display: block;
+  width: 100%;
+  height: 260rpx;
+  margin: 4rpx 0 8rpx;
+}
+.experience-note {
+  display: block;
+  line-height: 1.65;
+  margin: 24rpx 0;
+}
+.consent-row {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
+  min-height: 96rpx;
+  font-size: var(--font-secondary);
+  color: #586779;
+  padding: 12rpx 0 24rpx;
+}
+.consent-row checkbox {
+  flex: none;
+  transform: scale(0.85);
+  transform-origin: left center;
+  width: 40rpx;
+  margin-right: 8rpx;
+}
+.task-picture {
+  display: block;
+  width: 100%;
+  border-radius: 32rpx;
+  margin: 28rpx 0;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+}
+.sample-selected {
+  margin: 8rpx 0;
+}
+.step-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 24rpx;
+}
+.step-actions .btn {
+  flex: 1;
+  min-width: 0;
+  padding-left: 16rpx;
+  padding-right: 16rpx;
+}
+.confirmation-symbol,
+.completion-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 170rpx;
+  height: 170rpx;
+  border-radius: 50%;
+  margin: 40rpx auto;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.75), rgba(218, 239, 233, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.85);
+}
+.confirmation-symbol image,
+.completion-symbol image {
+  width: 90rpx;
+  height: 90rpx;
+}
+.audio-placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  background: rgba(255, 255, 255, 0.32);
+  border-radius: 28rpx;
+  padding: 30rpx;
+  margin: 24rpx 0;
+  color: #586779;
+  font-size: var(--font-body);
+}
+.result-title,
+.result-copy {
+  display: block;
+  text-align: center;
+}
+.result-copy {
+  margin-top: 24rpx;
+}
+.large .intro-illustration {
+  height: 280rpx;
+}

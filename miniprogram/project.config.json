@@ -1,7 +1,7 @@
 {
   "appid": "wx23c148b666ca9b93",
   "projectname": "yisheng-companion-miniprogram",
-  "description": "忆声陪伴手机端公共工程骨架",
+  "description": "忆声智护 · 原生微信小程序",
   "compileType": "miniprogram",
   "miniprogramRoot": "./",
   "setting": {
@@ -9,16 +9,61 @@
     "enhance": true,
     "postcss": true,
     "minified": true,
-    "urlCheck": true
+    "urlCheck": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
   },
   "packOptions": {
     "ignore": [
-      { "type": "folder", "value": "tests" },
-      { "type": "folder", "value": "scripts" },
-      { "type": "file", "value": "README.md" },
-      { "type": "file", "value": "CONTRIBUTING.md" },
-      { "type": "file", "value": "DESIGN.md" }
+      {
+        "value": "tests",
+        "type": "folder"
+      },
+      {
+        "value": "scripts",
+        "type": "folder"
+      },
+      {
+        "value": "README.md",
+        "type": "file"
+      },
+      {
+        "value": "CONTRIBUTING.md",
+        "type": "file"
+      },
+      {
+        "type": "file",
+        "value": "DESIGN.md"
+      },
+      {
+        "type": "file",
+        "value": "UI_UPDATE.md"
+      },
+      {
+        "type": "folder",
+        "value": "design"
+      },
+      {
+        "type": "folder",
+        "value": "ui-qa"
+      }
     ],
     "include": []
-  }
+  },
+  "simulatorPluginLibVersion": {},
+  "editorSetting": {}
 }

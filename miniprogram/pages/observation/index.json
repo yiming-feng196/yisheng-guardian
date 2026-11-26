@@ -1,1 +1,5 @@
-{ "navigationBarTitleText": "认知观察" }
+{
+  "navigationBarTitleText": "忆声智护",
+  "navigationBarBackgroundColor": "#DCE6F5",
+  "backgroundColor": "#DCE6F5"
+}
