@@ -4,6 +4,7 @@ import io
 import os
 from pathlib import Path
 from threading import Lock
+from urllib.request import getproxies
 from flask import Flask, jsonify, request, send_file
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -13,6 +14,14 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 26 * 1024 * 1024
 lock = Lock()
 model = None
+
+def tts_proxy():
+    """Honor explicit configuration, then the OS/environment HTTP proxy."""
+    configured = os.getenv('VOICE_TTS_PROXY', '').strip()
+    if configured.lower() == 'direct':
+        return None
+    proxies = getproxies()
+    return configured or proxies.get('https') or proxies.get('http') or None
 
 def load_model():
     global model
@@ -61,7 +70,8 @@ def synthesize():
     async def generate():
         import edge_tts
         output = bytearray()
-        async for chunk in edge_tts.Communicate(text.strip(), voice='zh-CN-XiaoxiaoNeural', rate='-5%').stream():
+        async for chunk in edge_tts.Communicate(text.strip(), voice='zh-CN-XiaoxiaoNeural', rate='-5%',
+                                               proxy=tts_proxy(), connect_timeout=8, receive_timeout=45).stream():
             if chunk['type'] == 'audio': output.extend(chunk['data'])
         return bytes(output)
     try:
@@ -70,8 +80,9 @@ def synthesize():
         response = send_file(io.BytesIO(audio), mimetype='audio/mpeg')
         response.headers['Cache-Control'] = 'no-store'
         return response
-    except Exception:
-        app.logger.exception('TTS failed')
+    except Exception as error:
+        # Third-party exceptions can include full URLs or proxy credentials.
+        app.logger.warning('TTS failed (%s)', type(error).__name__)
         return jsonify(message='在线朗读服务连接失败，请检查电脑网络'), 503
 
 if __name__ == '__main__':

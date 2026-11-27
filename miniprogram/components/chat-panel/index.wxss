@@ -222,3 +222,13 @@ button.send-button[disabled] {
   color: #146653;
   background: rgba(218, 239, 233, 0.65);
 }
+.speech-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  min-height: 44px;
+  padding: 0 4px 6px;
+  color: #586779;
+  font-size: 14px;
+}

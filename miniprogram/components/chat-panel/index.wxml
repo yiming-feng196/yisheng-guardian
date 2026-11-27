@@ -8,6 +8,10 @@
     <view class="handle-mark {{expanded ? 'handle-mark--down' : ''}}"></view>
     <text wx:if="{{expanded}}">与小忆的对话</text>
   </button>
+  <view wx:if="{{expanded && mode === 'live'}}" class="speech-options">
+    <text>自动朗读回复</text>
+    <switch checked="{{autoRead}}" color="#168773" aria-label="自动朗读回复" bindchange="autoReadChange" />
+  </view>
   <scroll-view
     wx:if="{{expanded}}"
     class="chat-history"
@@ -25,7 +29,7 @@
       <text class="chat-bubble {{item.error ? 'chat-bubble--error' : ''}}" selectable="{{true}}">
         {{item.content}}
       </text>
-      <button wx:if="{{mode === 'live' && item.role === 'assistant' && !item.error && item.id !== 'greeting'}}" class="read-reply" data-id="{{item.id}}" disabled="{{sending || voiceState !== 'idle'}}" bindtap="speak">朗读回复</button>
+      <button wx:if="{{mode === 'live' && item.role === 'assistant' && !item.error && item.id !== 'greeting'}}" class="read-reply" data-id="{{item.id}}" disabled="{{sending || (voiceState !== 'idle' && voiceState !== 'playing' && voiceState !== 'synthesizing')}}" bindtap="speak">{{speakingId === item.id ? (voiceState === 'playing' ? '停止朗读' : '取消朗读') : '朗读回复'}}</button>
       <text wx:if="{{item.notice}}" class="chat-notice">{{item.notice}}</text>
     </view>
     <view wx:if="{{sending}}" id="chat-thinking" class="chat-thinking" aria-role="status">
@@ -55,7 +59,7 @@
     />
     <button
       class="send-button"
-      disabled="{{sending || !value || voiceState !== 'idle'}}"
+      disabled="{{sending || !value || (voiceState !== 'idle' && voiceState !== 'playing' && voiceState !== 'synthesizing')}}"
       loading="{{sending}}"
       aria-label="发送消息"
       bindtap="send"
@@ -63,5 +67,5 @@
       <image wx:if="{{!sending}}" src="/assets/icons/arrow-up.png" mode="aspectFit" />
     </button>
   </view>
-  <text wx:if="{{expanded && voiceState === 'idle'}}" class="voice-help">录音最长 60 秒，结束后上传转文字，确认后发送。朗读将文字发送至在线语音服务。</text>
+  <text wx:if="{{expanded && voiceState === 'idle'}}" class="voice-help">{{mode === 'live' && autoRead ? '回复会自动朗读，可随时停止。' : ''}}录音确认后才发送。朗读文字会提交至在线语音服务。</text>
 </view>

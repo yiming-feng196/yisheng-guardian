@@ -2,12 +2,15 @@ const { VoiceSession } = require('../../services/voice');
 const { getSettings, environmentKey } = require('../../config/env');
 const { chat, getBackendStatus } = require('../../services/api');
 const { syncTab, windowInfo, keyboardInset } = require('../../utils/ui');
+const { getAutoRead, saveAutoRead } = require('../../config/voice');
 
 Page({
   data: {
     voiceState: 'idle',
     voiceLabel: '',
     voiceSeconds: 0,
+    autoRead: true,
+    speakingId: '',
     mode: 'demo',
     largeText: false,
     input: '',
@@ -27,10 +30,15 @@ Page({
     replyPresented: false
   },
   onShow() {
-    if (!this._voice) this._voice = new VoiceSession((patch) => this.setData(patch));
+    if (!this._voice)
+      this._voice = new VoiceSession((patch) => {
+        this.setData(
+          patch.voiceState === 'idle' ? Object.assign({ speakingId: '' }, patch) : patch
+        );
+      });
     const config = getSettings();
     const key = environmentKey();
-    this.setData({ mode: config.mode, largeText: config.largeText });
+    this.setData({ mode: config.mode, largeText: config.largeText, autoRead: getAutoRead() });
     if (key !== this._environment) {
       this._voice.cancel();
       this._environment = key;
@@ -195,12 +203,39 @@ Page({
     if (this.data.sending) return;
     const message = this.data.messages.find((item) => item.id === event.detail.id);
     if (!message || message.role !== 'assistant' || message.error) return;
-    this._voice
-      .speak(message.content)
-      .catch((error) => wx.showToast({ title: error.message, icon: 'none' }));
+    if (
+      this.data.speakingId === message.id &&
+      ['synthesizing', 'playing'].includes(this.data.voiceState)
+    ) {
+      this._voice.cancel();
+      return;
+    }
+    if (!['idle', 'synthesizing', 'playing'].includes(this.data.voiceState)) return;
+    this.readReply(message);
+  },
+  onAutoReadChange(event) {
+    const autoRead = event.detail.value === true;
+    saveAutoRead(autoRead);
+    this.setData({ autoRead });
+    if (!autoRead && this._voice && ['synthesizing', 'playing'].includes(this.data.voiceState))
+      this._voice.cancel();
+  },
+  readReply(message) {
+    if (!this._voice || !this.data.pageActive) return;
+    const pending = this._voice.speak(message.content).catch((error) => {
+      this.setData({ speakingId: '' });
+      wx.showToast({ title: error.message, icon: 'none' });
+    });
+    if (this._voice.state === 'synthesizing' || this._voice.state === 'playing')
+      this.setData({ speakingId: message.id });
+    return pending;
   },
   async sendMessage() {
-    if (this.data.voiceState && this.data.voiceState !== 'idle') {
+    if (this.data.sending) return;
+    if (
+      this.data.voiceState &&
+      !['idle', 'synthesizing', 'playing'].includes(this.data.voiceState)
+    ) {
       wx.showToast({ title: '请先结束语音操作', icon: 'none' });
       return;
     }
@@ -210,6 +245,8 @@ Page({
       wx.showToast({ title: '最多输入 500 字', icon: 'none' });
       return;
     }
+    if (this._voice && ['synthesizing', 'playing'].includes(this.data.voiceState))
+      this._voice.cancel();
     const key = environmentKey();
     const requestId = (this._requestId || 0) + 1;
     this._requestId = requestId;
@@ -223,6 +260,7 @@ Page({
       chatOpen: true,
       replyPresented: false
     });
+    let replyToRead;
     try {
       const result = await chat(value);
       if (requestId !== this._requestId || key !== environmentKey()) return;
@@ -247,6 +285,7 @@ Page({
               : '服务已连接'
       });
       getApp().globalData.chat = { key, messages: next };
+      replyToRead = next[next.length - 1];
     } catch (error) {
       if (requestId !== this._requestId || key !== environmentKey()) return;
       this.setData({
@@ -263,5 +302,16 @@ Page({
       if (requestId === this._requestId && key === environmentKey())
         this.setData({ sending: false });
     }
+    if (
+      replyToRead &&
+      requestId === this._requestId &&
+      key === environmentKey() &&
+      this.data.mode === 'live' &&
+      this.data.autoRead &&
+      this.data.pageActive &&
+      this.data.chatOpen &&
+      this.data.voiceState === 'idle'
+    )
+      this.readReply(replyToRead);
   }
 });

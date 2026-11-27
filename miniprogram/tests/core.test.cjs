@@ -813,3 +813,122 @@ test("cancelled speech synthesis cannot create or play an audio file", async (t)
   assert.equal(aborted, true);
   assert.equal(voice.state, "idle");
 });
+
+function speakingPage(t) {
+  const state = setup(t);
+  const env = state.load('config/env');
+  env.saveSettings({ mode: 'live', apiBaseUrl: 'http://192.168.1.2:8080' });
+  const page = state.page('companion'), spoken = [];
+  page.setData({ mode: 'live', input: '你好' });
+  page._voice = {
+    state: 'idle', cancelled: 0,
+    cancel() {
+      this.cancelled++; this.state = 'idle'; page.setData({ voiceState: 'idle', speakingId: '' });
+    },
+    async speak(text) {
+      assert.equal(page.data.sending, false, 'text reply completes before speech begins');
+      spoken.push(text); this.state = 'synthesizing'; page.setData({ voiceState: 'synthesizing' });
+    }
+  };
+  function reply(answer = '你好，今天过得怎么样？') {
+    const request = state.requests.findLast(r => r.url.endsWith('/assistant/chat'));
+    request.success({ statusCode: 200, data: { answer } });
+  }
+  return { ...state, page, spoken, env, reply };
+}
+
+test('a new live reply is presented and automatically read exactly once', async t => {
+  const s = speakingPage(t), pending = s.page.sendMessage();
+  s.reply(); await pending;
+  assert.equal(s.spoken.length, 1);
+  assert.equal(s.spoken[0], s.page.data.messages.at(-1).content);
+  assert.equal(s.page.data.speakingId, s.page.data.messages.at(-1).id);
+});
+
+test('automatic reading can be disabled persistently without changing backend settings', async t => {
+  const s = speakingPage(t), before = s.env.getSettings();
+  s.page.onAutoReadChange({ detail: { value: false } });
+  assert.equal(s.load('config/voice').getAutoRead(), false);
+  assert.deepEqual(s.env.getSettings(), before);
+  const pending = s.page.sendMessage(); s.reply(); await pending;
+  assert.equal(s.spoken.length, 0);
+  s.page.refreshConnection = () => Promise.resolve(); s.page.onShow();
+  assert.equal(s.page.data.autoRead, false);
+});
+
+test('hiding the page or changing backend prevents late replies from speaking', async t => {
+  const s = speakingPage(t), pending = s.page.sendMessage();
+  s.page.onHide(); s.reply(); await pending;
+  assert.equal(s.spoken.length, 0);
+  s.page.setData({ pageActive: true, input: '另一条消息' });
+  const next = s.page.sendMessage();
+  s.env.saveSettings({ mode: 'live', apiBaseUrl: 'http://other.example' });
+  s.reply('旧服务器的回复'); await next;
+  assert.equal(s.spoken.length, 0);
+});
+
+test('a reply after the user collapses chat remains visible on reopen without starting speech', async t => {
+  const s = speakingPage(t), pending = s.page.sendMessage();
+  s.page.closeChat(); s.reply('已保存的文字回复'); await pending;
+  assert.equal(s.spoken.length, 0);
+  s.page.openChat(); assert.equal(s.spoken.length, 0);
+  assert.equal(s.page.data.messages.at(-1).content, '已保存的文字回复');
+});
+
+test('demo replies and request failures are not automatically read', async t => {
+  const s = speakingPage(t);
+  s.env.saveSettings({ mode: 'demo' }); s.page.setData({ mode: 'demo' });
+  await s.page.sendMessage(); assert.equal(s.spoken.length, 0);
+  s.env.saveSettings({ mode: 'live', apiBaseUrl: 'http://192.168.1.2:8080' });
+  s.page.setData({ mode: 'live', input: '再试一次' });
+  const pending = s.page.sendMessage();
+  s.requests.at(-1).success({ statusCode: 503, data: { message: '服务暂不可用' } });
+  await pending; assert.equal(s.spoken.length, 0); assert.equal(s.page.data.messages.at(-1).error, true);
+});
+
+test('the read button stops active speech and a new message interrupts synthesis', async t => {
+  const s = speakingPage(t), pending = s.page.sendMessage(); s.reply(); await pending;
+  const message = s.page.data.messages.at(-1);
+  s.page.onSpeak({ detail: { id: message.id } });
+  assert.equal(s.page.data.voiceState, 'idle'); assert.equal(s.page.data.speakingId, '');
+  s.page.onSpeak({ detail: { id: message.id } });
+  assert.equal(s.page.data.voiceState, 'synthesizing');
+  const cancelled = s.page._voice.cancelled;
+  s.page.setData({ input: '先聊聊别的' });
+  const next = s.page.sendMessage();
+  assert.equal(s.page._voice.cancelled, cancelled + 1);
+  s.reply('好的'); await next; assert.equal(s.spoken.at(-1), '好的');
+  s.page.onAutoReadChange({ detail: { value: false } });
+  assert.equal(s.page.data.voiceState, 'idle');
+});
+
+test('speech failure preserves the successful text reply', async t => {
+  const s = speakingPage(t);
+  s.page._voice.speak = () => Promise.reject(new Error('朗读服务暂不可用'));
+  const pending = s.page.sendMessage(); s.reply('这段文字应当保留'); await pending; await Promise.resolve();
+  assert.equal(s.page.data.messages.at(-1).content, '这段文字应当保留');
+  assert.equal(s.page.data.messages.at(-1).error, undefined);
+  assert.equal(s.page.data.sending, false);
+});
+
+test('successful synthesis writes playable audio and ending playback removes the file', async t => {
+  const { voice, removed } = voiceSetup(t), callbacks = {};
+  global.wx.env = { USER_DATA_PATH: '/tmp' };
+  let written = 0, played = 0, destroyed = 0;
+  global.wx.getFileSystemManager = () => ({
+    writeFile(o) { written += o.data.byteLength; o.success(); },
+    unlink(o) { removed.push(o.filePath); }
+  });
+  global.wx.createInnerAudioContext = () => ({
+    onPlay(fn) { callbacks.play = fn; }, onEnded(fn) { callbacks.ended = fn; },
+    onError(fn) { callbacks.error = fn; },
+    play() { played++; callbacks.play(); }, stop() {}, destroy() { destroyed++; }
+  });
+  global.wx.request = o => {
+    o.success({ statusCode: 200, data: new ArrayBuffer(200) }); return { abort() {} };
+  };
+  await voice.speak('你好');
+  assert.equal(written, 200); assert.equal(played, 1); assert.equal(voice.state, 'playing');
+  callbacks.ended();
+  assert.equal(voice.state, 'idle'); assert.equal(destroyed, 1); assert.equal(removed.length, 1);
+});

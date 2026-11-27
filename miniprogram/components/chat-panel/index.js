@@ -4,6 +4,8 @@ Component({
     voiceState: String,
     voiceLabel: String,
     voiceSeconds: Number,
+    autoRead: { type: Boolean, value: true },
+    speakingId: String,
     expanded: Boolean,
     messages: Array,
     value: String,
@@ -12,6 +14,9 @@ Component({
     mode: String
   },
   methods: {
+    autoReadChange(event) {
+      this.triggerEvent('autoread', { value: event.detail.value });
+    },
     voice() {
       this.triggerEvent('voice');
     },
