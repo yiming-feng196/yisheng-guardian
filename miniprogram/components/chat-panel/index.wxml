@@ -11,7 +11,7 @@
   </button>
   <scroll-view
     wx:if="{{expanded}}"
-    class="chat-history {{focused ? '' : 'motion-enter'}}"
+    class="chat-history motion-enter"
     scroll-y="{{true}}"
     scroll-into-view="{{scrollTarget}}"
     scroll-with-animation="{{true}}"
@@ -34,13 +34,13 @@
     <input
       class="composer-input"
       value="{{value}}"
-      focus="{{focused}}"
       placeholder="和小忆说说话……"
       placeholder-class="input-placeholder"
       maxlength="500"
       confirm-type="send"
       adjust-position="{{false}}"
       bindinput="input"
+      bindtap="focus"
       bindfocus="focus"
       bindblur="blur"
       bindkeyboardheightchange="keyboard"

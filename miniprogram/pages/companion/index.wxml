@@ -81,7 +81,6 @@
       expanded="{{chatOpen}}"
       messages="{{messages}}"
       value="{{input}}"
-      focused="{{inputFocused}}"
       sending="{{sending}}"
       scroll-target="{{scrollTarget}}"
       mode="{{mode}}"

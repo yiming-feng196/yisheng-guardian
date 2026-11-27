@@ -174,7 +174,8 @@ Page({
   },
   onInputFocus(event) {
     if (!this.data.pageActive) return;
-    this.setData({ chatOpen: true, chatWasOpened: true, inputFocused: true, replyPresented: false });
+    if (!this.data.inputFocused)
+      this.setData({ chatOpen: true, chatWasOpened: true, inputFocused: true, replyPresented: false });
     const height = event && event.detail && event.detail.height;
     if (height > 0) this.onKeyboardHeight({ detail: { height } });
   },
