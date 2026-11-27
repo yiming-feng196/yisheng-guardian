@@ -1,6 +1,9 @@
 Component({
   options: { styleIsolation: 'apply-shared' },
   properties: {
+    voiceState: String,
+    voiceLabel: String,
+    voiceSeconds: Number,
     expanded: Boolean,
     messages: Array,
     value: String,
@@ -9,6 +12,12 @@ Component({
     mode: String
   },
   methods: {
+    voice() {
+      this.triggerEvent('voice');
+    },
+    speak(event) {
+      this.triggerEvent('speak', { id: event.currentTarget.dataset.id });
+    },
     toggle() {
       this.triggerEvent(this.properties.expanded ? 'collapse' : 'expand');
     },

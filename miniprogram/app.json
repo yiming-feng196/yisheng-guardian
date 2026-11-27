@@ -62,5 +62,10 @@
     "setting-row": "/components/setting-row/index"
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "permission": {
+    "scope.record": {
+      "desc": "将您主动录制的语音转成文字，供确认后发送给小忆"
+    }
+  }
 }

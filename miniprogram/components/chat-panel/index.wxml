@@ -25,13 +25,19 @@
       <text class="chat-bubble {{item.error ? 'chat-bubble--error' : ''}}" selectable="{{true}}">
         {{item.content}}
       </text>
+      <button wx:if="{{mode === 'live' && item.role === 'assistant' && !item.error && item.id !== 'greeting'}}" class="read-reply" data-id="{{item.id}}" disabled="{{sending || voiceState !== 'idle'}}" bindtap="speak">朗读回复</button>
       <text wx:if="{{item.notice}}" class="chat-notice">{{item.notice}}</text>
     </view>
     <view wx:if="{{sending}}" id="chat-thinking" class="chat-thinking" aria-role="status">
       小忆正在思考…
     </view>
   </scroll-view>
+  <view wx:if="{{voiceState !== 'idle'}}" class="voice-feedback" aria-role="status">{{voiceLabel}} {{voiceState === 'recording' ? voiceSeconds + '秒' : ''}}</view>
   <view class="composer">
+    <button class="voice-button {{voiceState === 'recording' ? 'voice-button--active' : ''}}" disabled="{{sending}}" bindtap="voice" aria-label="{{voiceState === 'recording' ? '结束录音并转成文字' : voiceState !== 'idle' ? '取消语音操作' : '开始录音'}}">
+      <image wx:if="{{voiceState === 'idle'}}" src="/assets/icons/microphone.png" mode="aspectFit" />
+      <text wx:else>{{voiceState === 'recording' ? '结束' : '取消'}}</text>
+    </button>
     <input
       class="composer-input"
       value="{{value}}"
@@ -50,7 +56,7 @@
     <button
       class="send-button"
       size="mini"
-      disabled="{{sending || !value}}"
+      disabled="{{sending || !value || voiceState !== 'idle'}}"
       loading="{{sending}}"
       aria-label="发送消息"
       bindtap="send"
@@ -58,4 +64,5 @@
       <image wx:if="{{!sending}}" src="/assets/icons/arrow-up.png" mode="aspectFit" />
     </button>
   </view>
+  <text wx:if="{{expanded && voiceState === 'idle'}}" class="voice-help">录音最长 60 秒，结束后上传转文字，确认后发送。朗读将文字发送至在线语音服务。</text>
 </view>

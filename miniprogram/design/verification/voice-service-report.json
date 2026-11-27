@@ -1,0 +1,29 @@
+{
+  "backend": {
+    "status": "UP",
+    "groups": [
+      "liveness",
+      "readiness"
+    ]
+  },
+  "voice": {
+    "asrReady": true,
+    "model": "small",
+    "service": "yisheng-voice",
+    "ttsEngine": "edge-online",
+    "ttsRequiresInternet": true
+  },
+  "ttsBytes": 34992,
+  "asr": {
+    "transcription": "你好,我是小忆。今天天气很好,很高兴陪你聊天。"
+  },
+  "asrSeconds": 4.65,
+  "date": "2026-11-27",
+  "audio_source": "Synthetic Mandarin test speech, not a human recording",
+  "frontend_logic_tests": 40,
+  "related_backend_tests": 8,
+  "native_wxml_compiler": true,
+  "native_wxss_compiler": true,
+  "phone_microphone_verified": false,
+  "phone_playback_verified": false
+}

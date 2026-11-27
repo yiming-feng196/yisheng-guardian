@@ -1,9 +1,13 @@
+const { VoiceSession } = require('../../services/voice');
 const { getSettings, environmentKey } = require('../../config/env');
 const { chat, getBackendStatus } = require('../../services/api');
 const { syncTab, windowInfo, keyboardInset } = require('../../utils/ui');
 
 Page({
   data: {
+    voiceState: 'idle',
+    voiceLabel: '',
+    voiceSeconds: 0,
     mode: 'demo',
     largeText: false,
     input: '',
@@ -23,10 +27,12 @@ Page({
     replyPresented: false
   },
   onShow() {
+    if (!this._voice) this._voice = new VoiceSession((patch) => this.setData(patch));
     const config = getSettings();
     const key = environmentKey();
     this.setData({ mode: config.mode, largeText: config.largeText });
     if (key !== this._environment) {
+      this._voice.cancel();
       this._environment = key;
       this._requestId = (this._requestId || 0) + 1;
       const cached = getApp().globalData.chat;
@@ -55,6 +61,7 @@ Page({
     this.refreshConnection();
   },
   onHide() {
+    if (this._voice) this._voice.cancel();
     this.setData({ pageActive: false });
   },
   onResize() {
@@ -78,6 +85,7 @@ Page({
     wx.switchTab({ url: '/pages/observation/index' });
   },
   onUnload() {
+    if (this._voice) this._voice.cancel();
     this._requestId = (this._requestId || 0) + 1;
     this._connectionVersion = (this._connectionVersion || 0) + 1;
   },
@@ -86,10 +94,18 @@ Page({
     this._connectionVersion = version;
     const key = environmentKey();
     if (this.data.mode !== 'live') {
-      this.setData({ connection: 'demo', connectionLabel: '演示模式', modelConfigured: null });
+      this.setData({
+        connection: 'demo',
+        connectionLabel: '演示模式',
+        modelConfigured: null
+      });
       return;
     }
-    this.setData({ connection: 'checking', connectionLabel: '连接中', modelConfigured: null });
+    this.setData({
+      connection: 'checking',
+      connectionLabel: '连接中',
+      modelConfigured: null
+    });
     try {
       const result = await getBackendStatus();
       if (version !== this._connectionVersion || key !== environmentKey()) return;
@@ -125,7 +141,13 @@ Page({
     this.setData({ chatOpen: true });
   },
   closeChat() {
-    this.setData({ chatOpen: false, inputFocused: false, keyboardHeight: 0, keyboardInset: 0 });
+    if (this._voice) this._voice.cancel();
+    this.setData({
+      chatOpen: false,
+      inputFocused: false,
+      keyboardHeight: 0,
+      keyboardInset: 0
+    });
     syncTab(this, 0);
     if (wx.hideKeyboard) wx.hideKeyboard();
   },
@@ -143,7 +165,45 @@ Page({
     this.setData({ input: event.currentTarget.dataset.message });
     this.sendMessage();
   },
+  onVoice() {
+    if (this.data.sending) return;
+    if (this.data.voiceState === 'recording') {
+      this._voice.stopRecording();
+      return;
+    }
+    if (this.data.voiceState !== 'idle') {
+      this._voice.cancel();
+      return;
+    }
+    this.setData({ chatOpen: true });
+    if (wx.hideKeyboard) wx.hideKeyboard();
+    this._voice
+      .start((text) => {
+        const draft = [this.data.input.trim(), text].filter(Boolean).join(' ');
+        if (draft.length > 500) {
+          wx.showToast({
+            title: '合并后超过 500 字，请先发送当前内容',
+            icon: 'none'
+          });
+          return;
+        }
+        this.setData({ input: draft, chatOpen: true });
+      })
+      .catch((error) => wx.showToast({ title: error.message, icon: 'none' }));
+  },
+  onSpeak(event) {
+    if (this.data.sending) return;
+    const message = this.data.messages.find((item) => item.id === event.detail.id);
+    if (!message || message.role !== 'assistant' || message.error) return;
+    this._voice
+      .speak(message.content)
+      .catch((error) => wx.showToast({ title: error.message, icon: 'none' }));
+  },
   async sendMessage() {
+    if (this.data.voiceState && this.data.voiceState !== 'idle') {
+      wx.showToast({ title: '请先结束语音操作', icon: 'none' });
+      return;
+    }
     const value = this.data.input.trim();
     if (!value || this.data.sending) return;
     if (value.length > 500) {

@@ -668,3 +668,148 @@ test('local address action preserves preferences and the diagnostic copy uses th
   p.copyHealthUrl();
   assert.equal(copied, 'http://192.168.1.10:8080/actuator/health');
 });
+
+function voiceSetup(t) {
+  const state = setup(t);
+  const callbacks = {},
+    uploads = [],
+    removed = [];
+  state
+    .load("config/env")
+    .saveSettings({ mode: "live", apiBaseUrl: "http://192.168.1.2:8080" });
+  const recorder = {
+    start() {
+      callbacks.Start();
+    },
+    stop() {},
+    onStart(fn) {
+      callbacks.Start = fn;
+    },
+    onStop(fn) {
+      callbacks.Stop = fn;
+    },
+    onError(fn) {
+      callbacks.Error = fn;
+    },
+    offStart(fn) {
+      if (callbacks.Start === fn) delete callbacks.Start;
+    },
+    offStop(fn) {
+      if (callbacks.Stop === fn) delete callbacks.Stop;
+    },
+    offError(fn) {
+      if (callbacks.Error === fn) delete callbacks.Error;
+    },
+  };
+  Object.assign(global.wx, {
+    authorize(o) {
+      o.success();
+    },
+    getRecorderManager() {
+      return recorder;
+    },
+    getFileSystemManager() {
+      return {
+        unlink(o) {
+          removed.push(o.filePath);
+        },
+      };
+    },
+    uploadFile(o) {
+      uploads.push(o);
+      return { abort() {} };
+    },
+  });
+  const updates = [];
+  const voice = new (state.load("services/voice").VoiceSession)((p) =>
+    updates.push(p),
+  );
+  t.after(() => voice.cancel());
+  return { state, voice, callbacks, uploads, removed, updates };
+}
+test("voice cancellation prevents upload and waits for native stop before restarting", async (t) => {
+  const { voice, callbacks, uploads, removed } = voiceSetup(t);
+  await voice.start(() => assert.fail("cancelled text"));
+  voice.cancel();
+  assert.equal(voice.stopPending, true);
+  callbacks.Stop({ tempFilePath: "/tmp/cancelled.mp3", duration: 2000 });
+  assert.equal(voice.stopPending, false);
+  assert.equal(uploads.length, 0);
+  assert.deepEqual(removed, ["/tmp/cancelled.mp3"]);
+});
+test("recorded speech becomes an editable draft, with no automatic chat submission", async (t) => {
+  const { voice, callbacks, uploads, removed } = voiceSetup(t);
+  let draft = "";
+  await voice.start((t) => (draft = t));
+  const completed = callbacks.Stop({
+    tempFilePath: "/tmp/speech.mp3",
+    duration: 2000,
+  });
+  assert.equal(uploads[0].name, "file");
+  uploads[0].success({
+    statusCode: 200,
+    data: JSON.stringify({ transcription: "今天心情很好" }),
+  });
+  await completed;
+  assert.equal(draft, "今天心情很好");
+  assert.equal(voice.state, "idle");
+  assert.deepEqual(removed, ["/tmp/speech.mp3"]);
+});
+test("a late transcription cannot cross a backend environment change", async (t) => {
+  const { state, voice, callbacks, uploads } = voiceSetup(t);
+  let delivered = false;
+  await voice.start(() => (delivered = true));
+  const completed = callbacks.Stop({
+    tempFilePath: "/tmp/speech.mp3",
+    duration: 2000,
+  });
+  state
+    .load("config/env")
+    .saveSettings({ mode: "live", apiBaseUrl: "http://192.168.1.3:8080" });
+  voice.cancel();
+  uploads[0].success({
+    statusCode: 200,
+    data: JSON.stringify({ transcription: "旧环境" }),
+  });
+  await completed;
+  assert.equal(delivered, false);
+});
+test("short or empty recordings are deleted without upload", async (t) => {
+  const { voice, callbacks, uploads, removed } = voiceSetup(t);
+  await voice.start(() => assert.fail());
+  await callbacks.Stop({ tempFilePath: "/tmp/short.mp3", duration: 100 });
+  assert.equal(uploads.length, 0);
+  assert.equal(voice.state, "idle");
+  assert.equal(removed.length, 1);
+});
+test("demo voice never asks for microphone permission", async (t) => {
+  const { state, voice } = voiceSetup(t);
+  state.load("config/env").saveSettings({ mode: "demo" });
+  global.wx.authorize = () => assert.fail("microphone requested in demo");
+  await assert.rejects(
+    voice.start(() => {}),
+    /真实服务/,
+  );
+});
+
+test("cancelled speech synthesis cannot create or play an audio file", async (t) => {
+  const { voice } = voiceSetup(t);
+  let response,
+    aborted = false;
+  global.wx.request = (o) => {
+    response = o;
+    return {
+      abort() {
+        aborted = true;
+      },
+    };
+  };
+  global.wx.getFileSystemManager = () =>
+    assert.fail("cancelled TTS wrote a file");
+  const pending = voice.speak("你好");
+  voice.cancel();
+  response.success({ statusCode: 200, data: new ArrayBuffer(200) });
+  await pending;
+  assert.equal(aborted, true);
+  assert.equal(voice.state, "idle");
+});
