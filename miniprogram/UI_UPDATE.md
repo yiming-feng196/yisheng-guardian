@@ -1,4 +1,4 @@
-# 忆声智护 UI / UX 实施与交付
+# 忆声陪伴 UI / UX 实施与交付
 
 本次直接修改 `F:\yisheng-guardian-main\miniprogram`，使用原生 JavaScript、WXML、WXSS。四张用户参考图用于布局与材质参照，没有把完整参考图作为运行时背景。产品版本沿用 **V0.1.0**。
 

@@ -17,7 +17,7 @@
       <image src="/assets/icons/profile-active.png" mode="aspectFit" />
     </view>
     <view class="account-copy">
-      <text class="account-name">{{loggedInUser || '欢迎使用忆声智护'}}</text>
+      <text class="account-name">{{loggedInUser || '欢迎使用忆声陪伴'}}</text>
       <text class="account-detail">
         {{loggedInUser ? '已登录 · 个人观察档案' : '登录后查看您的观察记录'}}
       </text>
@@ -233,7 +233,7 @@
     <view class="setting-divider"></view>
     <setting-row
       icon="info"
-      label="关于忆声智护"
+      label="关于忆声陪伴"
       detail="版本 V{{version}}"
       arrow="{{true}}"
       bindselect="showAbout"
@@ -259,8 +259,8 @@
   </button>
   <glass-modal
     visible="{{aboutVisible}}"
-    title="关于忆声智护"
-    content="忆声智护 V{{version}}
+    title="关于忆声陪伴"
+    content="忆声陪伴 V{{version}}
 温柔陪伴，记录点滴。
 
 当前支持账号注册、登录、文字问答与已有观察记录查询。数字人为静态形象；语音、实时 3D 和真实录音观察尚未开放。"
