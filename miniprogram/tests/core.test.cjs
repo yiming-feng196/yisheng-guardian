@@ -1067,7 +1067,7 @@ test('speech failure preserves the successful text reply', async t => {
   assert.equal(s.page.data.sending, false);
 });
 
-test('successful synthesis writes playable audio and ending playback removes the file', async t => {
+test('successful synthesis plays consecutive chunks and removes both temporary files', async t => {
   const { voice, removed } = voiceSetup(t), callbacks = {};
   global.wx.env = { USER_DATA_PATH: '/tmp' };
   let written = 0, played = 0, destroyed = 0;
@@ -1080,11 +1080,19 @@ test('successful synthesis writes playable audio and ending playback removes the
     onError(fn) { callbacks.error = fn; },
     play() { played++; callbacks.play(); }, stop() {}, destroy() { destroyed++; }
   });
+  const chunks = [];
   global.wx.request = o => {
+    chunks.push(o.data.text);
     o.success({ statusCode: 200, data: new ArrayBuffer(200) }); return { abort() {} };
   };
-  await voice.speak('你好');
+  const text = '你'.repeat(700) + '好';
+  await voice.speak(text);
   assert.equal(written, 200); assert.equal(played, 1); assert.equal(voice.state, 'playing');
   callbacks.ended();
-  assert.equal(voice.state, 'idle'); assert.equal(destroyed, 1); assert.equal(removed.length, 1);
+  await new Promise(setImmediate);
+  assert.deepEqual(chunks, [text.slice(0, 700), '好']);
+  assert.equal(voice.state, 'playing');
+  assert.equal(played, 2);
+  callbacks.ended();
+  assert.equal(voice.state, 'idle'); assert.equal(destroyed, 2); assert.equal(removed.length, 2);
 });

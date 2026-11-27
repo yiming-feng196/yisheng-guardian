@@ -116,7 +116,8 @@
       <text class="record-title">录音 {{item.id}} · {{item.duration}} 秒</text>
       <text wx:if="{{item.time}}" class="record-time">{{item.time}}</text>
       <view class="audio-actions">
-        <button class="btn btn-secondary" data-index="{{index}}" bindtap="playAudio">{{activeAudioId === item.id ? '停止' : '试听'}}</button>
+        <button class="btn btn-secondary" data-index="{{index}}" bindtap="playAudio">{{activeAudioId !== item.id ? '试听' : playbackState === 'loading' ? '取消下载' : playbackState === 'paused' ? '继续' : '暂停'}}</button>
+        <button wx:if="{{activeAudioId === item.id && playbackState !== 'loading'}}" class="btn btn-plain" bindtap="stopAudio">停止</button>
         <button wx:if="{{item.canAnalyze}}" class="btn btn-secondary" data-index="{{index}}" disabled="{{!!audioActionId}}" bindtap="analyzeAudio">发起分析</button>
         <button class="btn btn-plain" data-index="{{index}}" disabled="{{!!audioActionId}}" bindtap="deleteAudio">删除</button>
       </view>

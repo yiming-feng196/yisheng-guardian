@@ -13,6 +13,7 @@ Page({
     audioError: '',
     audioLoading: false,
     activeAudioId: 0,
+    playbackState: '',
     audioActionId: 0,
     loading: false,
     error: '',
@@ -128,17 +129,26 @@ Page({
     this._audio = null;
     discardFile(this._audioFile);
     this._audioFile = '';
-    if (this.data.activeAudioId) this.setData({ activeAudioId: 0 });
+    if (this.data.activeAudioId) this.setData({ activeAudioId: 0, playbackState: '' });
   },
   async playAudio(event) {
     const item = this.data.audios[event.currentTarget.dataset.index];
     if (!item) return;
-    const stop = item.id === this.data.activeAudioId;
-    this.stopAudio();
-    if (stop) return;
     if (this._audioToken !== getSession()?.token || this._audioKey !== environmentKey()) return;
+    if (item.id === this.data.activeAudioId) {
+      if (!this._audio) this.stopAudio();
+      else if (this.data.playbackState === 'paused') {
+        this._audio.play();
+        this.setData({ playbackState: 'playing' });
+      } else {
+        this._audio.pause();
+        this.setData({ playbackState: 'paused' });
+      }
+      return;
+    }
+    this.stopAudio();
     const version = this._audioVersion;
-    this.setData({ activeAudioId: item.id, audioError: '' });
+    this.setData({ activeAudioId: item.id, playbackState: 'loading', audioError: '' });
     const fail = () => {
       if (version !== this._audioVersion) return;
       this.stopAudio();
@@ -155,6 +165,7 @@ Page({
       audio.onError(fail);
       audio.src = file;
       audio.play();
+      this.setData({ playbackState: 'playing' });
     } catch (_) { fail(); }
   },
   async analyzeAudio(event) {

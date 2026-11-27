@@ -163,51 +163,58 @@ class VoiceSession {
   async speak(text) {
     this.cancel();
     this.config();
-    if (typeof text !== 'string' || !text.trim() || text.length > 3000)
-      throw new Error('朗读内容需要 1–3000 字');
-    const version = ++this.version,
-      key = environmentKey();
-    this.set('synthesizing', '正在准备朗读 · 可取消');
-    try {
-      const bytes = await synthesizeSpeech(text, (task) => { this.task = task; });
-      if (version === this.version) this.task = null;
-      if (!this.valid(version, key)) return;
-      const path = wx.env.USER_DATA_PATH + '/xiaoyi-voice-' + Date.now() + '-' + version + '.mp3';
-      await new Promise((resolve, reject) =>
-        wx.getFileSystemManager().writeFile({
+    if (typeof text !== 'string' || !text.trim()) throw new Error('没有可朗读的内容');
+    const characters = Array.from(text.trim());
+    const version = ++this.version;
+    const key = environmentKey();
+    const current = () => this.valid(version, key);
+    const failed = (message) => {
+      if (!current()) return;
+      this.cancel();
+      this.toast(message);
+    };
+    const playNext = async (offset) => {
+      if (!current()) return;
+      if (offset >= characters.length) { this.cancel(); return; }
+      this.set('synthesizing', '正在准备朗读 · 可取消');
+      try {
+        const nextOffset = Math.min(offset + 700, characters.length);
+        const chunk = characters.slice(offset, nextOffset).join('');
+        const bytes = await synthesizeSpeech(chunk, (task) => { this.task = task; });
+        if (!current()) return;
+        this.task = null;
+        const path = wx.env.USER_DATA_PATH + '/xiaoyi-voice-' + Date.now() + '-' + version + '-' + offset + '.mp3';
+        await new Promise((resolve, reject) => wx.getFileSystemManager().writeFile({
           filePath: path,
           data: bytes,
           success: resolve,
           fail: (error) => { recorder.discardFile(path); reject(error); }
-        })
-      );
-      if (!this.valid(version, key)) {
-        recorder.discardFile(path);
-        return;
+        }));
+        if (!current()) { recorder.discardFile(path); return; }
+        this.audioPath = path;
+        const audio = wx.createInnerAudioContext();
+        this.audio = audio;
+        audio.onPlay(() => {
+          if (current() && this.audio === audio) this.set('playing', '正在朗读 · 点击停止');
+        });
+        audio.onEnded(() => {
+          if (!current() || this.audio !== audio) return;
+          this.audio = null;
+          this.audioPath = null;
+          audio.destroy();
+          recorder.discardFile(path);
+          playNext(nextOffset);
+        });
+        audio.onError(() => {
+          if (this.audio === audio) failed('音频播放失败，请检查设备音量后重试');
+        });
+        audio.src = path;
+        audio.play();
+      } catch (error) {
+        failed(error.message);
       }
-      this.audioPath = path;
-      const audio = wx.createInnerAudioContext();
-      this.audio = audio;
-      audio.onPlay(() => {
-        if (this.valid(version, key)) this.set('playing', '正在朗读 · 点击停止');
-      });
-      audio.onEnded(() => {
-        if (this.valid(version, key)) this.cancel();
-      });
-      audio.onError(() => {
-        if (this.valid(version, key)) {
-          this.cancel();
-          this.toast('音频播放失败，请检查设备音量后重试');
-        }
-      });
-      audio.src = path;
-      audio.play();
-    } catch (error) {
-      if (this.valid(version, key)) {
-        this.cancel();
-        this.toast(error.message);
-      }
-    }
+    };
+    return playNext(0);
   }
 }
 module.exports = { VoiceSession };
