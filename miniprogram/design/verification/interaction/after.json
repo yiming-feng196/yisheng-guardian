@@ -1,0 +1,120 @@
+{
+  "phase": "after",
+  "checks": [
+    {
+      "name": "companion mounted",
+      "passed": true
+    },
+    {
+      "name": "observation mounted",
+      "passed": true
+    },
+    {
+      "name": "records mounted",
+      "passed": true
+    },
+    {
+      "name": "profile mounted",
+      "passed": true
+    },
+    {
+      "name": "synthetic keyboard cycles without final height event",
+      "restored": 20,
+      "total": 20
+    },
+    {
+      "name": "simulator input focus, typing and tap-to-dismiss",
+      "passed": true
+    },
+    {
+      "name": "demo text reply and profile sheet",
+      "passed": true
+    },
+    {
+      "name": "large text state across all tabs",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    "after-companion.png",
+    "after-observation.png",
+    "after-records.png",
+    "after-profile.png",
+    "after-keyboard-raised.png",
+    "after-keyboard-after-blur.png",
+    "after-chat-reply.png",
+    "after-profile-about.png",
+    "after-companion-large.png",
+    "after-observation-large.png",
+    "after-observation-large-action.png",
+    "after-records-large.png",
+    "after-profile-large.png"
+  ],
+  "exceptions": [],
+  "consoleLevels": {},
+  "warnings": [],
+  "switchesMs": [
+    224,
+    220,
+    220,
+    221,
+    222,
+    220,
+    221,
+    221,
+    218,
+    222,
+    221,
+    222,
+    221,
+    218,
+    219,
+    222,
+    221,
+    222,
+    221,
+    221,
+    223,
+    227,
+    221,
+    220,
+    221,
+    222,
+    229,
+    226,
+    225,
+    221
+  ],
+  "device": {
+    "model": "iPhone 12/13 mini",
+    "platform": "devtools",
+    "SDKVersion": "3.18.0",
+    "windowWidth": 375,
+    "windowHeight": 721
+  },
+  "firstBlur": {
+    "inset": 0,
+    "height": 0,
+    "tabHidden": false,
+    "draft": "键盘回归草稿",
+    "messages": 3
+  },
+  "geometry": {
+    "expanded": {
+      "pageHeight": 721,
+      "inputBottom": 589
+    },
+    "raised": {
+      "pageHeight": 421,
+      "inputBottom": 397
+    },
+    "afterBlur": {
+      "pageHeight": 721,
+      "inputBottom": 589
+    }
+  },
+  "modalHidesTab": true,
+  "localHealthProbe": {
+    "error": "request:fail url not in domain list"
+  }
+}

@@ -100,6 +100,7 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
     await call('openChat');
     assert.equal((await data()).messages.length, reply.messages.length);
     check('collapse and reopen preserves conversation');
+    await call('onInputFocus', { detail: { height: 300 } });
     await call('onKeyboardHeight', { detail: { height: 300 } });
     const keyboard = await data();
     assert.equal(keyboard.keyboardInset, 300);
@@ -107,6 +108,10 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
     assert.equal(hidden, true);
     await snap('companion-keyboard-layout');
     check('synthetic 300px keyboard inset hides navigation', { synthetic: true });
+    await call('onInputBlur');
+    assert.equal((await data()).keyboardInset, 0);
+    assert.equal(await mp.evaluate(() => getCurrentPages().at(-1).getTabBar().data.hidden), false);
+    check('blur restores the layout without a final height event', { synthetic: true });
     await call('closeChat');
     const observationPage = await route('observation');
     const startButton = await observationPage.$('.btn-primary'),

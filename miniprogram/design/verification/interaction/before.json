@@ -1,0 +1,71 @@
+{
+  "phase": "before",
+  "checks": [
+    {
+      "name": "synthetic keyboard cycles without final height event",
+      "restored": 0,
+      "total": 20
+    },
+    {
+      "name": "demo text reply and profile sheet",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    "before-companion.png",
+    "before-observation.png",
+    "before-records.png",
+    "before-profile.png",
+    "before-keyboard-raised.png",
+    "before-keyboard-after-blur.png",
+    "before-chat-reply.png",
+    "before-profile-about.png"
+  ],
+  "exceptions": [],
+  "switchesMs": [
+    222,
+    229,
+    225,
+    219,
+    223,
+    223,
+    229,
+    222,
+    220,
+    221,
+    220,
+    220,
+    223,
+    221,
+    223,
+    222,
+    222,
+    220,
+    220,
+    221,
+    222,
+    220,
+    221,
+    220,
+    221,
+    220,
+    223,
+    221,
+    225,
+    222
+  ],
+  "device": {
+    "model": "iPhone 12/13 mini",
+    "platform": "devtools",
+    "SDKVersion": "3.18.0",
+    "windowWidth": 375,
+    "windowHeight": 721
+  },
+  "firstBlur": {
+    "inset": 300,
+    "height": 300,
+    "tabHidden": true,
+    "draft": "键盘回归草稿",
+    "messages": 1
+  }
+}

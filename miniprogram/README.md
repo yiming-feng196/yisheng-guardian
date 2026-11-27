@@ -93,6 +93,14 @@ node --test miniprogram/tests/core.test.cjs
 
 检查覆盖源码语法、配置/页面/资源引用以及环境隔离、请求错误、登录和异步结果保护。它们不能代替微信开发者工具的 WXML/WXSS 编译与手机预览。
 
+### 开发者工具交互回归
+
+1. 启用微信开发者工具的服务端口，运行 CLI 的 `auto --project <miniprogram目录> --auto-port 9420`。
+2. 在小程序目录外安装测试依赖 `miniprogram-automator`，通过 `NODE_PATH` 指向依赖目录。可用 `WECHAT_AUTO_ENDPOINT` 指定其他自动化端口。
+3. 将 `UI_QA_OUTPUT` 设为截图和 JSON 的输出目录，运行 `node miniprogram/scripts/verify-interaction.cjs after`。基线版本使用同一脚本与 `before` 参数。设置 `UI_QA_PROBE_LOCAL=1` 可额外探测本机 8080 的健康接口。
+
+脚本临时切换到演示模式并在结束时恢复原设置。测试用合成事件控制键盘高度，手机系统返回键、第三方键盘及运行帧率按 [专项验收](UI_UPDATE.md) 执行。
+
 2026-11-25 的 Ubuntu 检查结果：源码结构检查通过，核心逻辑测试 10 项通过。Windows 微信开发者工具编译和手机预览待团队验证。
 
 2026-11-26 界面改版检查：Windows 源码结构检查和 12 项核心逻辑测试通过；调用本机开发者工具自带的 WXML/WXSS 编译器通过；另做了源代码转换的浏览器布局预览（含普通、大字和窄屏）。这些结果不代表完整微信运行时、真机键盘、背景模糊或真实后端联调已经验证。

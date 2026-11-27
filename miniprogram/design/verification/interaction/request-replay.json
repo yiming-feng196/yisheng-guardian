@@ -1,0 +1,14 @@
+{
+  "after": {
+    "/actuator/health": 1,
+    "/assistant/status": 1,
+    "/api/v1/screenings": 1
+  },
+  "before": {
+    "/actuator/health": 15,
+    "/assistant/status": 15,
+    "/api/v1/screenings": 15
+  },
+  "pageVisits": 30,
+  "backend": "mocked wx.request"
+}
