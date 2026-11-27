@@ -367,11 +367,36 @@ test('keyboard geometry avoids subtracting a resized Android viewport twice', (t
     }
   });
   page.onShow();
+  page.onInputFocus({ detail: {} });
   page.onKeyboardHeight({ detail: { height: 300 } });
   assert.equal(bar.hidden, true);
   page.closeChat();
   assert.equal(bar.hidden, false);
   assert.equal(page.data.keyboardInset, 0);
+});
+
+test('keyboard blur restores the composer and tab even without a final height event', (t) => {
+  const state = setup(t);
+  const page = state.page('companion');
+  const bar = { data: {}, setData(patch) { Object.assign(this.data, patch); } };
+  page.getTabBar = () => bar;
+  page.onShow();
+  page.onInput({ detail: { value: '未发送的草稿' } });
+  const messages = page.data.messages;
+  for (let i = 0; i < 20; i++) {
+    page.onInputFocus({ detail: { height: 300 } });
+    page.onKeyboardHeight({ detail: { height: 300 } });
+    assert.equal(page.data.keyboardInset, 300);
+    assert.equal(bar.data.hidden, true);
+    page.onInputBlur();
+    assert.equal(page.data.keyboardInset, 0);
+    assert.equal(bar.data.hidden, false);
+    page.onKeyboardHeight({ detail: { height: 300 } });
+    assert.equal(page.data.keyboardInset, 0);
+  }
+  assert.equal(page.data.chatOpen, true);
+  assert.equal(page.data.input, '未发送的草稿');
+  assert.equal(page.data.messages, messages);
 });
 
 test('demo chat never advertises a real connected service after replying', async (t) => {

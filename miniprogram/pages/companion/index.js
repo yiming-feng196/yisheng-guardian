@@ -50,34 +50,58 @@ Page({
       });
     }
     this._baselineHeight = windowInfo().windowHeight;
-    this.setData({ pageActive: true, keyboardHeight: 0, keyboardInset: 0 });
+    this.setData({ pageActive: true, inputFocused: false, keyboardHeight: 0, keyboardInset: 0 });
     syncTab(this, 0);
+    if (wx.onKeyboardHeightChange && wx.offKeyboardHeightChange && !this._keyboardListener) {
+      this._keyboardListener = (detail) => this.onKeyboardHeight({ detail });
+      wx.onKeyboardHeightChange(this._keyboardListener);
+    }
     this.refreshConnection();
   },
   onHide() {
+    this.stopKeyboardListener();
     this.setData({ pageActive: false });
+    this.dismissKeyboard();
   },
-  onResize() {
-    if (!this.data.keyboardHeight) this._baselineHeight = windowInfo().windowHeight;
-    this.onKeyboardHeight({ detail: { height: this.data.keyboardHeight } });
+  onResize(event) {
+    if (!this.data.pageActive) return;
+    const height = (event && event.size && event.size.windowHeight) || windowInfo().windowHeight;
+    if (!this.data.inputFocused) this._baselineHeight = height;
+    this.updateKeyboard(this.data.keyboardHeight, height);
   },
-  onKeyboardHeight(event) {
-    const height = Math.max(0, Number(event.detail.height) || 0);
-    const info = windowInfo();
-    this.setData({
-      keyboardHeight: height,
-      keyboardInset: keyboardInset(
-        height,
-        this._baselineHeight || info.windowHeight,
-        info.windowHeight
-      )
-    });
-    syncTab(this, 0, height > 0);
+  onKeyboardHeight({ detail }) {
+    if (!this.data.pageActive || !this.data.inputFocused) return;
+    const height = Math.max(0, Number(detail.height) || 0);
+    if (!height && this.data.keyboardHeight) {
+      this.dismissKeyboard(false);
+      return;
+    }
+    this.updateKeyboard(height, windowInfo().windowHeight);
+  },
+  updateKeyboard(height, windowHeight, focused = this.data.inputFocused) {
+    const inset = keyboardInset(height, this._baselineHeight || windowHeight, windowHeight);
+    const wasOpen = this.data.keyboardHeight > 0;
+    if (height !== this.data.keyboardHeight || inset !== this.data.keyboardInset ||
+        focused !== this.data.inputFocused) {
+      this.setData({ keyboardHeight: height, keyboardInset: inset, inputFocused: focused });
+    }
+    if (wasOpen !== (height > 0)) syncTab(this, 0, height > 0);
+  },
+  dismissKeyboard(hideNative = true) {
+    const wasFocused = this.data.inputFocused;
+    this.updateKeyboard(0, windowInfo().windowHeight, false);
+    if (hideNative && wasFocused && wx.hideKeyboard) wx.hideKeyboard();
+  },
+  stopKeyboardListener() {
+    if (!this._keyboardListener) return;
+    wx.offKeyboardHeightChange(this._keyboardListener);
+    this._keyboardListener = null;
   },
   openObservation() {
     wx.switchTab({ url: '/pages/observation/index' });
   },
   onUnload() {
+    this.stopKeyboardListener();
     this._requestId = (this._requestId || 0) + 1;
     this._connectionVersion = (this._connectionVersion || 0) + 1;
   },
@@ -125,15 +149,17 @@ Page({
     this.setData({ chatOpen: true });
   },
   closeChat() {
-    this.setData({ chatOpen: false, inputFocused: false, keyboardHeight: 0, keyboardInset: 0 });
-    syncTab(this, 0);
-    if (wx.hideKeyboard) wx.hideKeyboard();
+    this.dismissKeyboard();
+    this.setData({ chatOpen: false });
   },
-  onInputFocus() {
+  onInputFocus(event) {
+    if (!this.data.pageActive) return;
     this.setData({ chatOpen: true, inputFocused: true, replyPresented: false });
+    const height = event && event.detail && event.detail.height;
+    if (height > 0) this.onKeyboardHeight({ detail: { height } });
   },
   onInputBlur() {
-    this.setData({ inputFocused: false });
+    this.dismissKeyboard(false);
   },
   openProfile() {
     wx.switchTab({ url: '/pages/profile/index' });
@@ -150,6 +176,7 @@ Page({
       wx.showToast({ title: '最多输入 500 字', icon: 'none' });
       return;
     }
+    this.dismissKeyboard();
     const key = environmentKey();
     const requestId = (this._requestId || 0) + 1;
     this._requestId = requestId;

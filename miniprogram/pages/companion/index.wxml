@@ -11,7 +11,7 @@
     />
   </view>
   <image class="ginkgo" src="/assets/ginkgo-glass.png" mode="aspectFit" aria-hidden="true" />
-  <view class="identity">
+  <view class="identity" bindtap="dismissKeyboard">
     <view class="identity-top">
       <view class="identity-name">
         <text>小忆</text>
@@ -25,14 +25,14 @@
         class="connection-button"
         size="mini"
         aria-label="{{connectionLabel}}，打开服务设置"
-        bindtap="openProfile"
+        catchtap="openProfile"
       >
         <status-pill label="{{connectionLabel}}" tone="{{connection}}" />
       </button>
     </view>
     <text class="identity-subtitle">你的认知健康陪伴助手</text>
   </view>
-  <view class="human-stage">
+  <view class="human-stage" bindtap="dismissKeyboard">
     <digital-human
       state="{{sending ? 'thinking' : inputFocused ? 'input' : replyPresented ? 'responding' : connection === 'unavailable' ? 'error' : 'idle'}}"
       active="{{pageActive}}"
@@ -80,6 +80,7 @@
       expanded="{{chatOpen}}"
       messages="{{messages}}"
       value="{{input}}"
+      focused="{{inputFocused}}"
       sending="{{sending}}"
       scroll-target="{{scrollTarget}}"
       mode="{{mode}}"

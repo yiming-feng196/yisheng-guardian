@@ -1,4 +1,4 @@
-.companion {
+.page.companion {
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -163,10 +163,14 @@
 }
 .keyboard-open .human-stage {
   flex: 0 1 110rpx;
-  min-height: 64rpx;
+  min-height: 0;
+  margin-bottom: 0;
 }
 .keyboard-open .identity-subtitle {
   display: none;
+}
+.keyboard-open.chat-is-open .chat-host {
+  min-height: 0;
 }
 .large .topic {
   font-size: 32rpx;
@@ -191,10 +195,6 @@
   max-width: 100%;
 }
 @media (max-width: 350px) {
-  .companion {
-    padding-left: 24rpx;
-    padding-right: 24rpx;
-  }
   .topic {
     font-size: 27rpx;
     padding: 18rpx 6rpx;
@@ -247,10 +247,6 @@
   display: none;
 }
 @media (max-width: 350px) {
-  .companion {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
   .quick-topics .topic {
     flex-basis: 40%;
     min-width: 40%;
@@ -265,23 +261,5 @@
   .companion:not(.chat-is-open) .human-stage {
     flex-shrink: 0;
     min-height: 240rpx;
-  }
-}
-
-.human-stage {
-  transition:
-    flex-grow 280ms ease,
-    flex-basis 280ms ease,
-    max-height 280ms ease;
-}
-.chat-host {
-  transition:
-    flex-grow 300ms ease,
-    height 300ms ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .human-stage,
-  .chat-host {
-    transition: none;
   }
 }

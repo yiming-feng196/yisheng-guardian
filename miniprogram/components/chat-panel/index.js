@@ -4,6 +4,7 @@ Component({
     expanded: Boolean,
     messages: Array,
     value: String,
+    focused: Boolean,
     sending: Boolean,
     scrollTarget: String,
     mode: String

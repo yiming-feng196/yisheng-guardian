@@ -22,9 +22,7 @@
       id="{{item.id}}"
       class="chat-message chat-message--{{item.role}}"
     >
-      <text class="chat-bubble {{item.error ? 'chat-bubble--error' : ''}}" selectable="{{true}}">
-        {{item.content}}
-      </text>
+      <text class="chat-bubble {{item.error ? 'chat-bubble--error' : ''}}" selectable="{{true}}">{{item.content}}</text>
       <text wx:if="{{item.notice}}" class="chat-notice">{{item.notice}}</text>
     </view>
     <view wx:if="{{sending}}" id="chat-thinking" class="chat-thinking" aria-role="status">
@@ -35,12 +33,12 @@
     <input
       class="composer-input"
       value="{{value}}"
+      focus="{{focused}}"
       placeholder="和小忆说说话……"
       placeholder-class="input-placeholder"
       maxlength="500"
       confirm-type="send"
       adjust-position="{{false}}"
-      cursor-spacing="12"
       bindinput="input"
       bindfocus="focus"
       bindblur="blur"
