@@ -22,7 +22,8 @@
         </view>
       </view>
       <button
-        class="connection-button"
+        class="connection-button motion-press"
+        hover-class="pressed"
         size="mini"
         aria-label="{{connectionLabel}}，打开服务设置"
         catchtap="openProfile"
@@ -39,8 +40,8 @@
       compact="{{chatOpen}}"
     />
   </view>
-  <view wx:if="{{!chatOpen}}" class="home-actions">
-    <view class="greeting glass-surface glass-float">
+  <view wx:if="{{!chatOpen}}" class="home-actions {{chatWasOpened ? 'motion-enter' : ''}}">
+    <view class="greeting glass-surface">
       <view class="greeting-accent"></view>
       <view>
         <text class="greeting-title">今天想聊些什么？</text>

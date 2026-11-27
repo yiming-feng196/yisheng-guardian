@@ -1,5 +1,5 @@
 <view
-  class="page records screen-enter {{largeText ? 'large' : ''}}"
+  class="page records {{largeText ? 'large' : ''}}"
   style="--nav-space:{{navSpace}}px"
 >
   <view class="scene-background">
@@ -37,7 +37,7 @@
     </view>
     <text class="page-note">正在读取记录…</text>
   </view>
-  <view wx:elif="{{error}}">
+  <view wx:elif="{{error && !records.length}}">
     <empty-state
       title="暂时无法读取记录"
       message="{{error}}"
@@ -71,6 +71,7 @@
         刷新
       </button>
     </view>
+    <text wx:if="{{error}}" class="inline-feedback text-error" aria-role="status">{{error}}</text>
     <view class="record-list">
       <button
         wx:for="{{records}}"

@@ -399,6 +399,65 @@ test('keyboard blur restores the composer and tab even without a final height ev
   assert.equal(page.data.messages, messages);
 });
 
+test('global keyboard fallback handles system dismissal and is removed on tab hide', (t) => {
+  const state = setup(t);
+  const listeners = new Set();
+  wx.onKeyboardHeightChange = (callback) => listeners.add(callback);
+  wx.offKeyboardHeightChange = (callback) => listeners.delete(callback);
+  const page = state.page('companion');
+  page.onShow();
+  page.onShow();
+  assert.equal(listeners.size, 1);
+  const [listener] = listeners;
+  page.onInputFocus({ detail: {} });
+  listener({ height: 280 });
+  assert.equal(page.data.keyboardInset, 280);
+  listener({ height: 0 });
+  assert.equal(page.data.inputFocused, false);
+  assert.equal(page.data.keyboardInset, 0);
+  page.onHide();
+  assert.equal(listeners.size, 0);
+  listener({ height: 280 });
+  assert.equal(page.data.keyboardInset, 0);
+  page.onShow();
+  page.onUnload();
+  assert.equal(listeners.size, 0);
+});
+
+test('30 tab changes reuse verified connection and same-account records', async (t) => {
+  const state = setup(t, (request) => {
+    const result = request.url.endsWith('/assistant/status')
+      ? { service: 'yisheng-backend', modelConfigured: true }
+      : request.url.endsWith('/api/v1/screenings')
+        ? [{ taskId: 'one', status: 'FINISHED' }]
+        : { status: 'UP' };
+    request.success({ statusCode: 200, data: result });
+  });
+  state.load('config/env.js').saveSettings({ mode: 'live', apiBaseUrl: 'https://example.test' });
+  const sessions = state.load('services/session.js');
+  sessions.saveSession('first', 'first.test.token');
+  const companion = state.page('companion');
+  const records = state.page('records');
+  for (let i = 0; i < 15; i++) {
+    companion.onShow();
+    await companion.refreshConnection();
+    assert.equal(companion.data.connection, 'connected');
+    companion.onHide();
+    records.onShow();
+    await records.loadRecords(false);
+    assert.equal(records.data.records.length, 1);
+  }
+  assert.equal(state.requests.filter((r) => r.url.endsWith('/assistant/status')).length, 1);
+  assert.equal(state.requests.filter((r) => r.url.endsWith('/api/v1/screenings')).length, 1);
+  await records.loadRecords();
+  assert.equal(state.requests.filter((r) => r.url.endsWith('/api/v1/screenings')).length, 2);
+  sessions.saveSession('other', 'other.test.token');
+  records.onShow();
+  assert.deepEqual(records.data.records, []);
+  await records.loadRecords(false);
+  assert.equal(state.requests.at(-1).header.Authorization, 'Bearer other.test.token');
+});
+
 test('demo chat never advertises a real connected service after replying', async (t) => {
   const state = setup(t),
     page = state.page('companion');

@@ -1,5 +1,5 @@
 <view
-  class="page observation screen-enter {{largeText ? 'large' : ''}}"
+  class="page observation {{largeText ? 'large' : ''}}"
   style="--nav-space:{{navSpace}}px"
 >
   <view class="scene-background">

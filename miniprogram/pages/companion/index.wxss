@@ -2,8 +2,8 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding-top: 16rpx;
-  padding-bottom: calc(var(--nav-space, 100px) + 10rpx);
+  padding-top: var(--space-2);
+  padding-bottom: calc(var(--nav-space, 100px) + var(--space-1));
   overflow: hidden;
 }
 .companion .ginkgo {
@@ -21,7 +21,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12rpx;
+  gap: var(--space-2);
 }
 .identity-name {
   display: flex;
@@ -54,7 +54,7 @@
   line-height: 1;
   max-width: 49%;
   height: auto !important;
-  min-height: 44px;
+  min-height: var(--touch-min);
   display: flex !important;
   align-items: center;
 }
@@ -62,8 +62,8 @@
   display: block;
   font-size: var(--font-secondary);
   line-height: 1.5;
-  color: #586779;
-  margin-top: 8rpx;
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
 }
 .human-stage {
   position: relative;
@@ -72,15 +72,16 @@
   margin: 0 -26rpx -6rpx;
 }
 .home-actions {
+  --enter-time: 260ms;
   position: relative;
   z-index: 2;
   flex: none;
 }
 .greeting {
   display: flex;
-  gap: 22rpx;
+  gap: var(--space-3);
   align-items: center;
-  padding: 28rpx 30rpx;
+  padding: var(--space-3) var(--space-4);
   border-radius: 42rpx;
 }
 .greeting-accent {
@@ -108,8 +109,8 @@
 .quick-topics {
   display: flex;
   flex-wrap: wrap;
-  gap: 14rpx;
-  margin: 22rpx 0;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
 }
 .topic {
   display: flex;

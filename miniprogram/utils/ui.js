@@ -14,11 +14,16 @@ function keyboardInset(height, baseline, currentHeight) {
 function syncTab(page, selected, hidden) {
   const info = windowInfo();
   const safeBottom = info.safeArea ? Math.max(0, info.screenHeight - info.safeArea.bottom) : 0;
-  page.setData({ safeBottom, navSpace: safeBottom + (page.data.largeText ? 94 : 82) });
+  const largeText = !!page.data.largeText;
+  const dockHeight = Math.ceil((largeText ? 150 : 130) * info.windowWidth / 750) + 14;
+  const navSpace = safeBottom + Math.max(largeText ? 94 : 82, dockHeight);
+  if (page.data.navSpace !== navSpace) page.setData({ navSpace });
   if (page.getTabBar) {
     const bar = page.getTabBar();
-    if (bar)
-      bar.setData({ selected, hidden: !!hidden, largeText: !!page.data.largeText, safeBottom });
+    if (bar) {
+      const state = { selected, hidden: !!hidden, largeText, safeBottom };
+      if (!bar.data || Object.keys(state).some((key) => bar.data[key] !== state[key])) bar.setData(state);
+    }
   }
 }
 module.exports = { windowInfo, keyboardInset, syncTab };

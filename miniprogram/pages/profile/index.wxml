@@ -1,5 +1,5 @@
 <view
-  class="page profile screen-enter {{largeText ? 'large' : ''}}"
+  class="page profile {{largeText ? 'large' : ''}}"
   style="--nav-space:{{navSpace}}px"
 >
   <view class="scene-background">
@@ -145,7 +145,7 @@
       disabled="{{busy}}"
       bindselect="toggleConnection"
     />
-    <view wx:if="{{connectionExpanded}}" class="connection-details">
+    <view wx:if="{{connectionExpanded}}" class="connection-details motion-enter">
       <text class="form-label">后端服务地址</text>
       <input
         class="field"

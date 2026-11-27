@@ -13,7 +13,7 @@
     <text>小忆在这里</text>
   </view>
   <view class="human-fade" aria-hidden="true"></view>
-  <view wx:if="{{state === 'thinking'}}" class="human-hint" aria-role="status">
+  <view wx:if="{{active && state === 'thinking'}}" class="human-hint" aria-role="status">
     <view class="thinking-dot"></view>
     <text>小忆正在思考</text>
   </view>

@@ -11,11 +11,11 @@ Page({
     sending: false,
     scrollTarget: '',
     chatOpen: false,
+    chatWasOpened: false,
     inputFocused: false,
     connection: 'demo',
     connectionLabel: '演示模式',
     modelConfigured: null,
-    safeBottom: 0,
     navSpace: 82,
     keyboardHeight: 0,
     keyboardInset: 0,
@@ -25,7 +25,7 @@ Page({
   onShow() {
     const config = getSettings();
     const key = environmentKey();
-    this.setData({ mode: config.mode, largeText: config.largeText });
+    const patch = { mode: config.mode, largeText: config.largeText, pageActive: true };
     if (key !== this._environment) {
       this._environment = key;
       this._requestId = (this._requestId || 0) + 1;
@@ -40,17 +40,18 @@ Page({
                 content: '今天想聊些什么？可以聊聊生活、心情，也可以从一个小故事开始。'
               }
             ];
-      this.setData({
+      Object.assign(patch, {
         messages,
         input: '',
         sending: false,
         scrollTarget: '',
         chatOpen: false,
+        chatWasOpened: false,
         inputFocused: false
       });
     }
     this._baselineHeight = windowInfo().windowHeight;
-    this.setData({ pageActive: true, inputFocused: false, keyboardHeight: 0, keyboardInset: 0 });
+    if (Object.keys(patch).some((key) => this.data[key] !== patch[key])) this.setData(patch);
     syncTab(this, 0);
     if (wx.onKeyboardHeightChange && wx.offKeyboardHeightChange && !this._keyboardListener) {
       this._keyboardListener = (detail) => this.onKeyboardHeight({ detail });
@@ -106,47 +107,66 @@ Page({
     this._connectionVersion = (this._connectionVersion || 0) + 1;
   },
   async refreshConnection() {
+    const key = environmentKey();
+    if (this._connectionCheck && this._connectionCheck.key === key) return this._connectionCheck.promise;
+    if (this._connectionKey === key && this._connectionResult && this._connectionResult.key === key &&
+        Date.now() < this._connectionResult.expires) return;
     const version = (this._connectionVersion || 0) + 1;
     this._connectionVersion = version;
-    const key = environmentKey();
     if (this.data.mode !== 'live') {
-      this.setData({ connection: 'demo', connectionLabel: '演示模式', modelConfigured: null });
+      this._connectionResult = null;
+      this._connectionKey = null;
+      this._connectionCheck = null;
+      if (this.data.connection !== 'demo')
+        this.setData({ connection: 'demo', connectionLabel: '演示模式', modelConfigured: null });
       return;
     }
-    this.setData({ connection: 'checking', connectionLabel: '连接中', modelConfigured: null });
+    if (this._connectionKey !== key) {
+      this._connectionKey = key;
+      this.setData({ connection: 'checking', connectionLabel: '连接中', modelConfigured: null });
+    }
+    const promise = this.checkConnection(key, version);
+    this._connectionCheck = { key, promise };
+    try {
+      await promise;
+    } finally {
+      if (this._connectionCheck && this._connectionCheck.promise === promise) this._connectionCheck = null;
+    }
+  },
+  async checkConnection(key, version) {
     try {
       const result = await getBackendStatus();
       if (version !== this._connectionVersion || key !== environmentKey()) return;
-      this.setData({
+      this._connectionResult = { key, expires: Date.now() + 30000 };
+      const patch = {
         connection: 'connected',
         connectionLabel: result.modelConfigured ? '服务已连接' : '知识库已连接',
         modelConfigured: result.modelConfigured
-      });
+      };
       if (
         !result.modelConfigured &&
         this.data.messages.length === 1 &&
         this.data.messages[0].id === 'greeting'
       ) {
-        this.setData({
-          messages: [
-            {
-              id: 'greeting',
-              role: 'assistant',
-              content: '本机后端已连接。当前可查询认知健康知识；自由聊天需要在后端配置模型服务。'
-            }
-          ]
-        });
+        patch.messages = [{
+          id: 'greeting',
+          role: 'assistant',
+          content: '本机后端已连接。当前可查询认知健康知识；自由聊天需要在后端配置模型服务。'
+        }];
       }
+      this.setData(patch);
     } catch (_) {
-      if (version === this._connectionVersion && key === environmentKey())
-        this.setData({ connection: 'unavailable', connectionLabel: '未连接' });
+      if (version === this._connectionVersion && key === environmentKey()) {
+        this._connectionResult = { key, expires: Date.now() + 5000 };
+        this.setData({ connection: 'unavailable', connectionLabel: '未连接', modelConfigured: null });
+      }
     }
   },
   onInput(event) {
     this.setData({ input: event.detail.value });
   },
   openChat() {
-    this.setData({ chatOpen: true });
+    this.setData({ chatOpen: true, chatWasOpened: true });
   },
   closeChat() {
     this.dismissKeyboard();
@@ -154,7 +174,7 @@ Page({
   },
   onInputFocus(event) {
     if (!this.data.pageActive) return;
-    this.setData({ chatOpen: true, inputFocused: true, replyPresented: false });
+    this.setData({ chatOpen: true, chatWasOpened: true, inputFocused: true, replyPresented: false });
     const height = event && event.detail && event.detail.height;
     if (height > 0) this.onKeyboardHeight({ detail: { height } });
   },
@@ -188,6 +208,7 @@ Page({
       sending: true,
       scrollTarget: id,
       chatOpen: true,
+      chatWasOpened: true,
       replyPresented: false
     });
     try {

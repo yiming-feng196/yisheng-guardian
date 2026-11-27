@@ -1,14 +1,14 @@
 <view wx:if="{{visible}}" class="modal-layer" catchtouchmove="blockTouch">
   <view class="modal-mask" bindtap="close"></view>
   <view
-    class="modal-sheet glass-surface"
+    class="modal-sheet glass-surface motion-enter"
     aria-role="dialog"
     aria-modal="true"
     aria-label="{{title}}"
   >
     <view class="modal-heading">
       <text class="modal-title">{{title}}</text>
-      <button class="icon-button close-button" size="mini" aria-label="关闭弹窗" bindtap="close">
+      <button class="icon-button close-button motion-press" hover-class="pressed" size="mini" aria-label="关闭弹窗" bindtap="close">
         ×
       </button>
     </view>
@@ -19,10 +19,10 @@
     </scroll-view>
     <text wx:if="{{footnote}}" class="modal-footnote">{{footnote}}</text>
     <view class="modal-actions">
-      <button wx:if="{{showCancel}}" class="btn btn-secondary" bindtap="close">
+      <button wx:if="{{showCancel}}" class="btn btn-secondary motion-press" hover-class="pressed" bindtap="close">
         {{cancelText}}
       </button>
-      <button class="btn {{danger ? 'btn-danger' : 'btn-primary'}}" bindtap="confirm">
+      <button class="btn motion-press {{danger ? 'btn-danger' : 'btn-primary'}}" hover-class="pressed" bindtap="confirm">
         {{confirmText}}
       </button>
     </view>

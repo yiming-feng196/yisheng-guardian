@@ -1,6 +1,7 @@
-<view class="chat-panel glass-surface glass-float {{expanded ? 'chat-panel--expanded' : ''}}">
+<view class="chat-panel glass-surface {{expanded ? 'chat-panel--expanded' : ''}}">
   <button
-    class="chat-handle"
+    class="chat-handle motion-press"
+    hover-class="pressed"
     aria-label="{{expanded ? '收起对话' : '展开对话'}}"
     aria-expanded="{{expanded}}"
     bindtap="toggle"
@@ -10,7 +11,7 @@
   </button>
   <scroll-view
     wx:if="{{expanded}}"
-    class="chat-history"
+    class="chat-history {{focused ? '' : 'motion-enter'}}"
     scroll-y="{{true}}"
     scroll-into-view="{{scrollTarget}}"
     scroll-with-animation="{{true}}"
@@ -20,12 +21,12 @@
       wx:for="{{messages}}"
       wx:key="id"
       id="{{item.id}}"
-      class="chat-message chat-message--{{item.role}}"
+      class="chat-message chat-message--{{item.role}} {{item.id === scrollTarget ? 'motion-enter' : ''}}"
     >
       <text class="chat-bubble {{item.error ? 'chat-bubble--error' : ''}}" selectable="{{true}}">{{item.content}}</text>
       <text wx:if="{{item.notice}}" class="chat-notice">{{item.notice}}</text>
     </view>
-    <view wx:if="{{sending}}" id="chat-thinking" class="chat-thinking" aria-role="status">
+    <view wx:if="{{sending}}" id="chat-thinking" class="chat-thinking motion-enter" aria-role="status">
       小忆正在思考…
     </view>
   </scroll-view>
@@ -46,7 +47,8 @@
       bindconfirm="send"
     />
     <button
-      class="send-button"
+      class="send-button motion-press"
+      hover-class="pressed"
       size="mini"
       disabled="{{sending || !value}}"
       loading="{{sending}}"

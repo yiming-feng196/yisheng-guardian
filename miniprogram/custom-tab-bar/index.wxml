@@ -1,5 +1,5 @@
 <view
-  wx:if="{{!hidden}}"
+  hidden="{{hidden}}"
   class="tab-dock {{largeText ? 'tab-dock--large' : ''}}"
   style="bottom:{{safeBottom + 8}}px"
   aria-role="tablist"
@@ -9,7 +9,8 @@
     <button
       wx:for="{{tabs}}"
       wx:key="url"
-      class="tab-item {{selected === index ? 'tab-item--selected' : ''}}"
+      class="tab-item motion-press {{selected === index ? 'tab-item--selected' : ''}}"
+      hover-class="pressed"
       data-index="{{index}}"
       aria-role="tab"
       aria-selected="{{selected === index}}"

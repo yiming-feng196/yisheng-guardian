@@ -19,7 +19,7 @@ Page({
     const config = getSettings();
     this.setData({ mode: config.mode, largeText: config.largeText, reportVisible: false });
     syncTab(this, 2);
-    this.loadRecords();
+    this.loadRecords(false);
   },
   onUnload() {
     this._version = (this._version || 0) + 1;
@@ -27,32 +27,60 @@ Page({
   onPullDownRefresh() {
     this.loadRecords().finally(() => wx.stopPullDownRefresh());
   },
-  async loadRecords() {
+  async loadRecords(force = true) {
+    const key = environmentKey();
+    const live = getSettings().mode === 'live';
+    const session = live && getSession();
+    const token = session ? session.token : null;
+    const scope = this._scope;
+    const changed = !scope || scope.key !== key || scope.token !== token;
+    if (!changed && this._loadingRecords) return this._loadingRecords;
+    if (!changed && force === false && Date.now() < this._freshUntil) return;
     const version = (this._version || 0) + 1;
     this._version = version;
-    const key = environmentKey();
-    const needsLogin = getSettings().mode === 'live' && !getSession();
-    this.setData({
-      loading: !needsLogin,
+    this._scope = { key, token };
+    this._freshUntil = 0;
+    this._loadingRecords = null;
+    const needsLogin = live && !session;
+    const patch = {
+      loading: !needsLogin && (changed || !this.data.records.length),
       error: '',
-      records: [],
       needsLogin,
       reportVisible: false,
       selectedRecord: null
-    });
+    };
+    if (changed || needsLogin) patch.records = [];
+    this.setData(patch);
     if (needsLogin) return;
+    const promise = this.fetchRecords(version, key, token);
+    this._loadingRecords = promise;
+    try {
+      await promise;
+    } finally {
+      if (this._loadingRecords === promise) this._loadingRecords = null;
+    }
+  },
+  async fetchRecords(version, key, token) {
+    const isCurrent = () => this._version === version && key === environmentKey();
     try {
       const records = await listRecords();
-      if (this._version === version && key === environmentKey())
-        this.setData({ records: records.map(presentRecord) });
+      if (!isCurrent()) return;
+      const session = token && getSession();
+      if (token && (!session || session.token !== token)) {
+        this.setData({ records: [], needsLogin: !session });
+        return;
+      }
+      this._freshUntil = Date.now() + 15000;
+      this.setData({ records: records.map(presentRecord), loading: false });
     } catch (error) {
-      if (this._version === version && key === environmentKey())
-        this.setData({
-          error: error.message,
-          needsLogin: getSettings().mode === 'live' && !getSession()
-        });
+      if (isCurrent()) {
+        const session = token && getSession();
+        const patch = { error: error.message, needsLogin: !!token && !session };
+        if (token && (!session || session.token !== token)) patch.records = [];
+        this.setData(patch);
+      }
     } finally {
-      if (this._version === version && key === environmentKey()) this.setData({ loading: false });
+      if (isCurrent() && this.data.loading) this.setData({ loading: false });
     }
   },
   showRecord(event) {
