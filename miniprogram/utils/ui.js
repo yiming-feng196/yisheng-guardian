@@ -17,8 +17,11 @@ function syncTab(page, selected, hidden) {
   page.setData({ safeBottom, navSpace: safeBottom + (page.data.largeText ? 94 : 82) });
   if (page.getTabBar) {
     const bar = page.getTabBar();
-    if (bar)
-      bar.setData({ selected, hidden: !!hidden, largeText: !!page.data.largeText, safeBottom });
+    if (bar) {
+      const state = { selected, hidden: !!hidden, largeText: !!page.data.largeText, safeBottom };
+      if (bar.syncPage) bar.syncPage(state);
+      else bar.setData(state);
+    }
   }
 }
 module.exports = { windowInfo, keyboardInset, syncTab };

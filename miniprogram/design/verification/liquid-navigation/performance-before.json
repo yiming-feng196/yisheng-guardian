@@ -1,0 +1,63 @@
+{
+  "measureCalls": 8,
+  "drawP95Ms": 1,
+  "drawMaxMs": 1,
+  "transitions": [
+    {
+      "route": "pages/companion/index",
+      "firstDrawMs": 46,
+      "frames": 2,
+      "maxGapMs": 414,
+      "longFrames": 1
+    },
+    {
+      "route": "pages/records/index",
+      "firstDrawMs": 52,
+      "frames": 2,
+      "maxGapMs": 445,
+      "longFrames": 1
+    },
+    {
+      "route": "pages/observation/index",
+      "firstDrawMs": 34,
+      "frames": 2,
+      "maxGapMs": 519,
+      "longFrames": 1
+    },
+    {
+      "route": "pages/profile/index",
+      "firstDrawMs": 40,
+      "frames": 2,
+      "maxGapMs": 552,
+      "longFrames": 1
+    },
+    {
+      "route": "pages/companion/index",
+      "firstDrawMs": 59,
+      "frames": 2,
+      "maxGapMs": 561,
+      "longFrames": 1
+    },
+    {
+      "route": "pages/observation/index",
+      "firstDrawMs": 43,
+      "frames": 2,
+      "maxGapMs": 615,
+      "longFrames": 1
+    },
+    {
+      "route": "pages/records/index",
+      "firstDrawMs": 60,
+      "frames": 2,
+      "maxGapMs": 633,
+      "longFrames": 1
+    },
+    {
+      "route": "pages/profile/index",
+      "firstDrawMs": 45,
+      "frames": 2,
+      "maxGapMs": 686,
+      "longFrames": 1
+    }
+  ]
+}

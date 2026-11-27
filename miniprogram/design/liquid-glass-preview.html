@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" media="(prefers-color-scheme:light)" content="#f4f7fb">
+<meta name="theme-color" media="(prefers-color-scheme:dark)" content="#101923">
+<title>小忆 · 动态玻璃导航预览</title>
+<style>
+html{color-scheme:light dark;-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:light-dark(#f4f7fb,#101923);color:light-dark(#142536,#e7edf8);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft Yahei",sans-serif;padding:24px 12px;box-sizing:border-box}
+.preview-intro{max-width:440px;width:100%;padding:0 24px;box-sizing:border-box}
+.preview-intro h1{margin:0;font-size:20px;font-weight:600;line-height:1.5}
+.preview-intro p{margin:8px 0 0;font-size:14px;line-height:1.6;color:light-dark(#586779,#acbbd0)}
+#xiaoyi-liquid-nav{max-width:736px}
+.preview-note{margin:0 16px;font-size:12px;line-height:1.5;color:light-dark(#65758b,#a3b1c4)}
+</style>
+</head>
+<body>
+<div class="preview-intro"><h1>液态玻璃导航</h1><p>按住左右拖动，观察水滴拉伸、细颈连接和松手融合。</p></div>
+<div id="xiaoyi-liquid-nav" class="viz-dotted-background">
+  <section class="lg-stage" aria-label="忆声智护动态玻璃导航预览">
+    <div class="lg-ambient lg-ambient-mint" aria-hidden="true"></div>
+    <div class="lg-ambient lg-ambient-peach" aria-hidden="true"></div>
+    <div class="lg-ambient lg-ambient-blue" aria-hidden="true"></div>
+    <div class="lg-ribbon" aria-hidden="true"></div>
+    <div class="lg-ribbon lg-ribbon-second" aria-hidden="true"></div>
+    <header class="lg-brand">忆声智护<span>Liquid Glass</span></header>
+    <div class="lg-copy">
+      <div class="lg-section-label">陪伴</div>
+      <h2 class="lg-title">今天想聊些什么？</h2>
+      <p class="lg-description" aria-live="polite">我在这里，陪你聊聊。</p>
+    </div>
+    <div class="lg-small-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+    <nav class="lg-dock" aria-label="底部导航">
+      <div class="lg-edge" aria-hidden="true"></div>
+      <div class="lg-gleam" aria-hidden="true"></div>
+      <div class="lg-lens" aria-hidden="true"></div>
+      <svg class="lg-fluid-outline" aria-hidden="true" width="100%" height="68" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="lg-water-rim" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="white" stop-opacity=".92"/><stop offset=".45" stop-color="white" stop-opacity=".32"/><stop offset="1" stop-color="white" stop-opacity=".68"/></linearGradient><linearGradient id="lg-water-fill" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#d3f2e8" stop-opacity=".76"/><stop offset=".5" stop-color="#b3e4d6" stop-opacity=".59"/><stop offset="1" stop-color="#d6f2e9" stop-opacity=".54"/></linearGradient></defs>
+        <path class="lg-fluid-contour" fill="url(#lg-water-fill)" stroke="url(#lg-water-rim)" stroke-width="1.2" stroke-linejoin="round" />
+      </svg>
+      <div class="lg-items" role="tablist" aria-label="主要页面">
+        <button class="lg-tab" type="button" role="tab" aria-selected="true" aria-label="陪伴"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="message-circle-more" aria-hidden="true" class="lucide lucide-message-circle-more"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"></path><path d="M8 12h.01"></path><path d="M12 12h.01"></path><path d="M16 12h.01"></path></svg><span>陪伴</span></button>
+        <button class="lg-tab" type="button" role="tab" aria-selected="false" aria-label="观察"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-check-2" aria-hidden="true" class="lucide lucide-calendar-check-2"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"></path><path d="M3 10h18"></path><path d="m16 20 2 2 4-4"></path></svg><span>观察</span></button>
+        <button class="lg-tab" type="button" role="tab" aria-selected="false" aria-label="记录"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="notebook-text" aria-hidden="true" class="lucide lucide-notebook-text"><path d="M2 6h4"></path><path d="M2 10h4"></path><path d="M2 14h4"></path><path d="M2 18h4"></path><rect width="16" height="20" x="4" y="2" rx="2"></rect><path d="M9.5 8h5"></path><path d="M9.5 12H16"></path><path d="M9.5 16H14"></path></svg><span>记录</span></button>
+        <button class="lg-tab" type="button" role="tab" aria-selected="false" aria-label="我的"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="user-round" aria-hidden="true" class="lucide lucide-user-round"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg><span>我的</span></button>
+      </div>
+      <div class="lg-active" aria-hidden="true" inert>
+        <div class="lg-cell"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="message-circle-more" aria-hidden="true" class="lucide lucide-message-circle-more"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"></path><path d="M8 12h.01"></path><path d="M12 12h.01"></path><path d="M16 12h.01"></path></svg><span>陪伴</span></div>
+        <div class="lg-cell"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar-check-2" aria-hidden="true" class="lucide lucide-calendar-check-2"><path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"></path><path d="M3 10h18"></path><path d="m16 20 2 2 4-4"></path></svg><span>观察</span></div>
+        <div class="lg-cell"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="notebook-text" aria-hidden="true" class="lucide lucide-notebook-text"><path d="M2 6h4"></path><path d="M2 10h4"></path><path d="M2 14h4"></path><path d="M2 18h4"></path><rect width="16" height="20" x="4" y="2" rx="2"></rect><path d="M9.5 8h5"></path><path d="M9.5 12H16"></path><path d="M9.5 16H14"></path></svg><span>记录</span></div>
+        <div class="lg-cell"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="user-round" aria-hidden="true" class="lucide lucide-user-round"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg><span>我的</span></div>
+      </div>
+    </nav>
+    <div class="lg-home-indicator" aria-hidden="true"></div>
+  </section>
+</div>
+<style>
+#xiaoyi-liquid-nav{width:100%;padding:28px 12px;box-sizing:border-box;overflow:hidden}
+#xiaoyi-liquid-nav .lg-stage{
+  --lg-ink:light-dark(#142536,#e7edf8);--lg-secondary:light-dark(#526477,#aebdd2);
+  --lg-accent:#168773;--lg-active-ink:light-dark(#146653,#95e1c8);
+  --lg-frost:light-dark(rgb(255 255 255 / .3),rgb(31 49 72 / .5));
+  --lg-edge-color:light-dark(rgb(255 255 255 / .88),rgb(204 226 255 / .3));
+  --lg-blur:24px;--lg-fill:.32;
+  position:relative;isolation:isolate;max-width:440px;width:100%;height:374px;margin:0 auto;
+  border-radius:36px;overflow:hidden;color:var(--lg-ink);background:light-dark(#dfe9f6,#14243b);
+  box-shadow:inset 0 1px 0 light-dark(rgb(255 255 255 / .8),rgb(255 255 255 / .09));
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft Yahei",sans-serif;
+  -webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;
+}
+#xiaoyi-liquid-nav .lg-stage *{box-sizing:border-box}
+#xiaoyi-liquid-nav .lg-ambient{position:absolute;pointer-events:none;z-index:-2;filter:blur(34px);border-radius:50%;transition:transform 500ms cubic-bezier(.22,.7,.2,1),opacity 320ms ease}
+#xiaoyi-liquid-nav .lg-ambient-mint{width:270px;height:240px;left:-95px;bottom:-70px;background:light-dark(#b1ddd7,#22565c);opacity:.82}
+#xiaoyi-liquid-nav .lg-ambient-peach{width:255px;height:230px;right:-100px;bottom:20px;background:light-dark(#f4dcd7,#5c4053);opacity:.7}
+#xiaoyi-liquid-nav .lg-ambient-blue{width:250px;height:210px;left:125px;bottom:-145px;background:light-dark(#b9cced,#2c3e6b);opacity:.8}
+#xiaoyi-liquid-nav .lg-ribbon{position:absolute;z-index:-1;pointer-events:none;width:660px;height:220px;left:-105px;bottom:37px;border-radius:50%;border-top:1px solid light-dark(rgb(255 255 255 / .65),rgb(210 231 255 / .12));background:linear-gradient(180deg,light-dark(rgb(255 255 255 / .36),rgb(255 255 255 / .07)),transparent 56%);transform:rotate(-17deg)}
+#xiaoyi-liquid-nav .lg-ribbon-second{bottom:-133px;left:-25px;width:580px;height:310px;transform:rotate(13deg);opacity:.68}
+#xiaoyi-liquid-nav .lg-brand{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:28px 28px 0;font-size:14px;font-weight:500;line-height:1.5;color:var(--lg-secondary)}
+#xiaoyi-liquid-nav .lg-brand span{font-size:11px;letter-spacing:.04em;opacity:.8}
+#xiaoyi-liquid-nav .lg-copy{position:relative;margin:39px 28px 0;min-height:130px}
+#xiaoyi-liquid-nav .lg-section-label{font-size:13px;line-height:1.5;font-weight:500;color:var(--lg-active-ink);margin-bottom:9px}
+#xiaoyi-liquid-nav .lg-title{margin:0;max-width:100%;font-size:26px;line-height:1.35;font-weight:600;letter-spacing:-.035em;color:var(--lg-ink);text-wrap:balance}
+#xiaoyi-liquid-nav .lg-description{font-size:14px;line-height:1.6;color:var(--lg-secondary);margin:10px 0 0;font-weight:400}
+#xiaoyi-liquid-nav .lg-small-wave{position:absolute;right:30px;bottom:145px;display:flex;gap:4px;align-items:center;opacity:.45;height:25px;color:var(--lg-accent)}
+#xiaoyi-liquid-nav .lg-small-wave span{width:4px;height:10px;border-radius:6px;background:currentColor}
+#xiaoyi-liquid-nav .lg-small-wave span:nth-child(2),#xiaoyi-liquid-nav .lg-small-wave span:nth-child(4){height:18px}
+#xiaoyi-liquid-nav .lg-small-wave span:nth-child(3){height:25px}
+#xiaoyi-liquid-nav .lg-dock{
+  position:absolute;left:14px;right:14px;bottom:35px;height:82px;border-radius:33px;
+  background:linear-gradient(145deg,light-dark(rgb(255 255 255 / .4),rgb(58 74 98 / .3)),light-dark(rgb(255 255 255 / .14),rgb(31 46 68 / .22))),var(--lg-frost);
+  border:1px solid var(--lg-edge-color);box-shadow:0 12px 26px light-dark(rgb(64 87 127 / .10),rgb(0 0 0 / .24)),inset 0 1px 0 light-dark(rgb(255 255 255 / .85),rgb(255 255 255 / .18)),inset 0 -1px 1px light-dark(rgb(101 126 159 / .12),rgb(0 0 0 / .2));
+  backdrop-filter:blur(var(--lg-blur)) saturate(1.45);-webkit-backdrop-filter:blur(var(--lg-blur)) saturate(1.45);
+  touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow:visible;
+}
+#xiaoyi-liquid-nav .lg-edge{position:absolute;inset:-1px;pointer-events:none;border-radius:inherit;background:linear-gradient(135deg,rgb(255 255 255 / .8),transparent 20%,transparent 75%,rgb(255 255 255 / .55));padding:1px;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;opacity:.7}
+#xiaoyi-liquid-nav .lg-gleam{position:absolute;pointer-events:none;left:0;top:0;width:120px;height:100%;border-radius:inherit;background:radial-gradient(ellipse at 50% 0%,rgb(255 255 255 / .72),transparent 72%);opacity:0;transition:opacity 150ms ease;mix-blend-mode:soft-light}
+#xiaoyi-liquid-nav .lg-lens{
+  position:absolute;left:6px;top:6px;height:68px;width:calc((100% - 12px)/4 - 4px);border-radius:28px;pointer-events:none;
+  background:linear-gradient(140deg,light-dark(rgb(255 255 255 / .52),rgb(194 237 225 / .10)),transparent 45%),linear-gradient(120deg,light-dark(rgb(169 224 209 / .50),rgb(70 139 128 / .29)),light-dark(rgb(211 240 231 / .44),rgb(81 131 124 / .18)));
+  border:1px solid light-dark(rgb(255 255 255 / .85),rgb(184 233 220 / .35));
+  box-shadow:inset 0 1px 0 light-dark(rgb(255 255 255 / .85),rgb(255 255 255 / .22)),inset 0 -1px 0 rgb(50 124 106 / .08),0 2px 7px light-dark(rgb(54 133 115 / .07),rgb(0 0 0 / .1));
+  backdrop-filter:blur(9px) saturate(1.2);-webkit-backdrop-filter:blur(9px) saturate(1.2);transform-origin:center center;
+}
+#xiaoyi-liquid-nav .lg-lens-rim{position:absolute;pointer-events:none;inset:1px;border-radius:inherit;border-top:1px solid light-dark(rgb(255 255 255 / .7),rgb(255 255 255 / .16));opacity:.8}
+#xiaoyi-liquid-nav .lg-items,#xiaoyi-liquid-nav .lg-active{position:absolute;inset:6px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch}
+#xiaoyi-liquid-nav .lg-tab,#xiaoyi-liquid-nav .lg-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;border:0;background:transparent;border-radius:28px;padding:6px 0;margin:0;font-family:inherit;font-size:12px;font-weight:500;line-height:1.4;letter-spacing:0;color:var(--lg-secondary)}
+#xiaoyi-liquid-nav .lg-tab{cursor:pointer;touch-action:pan-y;min-height:44px}
+#xiaoyi-liquid-nav .lg-tab svg,#xiaoyi-liquid-nav .lg-cell svg{width:25px;height:25px;stroke-width:1.8;flex:none}
+#xiaoyi-liquid-nav .lg-tab i,#xiaoyi-liquid-nav .lg-cell i{display:block;width:25px;height:25px}
+#xiaoyi-liquid-nav .lg-active{pointer-events:none;color:var(--lg-active-ink);clip-path:inset(0 75% 0 0 round 27px)}
+#xiaoyi-liquid-nav .lg-cell{color:inherit;font-weight:600}
+#xiaoyi-liquid-nav .lg-tab[data-pressed="true"],#xiaoyi-liquid-nav .lg-cell[data-pressed="true"]{transform:scale(.96)}
+#xiaoyi-liquid-nav .lg-tab:focus-visible{outline:2px solid var(--lg-active-ink);outline-offset:-5px}
+#xiaoyi-liquid-nav .lg-home-indicator{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);width:116px;height:4px;border-radius:8px;background:var(--lg-ink);opacity:.85}
+@media(hover:hover) and (pointer:fine){#xiaoyi-liquid-nav .lg-tab:hover{background:light-dark(rgb(255 255 255 / .14),rgb(255 255 255 / .035))}}
+@media(max-width:380px){#xiaoyi-liquid-nav{padding:18px 0}#xiaoyi-liquid-nav .lg-stage{height:366px;border-radius:29px}#xiaoyi-liquid-nav .lg-brand{margin-left:22px;margin-right:22px}#xiaoyi-liquid-nav .lg-copy{margin-left:22px;margin-right:22px}#xiaoyi-liquid-nav .lg-title{font-size:24px}#xiaoyi-liquid-nav .lg-dock{left:9px;right:9px}}
+@media(prefers-reduced-motion:reduce){#xiaoyi-liquid-nav .lg-ambient,#xiaoyi-liquid-nav .lg-gleam{transition:none}}
+@media(prefers-reduced-transparency:reduce){#xiaoyi-liquid-nav .lg-dock{background:light-dark(#edf4f8,#20334a);backdrop-filter:none;-webkit-backdrop-filter:none}#xiaoyi-liquid-nav .lg-lens{background:light-dark(#d4eae3,#365f5b);backdrop-filter:none;-webkit-backdrop-filter:none}}
+@media(prefers-contrast:more){#xiaoyi-liquid-nav .lg-dock{background:light-dark(#edf4f8,#20334a);border-color:var(--lg-secondary)}#xiaoyi-liquid-nav .lg-stage{--lg-secondary:light-dark(#3e5062,#cbd7e5)}}
+
+/* One shared glass surface is clipped to the moving liquid outline. */
+#xiaoyi-liquid-nav .lg-lens{width:calc(100% - 12px)!important;border:0!important;border-radius:0!important;box-shadow:none!important;transform:none!important;backdrop-filter:blur(10px) saturate(1.28);-webkit-backdrop-filter:blur(10px) saturate(1.28);background:linear-gradient(155deg,light-dark(rgb(255 255 255 / .6),rgb(213 250 239 / .12)),transparent 45%),linear-gradient(110deg,light-dark(rgb(168 224 207 / .59),rgb(70 142 127 / .36)),light-dark(rgb(214 242 233 / .58),rgb(85 148 136 / .28)))}
+#xiaoyi-liquid-nav .lg-fluid-outline{position:absolute;left:6px;right:6px;top:6px;width:calc(100% - 12px);height:68px;pointer-events:none;overflow:visible;filter:drop-shadow(0 1px 2px light-dark(rgb(50 110 96 / .08),rgb(0 0 0 / .2)))}
+#xiaoyi-liquid-nav .lg-active{clip-path:inset(0 75% 0 0 round 27px)}
+/* Keep blur on the stationary dock; the deforming surface is one SVG path. */
+#xiaoyi-liquid-nav .lg-lens{display:none}
+#xiaoyi-liquid-nav .lg-fluid-outline{filter:none}
+@media(prefers-reduced-transparency:reduce){#xiaoyi-liquid-nav .lg-lens{background:light-dark(#d4eae3,#365f5b);backdrop-filter:none;-webkit-backdrop-filter:none}}
+</style>
+<script>
+(() => {
+  const root = document.getElementById('xiaoyi-liquid-nav');
+  if (!root) return;
+  const stage = root.querySelector('.lg-stage');
+  const dock = root.querySelector('.lg-dock');
+  const items = root.querySelector('.lg-items');
+  const lens = root.querySelector('.lg-lens');
+  const outline = root.querySelector('.lg-fluid-outline');
+  const contour = root.querySelector('.lg-fluid-contour');
+  const overlay = root.querySelector('.lg-active');
+  const gleam = root.querySelector('.lg-gleam');
+  const buttons = [...root.querySelectorAll('.lg-tab')];
+  const cells = [...root.querySelectorAll('.lg-cell')];
+  const title = root.querySelector('.lg-title');
+  const section = root.querySelector('.lg-section-label');
+  const description = root.querySelector('.lg-description');
+  const ambient = ['mint', 'peach', 'blue'].map(name => root.querySelector('.lg-ambient-' + name));
+  const pages = [
+    { label: '陪伴', title: '今天想聊些什么？', description: '我在这里，陪你聊聊。' },
+    { label: '观察', title: '从一张图片开始', description: '慢慢说，不着急。' },
+    { label: '记录', title: '每一次，都记得', description: '记录点滴，关注变化。' },
+    { label: '我的', title: '把陪伴调成喜欢的样子', description: '你的偏好，都在这里。' }
+  ];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const options = { opacity: .32, blur: 24, response: 240, reducedMotion: false };
+  const clamp = (n, low, high) => Math.min(high, Math.max(low, n));
+  const reducedMotion = () => reduced.matches || options.reducedMotion;
+  let selected = 0, slot = 1, width = 1;
+  let x = 0, velocity = 0, target = 0, tail = 0, tailVelocity = 0;
+  let pressure = 0, pressureVelocity = 0, pressureTarget = 0;
+  let gesture = null, raf = 0, previousTime = 0, ignoreClickUntil = 0;
+
+  // One continuous, closed organic contour. The head follows the pointer;
+  // the smaller trailing lobe catches up through its own damped spring.
+  function makeContour() {
+    const rx = Math.max(12, (slot - 4) / 2), ry = 32.5;
+    const gap = reducedMotion() ? 0 : Math.abs(x - tail);
+    const amount = clamp(gap / (slot * 1.25), 0, 1);
+    const speed = reducedMotion() ? 0 : clamp(Math.abs(velocity) / 1500, 0, 1);
+    const headRX = Math.min(slot / 2 - .7, rx * (1 + pressure * .025 + speed * .04));
+    const headRY = ry * (1 - pressure * .055 - speed * .025);
+    const tailRX = rx * (1 - .42 * amount);
+    const tailRY = ry * (1 - .43 * amount);
+    const headCX = clamp(x + slot / 2, headRX + .5, width - headRX - .5);
+    const tailCX = reducedMotion() ? headCX : clamp(tail + slot / 2, tailRX + .5, width - tailRX - .5);
+    const distance = Math.abs(headCX - tailCX);
+    const leftLobe = headCX <= tailCX ? { cx: headCX, rx: headRX, ry: headRY } : { cx: tailCX, rx: tailRX, ry: tailRY };
+    const rightLobe = headCX <= tailCX ? { cx: tailCX, rx: tailRX, ry: tailRY } : { cx: headCX, rx: headRX, ry: headRY };
+    const start = Math.min(headCX - headRX, tailCX - tailRX);
+    const end = Math.max(headCX + headRX, tailCX + tailRX);
+    const steps = Math.max(24, Math.min(48, Math.ceil((end - start) / 4.5)));
+    const top = [], bottom = [];
+    const envelope = (p, lobe) => {
+      const u = Math.abs((p - lobe.cx) / lobe.rx);
+      return u >= 1 ? 0 : lobe.ry * Math.pow(1 - Math.pow(u, 3.15), 1 / 3.15);
+    };
+    const smoothMax = (a, b, k) => Math.max(a, b) + Math.pow(Math.max(k - Math.abs(a - b), 0), 2) / (4 * k);
+    for (let i = 0; i <= steps; i++) {
+      const px = start + (end - start) * i / steps;
+      let half, centerY = 34;
+      if (distance < 1) {
+        half = envelope(px, { cx: headCX, rx: headRX, ry: headRY });
+      } else {
+        half = Math.max(envelope(px, leftLobe), envelope(px, rightLobe));
+        if (px > leftLobe.cx && px < rightLobe.cx) {
+          const t = (px - leftLobe.cx) / distance;
+          const base = leftLobe.ry + (rightLobe.ry - leftLobe.ry) * t;
+          const pinch = clamp(distance / (leftLobe.rx + rightLobe.rx) * .88, 0, .88);
+          const bridge = Math.max(3.8, base * (1 - pinch * Math.pow(Math.sin(Math.PI * t), .65)));
+          half = smoothMax(half, bridge, 2.2);
+          centerY += Math.sin(Math.PI * t) * amount * Math.sign(velocity) * 1.5;
+        }
+      }
+      if (i === 0 || i === steps) half = 0;
+      half = Math.min(half, 32.8);
+      top.push([px, centerY - half]); bottom.push([px, centerY + half]);
+    }
+    const points = top.concat(bottom.reverse().slice(1, -1));
+    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    const number = n => Math.round(n * 100) / 100;
+    const first = mid(points[points.length - 1], points[0]);
+    let d = `M${number(first[0])} ${number(first[1])}`;
+    for (let i = 0; i < points.length; i++) {
+      const p = points[i], next = mid(p, points[(i + 1) % points.length]);
+      d += `Q${number(p[0])} ${number(p[1])} ${number(next[0])} ${number(next[1])}`;
+    }
+    return { d: d + 'Z', gap, left: start, right: end };
+  }
+
+  function draw() {
+    const shape = makeContour();
+    const clip = `path("${shape.d}")`;
+    overlay.style.clipPath = clip;
+    contour.setAttribute('d', shape.d);
+    lens.dataset.gap = shape.gap.toFixed(2);
+    lens.dataset.head = x.toFixed(2);
+    lens.dataset.tail = tail.toFixed(2);
+  }
+
+  function tick(time) {
+    const dt = Math.min((time - (previousTime || time - 16)) / 1000, .16);
+    previousTime = time;
+    const steps = Math.max(1, Math.ceil(dt / .008)), h = dt / steps;
+    const k = 800 * Math.pow(240 / options.response, 2);
+    for (let i = 0; i < steps; i++) {
+      if (!gesture || !gesture.dragging) {
+        velocity += ((target - x) * k - 2 * Math.sqrt(k) * velocity) * h;
+        x += velocity * h;
+      } else if (time - gesture.lastTime > 45) velocity *= Math.exp(-h * 18);
+      tailVelocity += ((x - tail) * 200 - 28.3 * tailVelocity) * h;
+      tail += tailVelocity * h;
+      pressureVelocity += ((pressureTarget - pressure) * 1000 - 64 * pressureVelocity) * h;
+      pressure += pressureVelocity * h;
+    }
+    draw();
+    const headMoving = (!gesture || !gesture.dragging) && (Math.abs(target - x) > .04 || Math.abs(velocity) > .4);
+    const tailMoving = Math.abs(x - tail) > .09 || Math.abs(tailVelocity) > .5;
+    const pressMoving = Math.abs(pressureTarget - pressure) > .002 || Math.abs(pressureVelocity) > .01;
+    const dragMoving = gesture && gesture.dragging && Math.abs(velocity) > .5;
+    if (headMoving || tailMoving || pressMoving || dragMoving) raf = requestAnimationFrame(tick);
+    else {
+      if (!gesture || !gesture.dragging) x = target;
+      tail = x; velocity = tailVelocity = 0; pressure = pressureTarget;
+      draw(); raf = 0; previousTime = 0;
+    }
+  }
+
+  function animate() {
+    if (reducedMotion()) {
+      if (!gesture || !gesture.dragging) x = target;
+      tail = x; velocity = tailVelocity = 0; pressure = pressureTarget; draw(); return;
+    }
+    if (!raf) { previousTime = 0; raf = requestAnimationFrame(tick); }
+  }
+
+  function geometry() {
+    width = items.getBoundingClientRect().width; slot = width / 4;
+    outline.setAttribute('viewBox', `0 0 ${width} 68`);
+    x = target = tail = selected * slot; velocity = tailVelocity = 0; draw();
+  }
+
+  function content(instant = false) {
+    const page = pages[selected];
+    section.textContent = page.label; title.textContent = page.title; description.textContent = page.description;
+    buttons.forEach((b, i) => b.setAttribute('aria-selected', String(i === selected)));
+    ambient.forEach(el => el.style.transition = instant || reducedMotion() ? 'none' : '');
+    ambient[0].style.transform = `translate(${selected * 47}px,${-selected * 18}px)`;
+    ambient[1].style.transform = `translate(${-selected * 26}px,${selected % 2 ? 68 : 0}px)`;
+    ambient[2].style.transform = `translate(${-selected * 34}px,${-selected * 29}px)`;
+  }
+
+  function select(index, animated = true) {
+    if (index < 0 || index > 3) return;
+    selected = index; target = index * slot; content(!animated);
+    if (animated && !reducedMotion()) animate();
+    else {
+      if (raf) cancelAnimationFrame(raf); raf = 0;
+      x = tail = target; velocity = tailVelocity = 0; pressure = pressureTarget; draw();
+    }
+  }
+
+  function point(event) {
+    const rect = dock.getBoundingClientRect();
+    gleam.style.transform = `translate3d(${clamp(event.clientX - rect.left, 0, rect.width) - 60}px,0,0)`;
+  }
+  function pressed(index, on) {
+    buttons.forEach((b, i) => b.dataset.pressed = String(on && i === index));
+    cells.forEach((c, i) => c.dataset.pressed = String(on && i === index));
+    pressureTarget = on ? 1 : 0; gleam.style.opacity = on ? '.85' : '0'; animate();
+  }
+
+  dock.addEventListener('pointerdown', event => {
+    const button = event.target.closest('.lg-tab');
+    if (!button || gesture || !event.isPrimary || event.button !== 0) return;
+    const index = buttons.indexOf(button);
+    gesture = { id: event.pointerId, index, startX: event.clientX, lastX: event.clientX, lastTime: performance.now(), anchor: x, dragging: false, v: 0 };
+    dock.setPointerCapture(event.pointerId); point(event); target = index * slot; pressed(index, true);
+  });
+  dock.addEventListener('pointermove', event => {
+    if (!gesture) { if (event.pointerType === 'mouse') point(event); return; }
+    if (event.pointerId !== gesture.id) return;
+    const dx = event.clientX - gesture.startX, now = performance.now();
+    if (!gesture.dragging && Math.abs(dx) > 6) { gesture.dragging = true; gesture.anchor = x - dx; }
+    if (gesture.dragging) {
+      const raw = gesture.anchor + dx, max = slot * 3;
+      x = raw < 0 ? -24 * (1 - Math.exp(raw / 70)) : raw > max ? max + 24 * (1 - Math.exp(-(raw - max) / 70)) : raw;
+      gesture.v = clamp((event.clientX - gesture.lastX) / Math.max((now - gesture.lastTime) / 1000, .008), -1600, 1600);
+      velocity = gesture.v; point(event); draw(); animate();
+    }
+    gesture.lastX = event.clientX; gesture.lastTime = now;
+  });
+
+  function release(event, cancel = false) {
+    if (!gesture || event.pointerId !== gesture.id) return;
+    const finished = gesture; gesture = null;
+    if (dock.hasPointerCapture(event.pointerId)) dock.releasePointerCapture(event.pointerId);
+    velocity = finished.v * Math.exp(-(performance.now() - finished.lastTime) / 90);
+    pressed(finished.index, false); ignoreClickUntil = performance.now() + 400;
+    const rect = items.getBoundingClientRect();
+    if (cancel || event.clientY < rect.top - 32 || event.clientY > rect.bottom + 32) {
+      target = selected * slot; animate(); return;
+    }
+    const projected = event.clientX - rect.left + (finished.dragging ? velocity * .025 : 0);
+    select(finished.dragging ? clamp(Math.floor(projected / slot), 0, 3) : finished.index, true);
+  }
+  dock.addEventListener('pointerup', event => release(event));
+  dock.addEventListener('pointercancel', event => release(event, true));
+  dock.addEventListener('lostpointercapture', event => { if (gesture) release(event, true); });
+  dock.addEventListener('pointerleave', () => { if (!gesture) gleam.style.opacity = '0'; });
+  dock.addEventListener('click', event => {
+    const button = event.target.closest('.lg-tab'); if (!button) return;
+    if (event.detail === 0) select(buttons.indexOf(button), false);
+    else if (performance.now() > ignoreClickUntil) select(buttons.indexOf(button), true);
+  });
+  dock.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? 3 : clamp(selected + (event.key === 'ArrowRight' ? 1 : -1), 0, 3);
+    select(next, false); buttons[next].focus();
+  });
+  geometry(); content(true); new ResizeObserver(geometry).observe(items);
+  reduced.addEventListener('change', () => select(selected, false));
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) return;
+    if (gesture && dock.hasPointerCapture(gesture.id)) dock.releasePointerCapture(gesture.id);
+    gesture = null; pressureTarget = 0;
+    buttons.forEach(b => b.dataset.pressed = 'false'); cells.forEach(c => c.dataset.pressed = 'false');
+    gleam.style.opacity = '0'; select(selected, false);
+  });
+})();
+
+</script>
+
+<p class="preview-note">交互效果预览 · 不连接账号与真实服务</p>
+</body>
+</html>
