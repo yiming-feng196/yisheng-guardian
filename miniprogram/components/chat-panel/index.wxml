@@ -55,7 +55,6 @@
     />
     <button
       class="send-button"
-      size="mini"
       disabled="{{sending || !value || voiceState !== 'idle'}}"
       loading="{{sending}}"
       aria-label="发送消息"
