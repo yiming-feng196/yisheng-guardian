@@ -22,7 +22,8 @@ function syncTab(page, selected, hidden) {
     const bar = page.getTabBar();
     if (bar) {
       const state = { selected, hidden: !!hidden, largeText, safeBottom };
-      if (!bar.data || Object.keys(state).some((key) => bar.data[key] !== state[key])) bar.setData(state);
+      if (bar.syncPage) bar.syncPage(state);
+      else if (!bar.data || Object.keys(state).some((key) => bar.data[key] !== state[key])) bar.setData(state);
     }
   }
 }

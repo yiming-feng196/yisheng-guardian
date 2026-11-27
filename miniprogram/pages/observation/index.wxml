@@ -12,7 +12,7 @@
   </view>
   <image class="ginkgo" src="/assets/ginkgo-glass.png" mode="aspectFit" aria-hidden="true" />
   <page-header title="认知观察" subtitle="看看图片，说说您看到的故事。" wave="{{true}}">
-    <status-pill slot="aside" label="流程体验" tone="demo" />
+    <status-pill slot="aside" label="{{mode === 'live' ? '语音观察' : '流程体验'}}" tone="{{mode === 'live' ? 'neutral' : 'demo'}}" />
   </page-header>
   <step-progress steps="{{steps}}" current="{{step}}" />
   <view class="observation-card glass-surface">
@@ -30,20 +30,21 @@
         mode="aspectFit"
         aria-label="磨砂玻璃相框主题插图"
       />
-      <text class="secondary experience-note">当前为流程体验，不会录音或生成健康评估。</text>
+      <text class="secondary experience-note">{{mode === 'live' ? '录音后可先试听或删除。确认上传后，录音会发送到当前账号的后端，供语音转写和观察分析。' : '当前为流程体验，不会录音或生成健康评估。'}}</text>
       <checkbox-group bindchange="onConsentChange">
         <label class="consent-row">
           <checkbox value="consent" checked="{{consent}}" color="#168773" />
-          <text>我已了解，继续体验流程示例。</text>
+          <text>{{mode === 'live' ? '我同意为本次观察处理录音、转写和图片任务记录。观察结果仅供参考。' : '我已了解，继续体验流程示例。'}}</text>
         </label>
       </checkbox-group>
-      <button
+      <button wx:if="{{mode === 'live' && !signedIn}}" class="btn btn-secondary" bindtap="openProfile">前往登录</button>
+      <button wx:else
         class="btn btn-primary"
         disabled="{{!consent}}"
         hover-class="pressed"
         bindtap="nextStep"
       >
-        开始体验
+        {{mode === 'live' ? '同意并继续' : '开始体验'}}
         <image src="/assets/icons/arrow-right-white.png" mode="aspectFit" />
       </button>
     </block>
@@ -56,6 +57,7 @@
         mode="widthFix"
         aria-label="看图讲述任务图片"
       />
+      <block wx:if="{{mode === 'demo'}}">
       <view wx:if="{{sampleReady}}" class="sample-selected">
         <status-pill label="已选择流程示例" tone="success" />
       </view>
@@ -73,8 +75,24 @@
           下一步
         </button>
       </view>
+      </block>
+      <block wx:else>
+        <view class="audio-placeholder" aria-role="status">{{clock}} · {{status}}</view>
+        <text wx:if="{{error}}" class="secondary experience-note" aria-role="status">{{error}}</text>
+        <view class="step-actions" wx:if="{{phase === 'idle'}}">
+          <button class="btn btn-secondary" bindtap="previousStep">上一步</button>
+          <button class="btn btn-primary" bindtap="startRecording">开始录音</button>
+        </view>
+        <button wx:if="{{needsSettings}}" class="btn btn-secondary" bindtap="openMicSettings">打开录音权限设置</button>
+        <view class="step-actions" wx:if="{{phase !== 'idle'}}">
+          <button wx:if="{{phase === 'recording'}}" class="btn btn-secondary" bindtap="pauseRecording">暂停</button>
+          <button wx:if="{{phase === 'paused'}}" class="btn btn-secondary" bindtap="resumeRecording">继续</button>
+          <button wx:if="{{phase === 'paused' || phase === 'recording'}}" class="btn btn-primary" bindtap="stopRecording">结束</button>
+          <button class="btn btn-plain" bindtap="cancelRecording">取消</button>
+        </view>
+      </block>
     </block>
-    <block wx:elif="{{step === 2}}">
+    <block wx:elif="{{step === 2 && mode === 'demo'}}">
       <text class="title">确认体验内容</text>
       <view class="confirmation-symbol">
         <image src="/assets/icons/document.png" mode="aspectFit" />
@@ -92,6 +110,28 @@
         <button class="btn btn-primary" bindtap="nextStep">完成体验</button>
       </view>
     </block>
+    <block wx:elif="{{step === 2}}">
+      <text class="title">确认录音</text>
+      <view class="audio-placeholder" aria-role="status">{{clock}} · {{status}}</view>
+      <text wx:if="{{error}}" class="secondary experience-note" aria-role="status">{{error}}</text>
+      <progress wx:if="{{phase === 'uploading'}}" percent="{{progress}}" show-info activeColor="#168773" />
+      <block wx:elif="{{phase !== 'reconciling'}}">
+        <view class="step-actions">
+          <button class="btn btn-secondary" bindtap="togglePlayback">{{playing ? '停止试听' : '试听录音'}}</button>
+          <button class="btn btn-secondary" bindtap="removeRecording">删除并重录</button>
+        </view>
+        <button wx:if="{{phase === 'uncertain'}}" class="btn btn-secondary section-gap" bindtap="openRecords">查看录音记录</button>
+        <button wx:if="{{!signedIn}}" class="btn btn-secondary section-gap" bindtap="openProfile">重新登录</button>
+        <button wx:elif="{{phase === 'uncertain'}}" class="btn btn-primary section-gap" bindtap="confirmRetry">核对后重试</button>
+        <button wx:else class="btn btn-primary section-gap" bindtap="submitRecording">{{phase === 'failed' ? '重试上传' : '上传录音'}}</button>
+      </block>
+    </block>
+    <block wx:elif="{{mode === 'live'}}">
+      <text class="title">录音已上传</text>
+      <text class="secondary experience-note">可在记录页试听录音或发起观察分析。</text>
+      <button class="btn btn-primary" bindtap="openRecords">查看记录</button>
+      <button class="btn btn-plain section-gap" bindtap="restart">录制另一段</button>
+    </block>
     <block wx:else>
       <view class="completion-symbol">
         <image src="/assets/icons/check-circle.png" mode="aspectFit" />
@@ -104,11 +144,4 @@
     </block>
   </view>
   <text class="page-note">观察信息仅供参考，不能替代专业诊断。</text>
-  <glass-modal
-    visible="{{noticeVisible}}"
-    title="录音与上传尚未开放"
-    content="当前仅提供观察流程体验，不会调用麦克风、上传音频或生成观察报告。您可以返回演示模式，了解完整步骤。"
-    bindclose="closeNotice"
-    bindconfirm="closeNotice"
-  />
 </view>

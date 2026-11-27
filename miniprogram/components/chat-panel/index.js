@@ -1,6 +1,11 @@
 Component({
   options: { styleIsolation: 'apply-shared' },
   properties: {
+    voiceState: String,
+    voiceLabel: String,
+    voiceSeconds: Number,
+    autoRead: { type: Boolean, value: true },
+    speakingId: String,
     expanded: Boolean,
     messages: Array,
     value: String,
@@ -9,6 +14,15 @@ Component({
     mode: String
   },
   methods: {
+    autoReadChange(event) {
+      this.triggerEvent('autoread', { value: event.detail.value });
+    },
+    voice() {
+      this.triggerEvent('voice');
+    },
+    speak(event) {
+      this.triggerEvent('speak', { id: event.currentTarget.dataset.id });
+    },
     toggle() {
       this.triggerEvent(this.properties.expanded ? 'collapse' : 'expand');
     },
@@ -24,6 +38,8 @@ Component({
     keyboard(event) {
       this.triggerEvent('keyboard', event.detail);
     },
+    toggleSpeechPlayback() { this.triggerEvent('speechplayback'); },
+    cancelVoice() { this.triggerEvent('cancelvoice'); },
     send() {
       this.triggerEvent('send');
     }

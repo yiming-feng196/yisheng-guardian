@@ -5,23 +5,26 @@
   aria-role="tablist"
 >
   <view class="tab-track">
-    <view class="tab-selection" style="transform:translateX({{selected * 100}}%)"></view>
+    <view class="tab-selection {{liquidReady ? 'tab-selection--canvas' : ''}}" style="transform:translateX({{visualIndex * 100}}%)" aria-hidden="true"></view>
+    <canvas type="2d" id="tab-liquid" class="tab-liquid {{liquidReady ? 'tab-liquid--ready' : ''}}" aria-hidden="true" disable-scroll="true"></canvas>
     <button
       wx:for="{{tabs}}"
       wx:key="url"
-      class="tab-item motion-press {{selected === index ? 'tab-item--selected' : ''}}"
-      hover-class="pressed"
+      class="tab-item {{visualIndex === index ? 'tab-item--selected' : ''}} {{pressedIndex === index ? 'tab-item--pressed' : ''}}"
       data-index="{{index}}"
       aria-role="tab"
       aria-selected="{{selected === index}}"
       aria-label="{{item.text}}"
       bindtap="switchTab"
+      bindtouchstart="onTouchStart"
+      catchtouchmove="onTouchMove"
+      bindtouchend="onTouchEnd"
+      bindtouchcancel="onTouchCancel"
     >
-      <image
-        src="/assets/icons/{{item.icon}}{{selected === index ? '-active' : ''}}.png"
-        mode="aspectFit"
-        aria-hidden="true"
-      />
+      <view class="tab-icon" aria-hidden="true">
+        <image class="tab-icon-base" src="/assets/icons/{{item.icon}}.png" mode="aspectFit" />
+        <image class="tab-icon-active" src="/assets/icons/{{item.icon}}-active.png" mode="aspectFit" />
+      </view>
       <text>{{item.text}}</text>
     </button>
   </view>

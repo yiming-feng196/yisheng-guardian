@@ -1,7 +1,7 @@
 {
   "appid": "wx23c148b666ca9b93",
   "projectname": "yisheng-companion-miniprogram",
-  "description": "忆声智护 · 原生微信小程序",
+  "description": "忆声陪伴 · 原生微信小程序",
   "compileType": "miniprogram",
   "miniprogramRoot": "./",
   "setting": {
@@ -66,7 +66,10 @@
         "value": "MOBILE_SETUP.md"
       }
     ],
-    "include": []
+    "include": [
+      { "type": "file", "value": "custom-tab-bar/liquid.js" },
+      { "type": "file", "value": "services/recorder.js" }
+    ]
   },
   "simulatorPluginLibVersion": {},
   "editorSetting": {}

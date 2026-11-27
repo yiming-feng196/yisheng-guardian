@@ -1,0 +1,63 @@
+{
+  "measureCalls": 0,
+  "drawP95Ms": 1,
+  "drawMaxMs": 3,
+  "transitions": [
+    {
+      "route": "pages/companion/index",
+      "firstDrawMs": 10,
+      "frames": 48,
+      "maxGapMs": 125,
+      "longFrames": 1
+    },
+    {
+      "route": "pages/records/index",
+      "firstDrawMs": 13,
+      "frames": 56,
+      "maxGapMs": 21,
+      "longFrames": 0
+    },
+    {
+      "route": "pages/observation/index",
+      "firstDrawMs": 9,
+      "frames": 53,
+      "maxGapMs": 21,
+      "longFrames": 0
+    },
+    {
+      "route": "pages/profile/index",
+      "firstDrawMs": 14,
+      "frames": 54,
+      "maxGapMs": 58,
+      "longFrames": 1
+    },
+    {
+      "route": "pages/companion/index",
+      "firstDrawMs": 14,
+      "frames": 56,
+      "maxGapMs": 21,
+      "longFrames": 0
+    },
+    {
+      "route": "pages/observation/index",
+      "firstDrawMs": 10,
+      "frames": 52,
+      "maxGapMs": 22,
+      "longFrames": 0
+    },
+    {
+      "route": "pages/records/index",
+      "firstDrawMs": 10,
+      "frames": 52,
+      "maxGapMs": 27,
+      "longFrames": 0
+    },
+    {
+      "route": "pages/profile/index",
+      "firstDrawMs": 12,
+      "frames": 53,
+      "maxGapMs": 20,
+      "longFrames": 0
+    }
+  ]
+}

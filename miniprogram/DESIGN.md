@@ -1,4 +1,4 @@
-# 忆声智护界面规范
+# 忆声陪伴界面规范
 
 四页共享雾蓝、冰蓝、浅薰衣草与奶油色空间背景；局部蜜桃暖光；品牌绿色只用于主要交互、状态与导航。实现与验收说明见 [UI_UPDATE.md](UI_UPDATE.md)，参数见 [design/tokens.json](design/tokens.json)。
 

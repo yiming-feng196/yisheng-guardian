@@ -1,4 +1,4 @@
-param([switch]$Build)
+param([switch]$Build, [switch]$Voice = $true)
 $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
 $runtimeRoot = Join-Path $projectRoot '.runtime'
@@ -13,6 +13,10 @@ if (Test-Path -LiteralPath $envPath) {
             [Environment]::SetEnvironmentVariable($matches[1], $matches[2].Trim().Trim('"').Trim("'"), 'Process')
         }
     }
+}
+if ($Voice) {
+    & (Join-Path $projectRoot 'start-voice.ps1')
+    if (!$env:PYTHON_TRANSCRIPTION_URL) { $env:PYTHON_TRANSCRIPTION_URL = 'http://127.0.0.1:5010/api/transcription' }
 }
 if ($env:DEEPSEEK_API_KEY -and !$env:DEEPSEEK_ENABLED) { $env:DEEPSEEK_ENABLED = 'true' }
 

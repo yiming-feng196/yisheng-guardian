@@ -9,6 +9,10 @@
     <view class="handle-mark {{expanded ? 'handle-mark--down' : ''}}"></view>
     <text wx:if="{{expanded}}">与小忆的对话</text>
   </button>
+  <view wx:if="{{expanded && mode === 'live'}}" class="speech-options">
+    <text>自动朗读回复</text>
+    <switch checked="{{autoRead}}" color="#168773" aria-label="自动朗读回复" bindchange="autoReadChange" />
+  </view>
   <scroll-view
     wx:if="{{expanded}}"
     class="chat-history motion-enter"
@@ -24,13 +28,22 @@
       class="chat-message chat-message--{{item.role}} {{item.id === scrollTarget ? 'motion-enter' : ''}}"
     >
       <text class="chat-bubble {{item.error ? 'chat-bubble--error' : ''}}" selectable="{{true}}">{{item.content}}</text>
+      <view wx:if="{{mode === 'live' && item.role === 'assistant' && !item.error && item.id !== 'greeting'}}" class="read-actions">
+        <button class="read-reply" data-id="{{item.id}}" disabled="{{sending || (voiceState !== 'idle' && voiceState !== 'playing' && voiceState !== 'synthesizing' && voiceState !== 'paused')}}" bindtap="speak">{{speakingId === item.id ? (voiceState === 'playing' || voiceState === 'paused' ? '停止朗读' : '取消朗读') : '朗读回复'}}</button>
+        <button wx:if="{{speakingId === item.id && (voiceState === 'playing' || voiceState === 'paused')}}" class="read-reply" bindtap="toggleSpeechPlayback">{{voiceState === 'paused' ? '继续朗读' : '暂停朗读'}}</button>
+      </view>
       <text wx:if="{{item.notice}}" class="chat-notice">{{item.notice}}</text>
     </view>
     <view wx:if="{{sending}}" id="chat-thinking" class="chat-thinking motion-enter" aria-role="status">
       小忆正在思考…
     </view>
   </scroll-view>
-  <view class="composer">
+  <view wx:if="{{voiceState !== 'idle'}}" class="voice-feedback" aria-role="status"><text>{{voiceLabel}} {{voiceState === 'recording' ? voiceSeconds + ' 秒' : ''}}</text><button wx:if="{{voiceState === 'recording'}}" class="voice-cancel" bindtap="cancelVoice">取消</button></view>
+  <view class="composer {{mode === 'live' ? 'composer--voice' : ''}}">
+    <button wx:if="{{mode === 'live'}}" class="voice-button {{voiceState === 'recording' ? 'voice-button--active' : ''}}" disabled="{{sending}}" bindtap="voice" aria-label="{{voiceState === 'recording' ? '结束录音并转成文字' : voiceState !== 'idle' ? '取消语音操作' : '开始录音'}}">
+      <image class="voice-icon" wx:if="{{voiceState === 'idle'}}" src="/assets/icons/microphone.png" mode="aspectFit" />
+      <text wx:else>{{voiceState === 'recording' ? '结束' : '取消'}}</text>
+    </button>
     <input
       class="composer-input"
       value="{{value}}"
@@ -49,13 +62,12 @@
     <button
       class="send-button motion-press"
       hover-class="pressed"
-      size="mini"
-      disabled="{{sending || !value}}"
+      disabled="{{sending || !value || (voiceState !== 'idle' && voiceState !== 'playing' && voiceState !== 'synthesizing' && voiceState !== 'paused')}}"
       loading="{{sending}}"
       aria-label="发送消息"
       bindtap="send"
     >
-      <image wx:if="{{!sending}}" src="/assets/icons/arrow-up.png" mode="aspectFit" />
+      <image class="send-arrow" wx:if="{{!sending}}" src="/assets/icons/arrow-up.png" mode="aspectFit" />
     </button>
   </view>
 </view>

@@ -205,7 +205,8 @@ test('the observation example never submits a fake recording or creates a real t
   page.nextStep();
   page.prepareSample();
   assert.equal(page.data.sampleReady, false);
-  assert.equal(page.data.noticeVisible, true);
+  assert.equal(page.data.step, 0);
+  assert.equal(page.data.signedIn, false);
   assert.equal(state.requests.length, 0);
 });
 
@@ -751,4 +752,339 @@ test('local address action preserves preferences and the diagnostic copy uses th
   };
   p.copyHealthUrl();
   assert.equal(copied, 'http://192.168.1.10:8080/actuator/health');
+});
+
+function voiceSetup(t) {
+  const state = setup(t);
+  const callbacks = {},
+    uploads = [],
+    removed = [];
+  state
+    .load("config/env")
+    .saveSettings({ mode: "live", apiBaseUrl: "http://192.168.1.2:8080" });
+  const recorder = {
+    start(options) {
+      assert.equal(options.format, "wav");
+      assert.equal(options.sampleRate, 16000);
+      callbacks.Start();
+    },
+    stop() {},
+    onInterruptionBegin(fn) { callbacks.Interrupt = fn; },
+    onStart(fn) {
+      callbacks.Start = fn;
+    },
+    onStop(fn) {
+      callbacks.Stop = fn;
+    },
+    onError(fn) {
+      callbacks.Error = fn;
+    },
+  };
+  const wav = (length, broken = false) => {
+    const buffer = Buffer.alloc(44 + length);
+    buffer.write('RIFF', 0);
+    buffer.writeUInt32LE(buffer.length - 8 + (broken ? 44 : 0), 4);
+    buffer.write('WAVEfmt ', 8);
+    buffer.writeUInt32LE(16, 16);
+    buffer.writeUInt16LE(1, 20);
+    buffer.writeUInt16LE(1, 22);
+    buffer.writeUInt32LE(16000, 24);
+    buffer.writeUInt32LE(32000, 28);
+    buffer.writeUInt16LE(2, 32);
+    buffer.writeUInt16LE(16, 34);
+    buffer.write('data', 36);
+    buffer.writeUInt32LE(broken ? buffer.length : length, 40);
+    return Uint8Array.from(buffer).buffer;
+  };
+  const fs = {
+    unlink(o) { removed.push(o.filePath); },
+    readFile(o) {
+      o.success({ data: wav(o.filePath.includes('short') ? 3200 : 64000, o.filePath.includes('broken')) });
+    }
+  };
+  Object.assign(global.wx, {
+    showModal(o) { o.success({ confirm: true }); },
+    authorize(o) {
+      o.success();
+    },
+    getRecorderManager() {
+      return recorder;
+    },
+    getFileSystemManager() { return fs; },
+    uploadFile(o) {
+      uploads.push(o);
+      return { abort() {} };
+    },
+  });
+  const updates = [];
+  const voice = new (state.load("services/voice").VoiceSession)((p) =>
+    updates.push(p),
+  );
+  t.after(() => voice.cancel());
+  return { state, voice, callbacks, uploads, removed, updates, fs };
+}
+test("voice cancellation prevents upload and waits for native stop before restarting", async (t) => {
+  const { voice, callbacks, uploads, removed } = voiceSetup(t);
+  await voice.start(() => assert.fail("cancelled text"));
+  voice.cancel();
+  assert.equal(require("../services/recorder").isBusy(), true);
+  callbacks.Stop({ tempFilePath: "/tmp/cancelled.wav", duration: 2000 });
+  assert.equal(require("../services/recorder").isBusy(), false);
+  assert.equal(uploads.length, 0);
+  assert.deepEqual(removed, ["/tmp/cancelled.wav"]);
+});
+test("recorded speech becomes an editable draft, with no automatic chat submission", async (t) => {
+  const { voice, callbacks, uploads, removed } = voiceSetup(t);
+  let draft = "";
+  await voice.start((t) => (draft = t));
+  const completed = callbacks.Stop({
+    tempFilePath: "/tmp/speech.wav",
+    duration: 2000,
+  });
+  await new Promise(setImmediate);
+  assert.equal(uploads[0].name, "file");
+  uploads[0].success({
+    statusCode: 200,
+    data: JSON.stringify({ transcription: "今天心情很好" }),
+  });
+  await completed;
+  assert.equal(draft, "今天心情很好");
+  assert.equal(voice.state, "idle");
+  assert.deepEqual(removed, ["/tmp/speech.wav"]);
+});
+test("a late transcription cannot cross a backend environment change", async (t) => {
+  const { state, voice, callbacks, uploads } = voiceSetup(t);
+  let delivered = false;
+  await voice.start(() => (delivered = true));
+  const completed = callbacks.Stop({
+    tempFilePath: "/tmp/speech.wav",
+    duration: 2000,
+  });
+  await new Promise(setImmediate);
+  state
+    .load("config/env")
+    .saveSettings({ mode: "live", apiBaseUrl: "http://192.168.1.3:8080" });
+  voice.cancel();
+  uploads[0].success({
+    statusCode: 200,
+    data: JSON.stringify({ transcription: "旧环境" }),
+  });
+  await completed;
+  assert.equal(delivered, false);
+});
+test("short or empty recordings are deleted without upload", async (t) => {
+  const { voice, callbacks, uploads, removed } = voiceSetup(t);
+  await voice.start(() => assert.fail());
+  await callbacks.Stop({ tempFilePath: "/tmp/short.wav", duration: 100 });
+  assert.equal(uploads.length, 0);
+  assert.equal(voice.state, "idle");
+  assert.equal(removed.length, 1);
+});
+test('repairs the known 44-byte device WAV length error before upload', async (t) => {
+  const { voice, callbacks, uploads, removed, fs } = voiceSetup(t);
+  global.wx.env = { USER_DATA_PATH: '/data' };
+  fs.writeFile = (options) => {
+    const header = new DataView(options.data);
+    assert.equal(header.getUint32(4, true), 64036);
+    assert.equal(header.getUint32(40, true), 64000);
+    options.success();
+  };
+  await voice.start(() => {});
+  const completed = callbacks.Stop({ tempFilePath: '/tmp/broken.wav' });
+  await new Promise(setImmediate);
+  assert.match(uploads[0].filePath, /^\/data\/recording-.*\.wav$/);
+  uploads[0].success({ statusCode: 200, data: '{"transcription":"已修复"}' });
+  await completed;
+  assert.deepEqual(removed, ['/tmp/broken.wav', uploads[0].filePath]);
+});
+
+test('interruption discards the recording and permits a subsequent recording', async (t) => {
+  const { voice, callbacks, uploads } = voiceSetup(t);
+  await voice.start(() => assert.fail('interrupted audio was delivered'));
+  callbacks.Interrupt();
+  await callbacks.Stop({ tempFilePath: '/tmp/interrupted.wav' });
+  assert.equal(uploads.length, 0);
+  await voice.start(() => {});
+  assert.equal(voice.state, 'recording');
+});
+
+test('developer tools WebM is renamed for chat and rejected for observation', async (t) => {
+  const { voice, callbacks, uploads, fs, state } = voiceSetup(t);
+  global.wx.getDeviceInfo = () => ({ platform: 'devtools' });
+  global.wx.env = { USER_DATA_PATH: '/data' };
+  fs.readFile = (options) => options.success({ data: Uint8Array.of(0x1a, 0x45, 0xdf, 0xa3).buffer });
+  fs.copyFile = (options) => options.success();
+  const result = { tempFilePath: '/tmp/devtools.wav', duration: 2000 };
+  await assert.rejects(state.load('services/recorder').inspectRecording(result), /手机真机/);
+  await voice.start(() => {});
+  const completed = callbacks.Stop(result);
+  await new Promise(setImmediate);
+  assert.match(uploads[0].filePath, /[.]webm$/);
+  uploads[0].success({ statusCode: 200, data: '{"transcription":"测试"}' });
+  await completed;
+});
+
+test('microphone permission rejection returns the voice flow to idle', async (t) => {
+  const { voice, uploads } = voiceSetup(t);
+  const prompts = [];
+  global.wx.showModal = (options) => { prompts.push(options); options.success({ confirm: true }); };
+  global.wx.authorize = (options) => options.fail({});
+  let settingsOpened = 0;
+  global.wx.openSetting = () => { settingsOpened++; };
+  await voice.start(() => assert.fail('permission was denied'));
+  assert.equal(voice.state, 'idle');
+  assert.equal(uploads.length, 0);
+  assert.equal(settingsOpened, 1);
+  assert.equal(prompts[1].confirmText, '打开设置');
+});
+
+test("demo voice never asks for microphone permission", async (t) => {
+  const { state, voice } = voiceSetup(t);
+  state.load("config/env").saveSettings({ mode: "demo" });
+  global.wx.authorize = () => assert.fail("microphone requested in demo");
+  await assert.rejects(
+    voice.start(() => {}),
+    /真实服务/,
+  );
+});
+
+test("cancelled speech synthesis cannot create or play an audio file", async (t) => {
+  const { voice } = voiceSetup(t);
+  let response,
+    aborted = false;
+  global.wx.request = (o) => {
+    response = o;
+    return {
+      abort() {
+        aborted = true;
+      },
+    };
+  };
+  global.wx.getFileSystemManager = () =>
+    assert.fail("cancelled TTS wrote a file");
+  const pending = voice.speak("你好");
+  voice.cancel();
+  response.success({ statusCode: 200, data: new ArrayBuffer(200) });
+  await pending;
+  assert.equal(aborted, true);
+  assert.equal(voice.state, "idle");
+});
+
+function speakingPage(t) {
+  const state = setup(t);
+  const env = state.load('config/env');
+  env.saveSettings({ mode: 'live', apiBaseUrl: 'http://192.168.1.2:8080' });
+  const page = state.page('companion'), spoken = [];
+  page.setData({ mode: 'live', input: '你好' });
+  page._voice = {
+    state: 'idle', cancelled: 0,
+    cancel() {
+      this.cancelled++; this.state = 'idle'; page.setData({ voiceState: 'idle', speakingId: '' });
+    },
+    async speak(text) {
+      assert.equal(page.data.sending, false, 'text reply completes before speech begins');
+      spoken.push(text); this.state = 'synthesizing'; page.setData({ voiceState: 'synthesizing' });
+    }
+  };
+  function reply(answer = '你好，今天过得怎么样？') {
+    const request = state.requests.findLast(r => r.url.endsWith('/assistant/chat'));
+    request.success({ statusCode: 200, data: { answer } });
+  }
+  return { ...state, page, spoken, env, reply };
+}
+
+test('a new live reply is presented and automatically read exactly once', async t => {
+  const s = speakingPage(t), pending = s.page.sendMessage();
+  s.reply(); await pending;
+  assert.equal(s.spoken.length, 1);
+  assert.equal(s.spoken[0], s.page.data.messages.at(-1).content);
+  assert.equal(s.page.data.speakingId, s.page.data.messages.at(-1).id);
+});
+
+test('automatic reading can be disabled persistently without changing backend settings', async t => {
+  const s = speakingPage(t), before = s.env.getSettings();
+  s.page.onAutoReadChange({ detail: { value: false } });
+  assert.equal(s.load('config/voice').getAutoRead(), false);
+  assert.deepEqual(s.env.getSettings(), before);
+  const pending = s.page.sendMessage(); s.reply(); await pending;
+  assert.equal(s.spoken.length, 0);
+  s.page.refreshConnection = () => Promise.resolve(); s.page.onShow();
+  assert.equal(s.page.data.autoRead, false);
+});
+
+test('hiding the page or changing backend prevents late replies from speaking', async t => {
+  const s = speakingPage(t), pending = s.page.sendMessage();
+  s.page.onHide(); s.reply(); await pending;
+  assert.equal(s.spoken.length, 0);
+  s.page.setData({ pageActive: true, input: '另一条消息' });
+  const next = s.page.sendMessage();
+  s.env.saveSettings({ mode: 'live', apiBaseUrl: 'http://other.example' });
+  s.reply('旧服务器的回复'); await next;
+  assert.equal(s.spoken.length, 0);
+});
+
+test('a reply after the user collapses chat remains visible on reopen without starting speech', async t => {
+  const s = speakingPage(t), pending = s.page.sendMessage();
+  s.page.closeChat(); s.reply('已保存的文字回复'); await pending;
+  assert.equal(s.spoken.length, 0);
+  s.page.openChat(); assert.equal(s.spoken.length, 0);
+  assert.equal(s.page.data.messages.at(-1).content, '已保存的文字回复');
+});
+
+test('demo replies and request failures are not automatically read', async t => {
+  const s = speakingPage(t);
+  s.env.saveSettings({ mode: 'demo' }); s.page.setData({ mode: 'demo' });
+  await s.page.sendMessage(); assert.equal(s.spoken.length, 0);
+  s.env.saveSettings({ mode: 'live', apiBaseUrl: 'http://192.168.1.2:8080' });
+  s.page.setData({ mode: 'live', input: '再试一次' });
+  const pending = s.page.sendMessage();
+  s.requests.at(-1).success({ statusCode: 503, data: { message: '服务暂不可用' } });
+  await pending; assert.equal(s.spoken.length, 0); assert.equal(s.page.data.messages.at(-1).error, true);
+});
+
+test('the read button stops active speech and a new message interrupts synthesis', async t => {
+  const s = speakingPage(t), pending = s.page.sendMessage(); s.reply(); await pending;
+  const message = s.page.data.messages.at(-1);
+  s.page.onSpeak({ detail: { id: message.id } });
+  assert.equal(s.page.data.voiceState, 'idle'); assert.equal(s.page.data.speakingId, '');
+  s.page.onSpeak({ detail: { id: message.id } });
+  assert.equal(s.page.data.voiceState, 'synthesizing');
+  const cancelled = s.page._voice.cancelled;
+  s.page.setData({ input: '先聊聊别的' });
+  const next = s.page.sendMessage();
+  assert.equal(s.page._voice.cancelled, cancelled + 1);
+  s.reply('好的'); await next; assert.equal(s.spoken.at(-1), '好的');
+  s.page.onAutoReadChange({ detail: { value: false } });
+  assert.equal(s.page.data.voiceState, 'idle');
+});
+
+test('speech failure preserves the successful text reply', async t => {
+  const s = speakingPage(t);
+  s.page._voice.speak = () => Promise.reject(new Error('朗读服务暂不可用'));
+  const pending = s.page.sendMessage(); s.reply('这段文字应当保留'); await pending; await Promise.resolve();
+  assert.equal(s.page.data.messages.at(-1).content, '这段文字应当保留');
+  assert.equal(s.page.data.messages.at(-1).error, undefined);
+  assert.equal(s.page.data.sending, false);
+});
+
+test('successful synthesis writes playable audio and ending playback removes the file', async t => {
+  const { voice, removed } = voiceSetup(t), callbacks = {};
+  global.wx.env = { USER_DATA_PATH: '/tmp' };
+  let written = 0, played = 0, destroyed = 0;
+  global.wx.getFileSystemManager = () => ({
+    writeFile(o) { written += o.data.byteLength; o.success(); },
+    unlink(o) { removed.push(o.filePath); }
+  });
+  global.wx.createInnerAudioContext = () => ({
+    onPlay(fn) { callbacks.play = fn; }, onEnded(fn) { callbacks.ended = fn; },
+    onError(fn) { callbacks.error = fn; },
+    play() { played++; callbacks.play(); }, stop() {}, destroy() { destroyed++; }
+  });
+  global.wx.request = o => {
+    o.success({ statusCode: 200, data: new ArrayBuffer(200) }); return { abort() {} };
+  };
+  await voice.speak('你好');
+  assert.equal(written, 200); assert.equal(played, 1); assert.equal(voice.state, 'playing');
+  callbacks.ended();
+  assert.equal(voice.state, 'idle'); assert.equal(destroyed, 1); assert.equal(removed.length, 1);
 });

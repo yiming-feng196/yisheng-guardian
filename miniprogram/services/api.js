@@ -2,6 +2,108 @@ const { getSettings } = require('../config/env');
 const { request } = require('./request');
 const { getSession, saveSession } = require('./session');
 
+const CONSENT_VERSION = 'voice-screening-consent-v1';
+const TASK_TYPE = 'NATURAL_SPEECH';
+
+async function uploadObservation(filePath, consentAccepted, onProgress, isCurrent) {
+  if (getSettings().mode !== 'live' || !consentAccepted || !filePath) {
+    throw new Error('请在接口联调模式中确认知情同意并完成录音');
+  }
+  const result = await withAudioExtension(filePath, 'wav', (path) => isCurrent() && request({
+    path: '/audio/upload', auth: 'required', filePath: path, onProgress,
+    data: { imageName: 'test.jpg', consentAccepted: 'true', consentVersion: CONSENT_VERSION, taskType: TASK_TYPE }
+  }));
+  if (typeof result !== 'string' || result.trim() !== '上传成功') {
+    throw new Error('后端未确认录音已保存');
+  }
+}
+
+async function observationRequest(path, method) {
+  if (getSettings().mode !== 'live') throw new Error('请先切换到接口联调模式');
+  return request({ path, method, auth: 'required' });
+}
+
+async function listAudios() {
+  const items = await observationRequest('/audio/my');
+  if (!Array.isArray(items)) throw new Error('后端录音列表格式不正确');
+  return items.filter((item) => item && Number.isSafeInteger(item.id) && item.id > 0).map((item) => ({
+    id: item.id, name: item.filePath, duration: item.duration, time: item.uploadTime,
+    canAnalyze: item.consentVersion === CONSENT_VERSION && item.taskType === TASK_TYPE
+  }));
+}
+
+function audioIdPath(id) {
+  if (!Number.isSafeInteger(id) || id <= 0) throw new Error('无效的录音编号');
+  return String(id);
+}
+
+async function startAnalysis(id) {
+  const result = await observationRequest('/api/v1/audios/' + audioIdPath(id) + '/screenings', 'POST');
+  if (!result || typeof result.taskId !== 'string' || !result.taskId) throw new Error('后端未返回任务编号');
+  return result.taskId;
+}
+
+function fileSegment(name) {
+  if (typeof name !== 'string' || !name || /[/\\]/.test(name) || name === '.' || name === '..') {
+    throw new Error('后端未返回有效的文件名');
+  }
+  return encodeURIComponent(name);
+}
+
+async function removeAudio(name) {
+  let result;
+  try {
+    result = await observationRequest('/audio/' + fileSegment(name), 'DELETE');
+  } catch (error) {
+    if (error.statusCode === 409) throw new Error('这段录音仍有正在处理的观察任务，请等任务结束后再删除。');
+    throw error;
+  }
+  if (!result || result.deleted !== true) throw new Error('后端未确认删除');
+}
+
+async function withAudioExtension(filePath, extension, useFile) {
+  // The transcription controller validates the multipart filename extension.
+  let staged = '';
+  try {
+    if (!filePath.toLowerCase().endsWith('.' + extension)) {
+      staged = wx.env.USER_DATA_PATH + '/chat-' + Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + extension;
+      await new Promise((resolve, reject) => wx.getFileSystemManager().copyFile({
+        srcPath: filePath, destPath: staged, success: resolve, fail: () => reject(new Error('无法准备转写文件'))
+      }));
+    }
+    return await useFile(staged || filePath);
+  } finally {
+    if (staged) wx.getFileSystemManager().unlink({ filePath: staged, fail() {} });
+  }
+}
+
+async function transcribe({ path: filePath, format = 'wav' }, onTask, isCurrent) {
+  return withAudioExtension(filePath, format, async (path) => {
+    if (!isCurrent()) return '';
+    const result = await request({
+      path: '/assistant/speech/transcribe', auth: false, filePath: path, onTask, timeout: 120000
+    });
+    if (typeof result?.transcription !== 'string' || !result.transcription.trim())
+      throw new Error('没有识别到语音，请重新录制');
+    return result.transcription.trim();
+  });
+}
+
+function synthesizeSpeech(text, onTask) {
+  return request({
+    path: '/assistant/voice/synthesize', auth: false, method: 'POST',
+    data: { text }, responseType: 'arraybuffer', timeout: 120000, onTask
+  }).then((audio) => {
+    if (!(audio instanceof ArrayBuffer) || audio.byteLength < 100)
+      throw new Error('朗读服务未返回有效音频');
+    return audio;
+  });
+}
+
+function downloadAudio(name, onTask) {
+  return request({ path: '/audio/file/' + fileSegment(name), auth: 'required', download: true, onTask });
+}
+
 function checkConnection() {
   return request({ path: '/actuator/health', auth: false, timeout: 8000 }).then((result) => {
     if (!result || result.status !== 'UP') throw new Error('后端健康检查未通过');
@@ -119,4 +221,7 @@ function getBackendStatus() {
     });
 }
 
-module.exports = { checkConnection, getBackendStatus, chat, login, register, listRecords };
+module.exports = {
+  checkConnection, getBackendStatus, chat, login, register, listRecords,
+  transcribe, synthesizeSpeech, uploadObservation, listAudios, startAnalysis, removeAudio, downloadAudio
+};

@@ -1,0 +1,33 @@
+{
+  "runtime": "WeChat DevTools native simulator",
+  "project": "F:/yisheng-guardian-main/miniprogram",
+  "gestureInput": "synthetic native component touch events; no physical phone verification",
+  "checks": [
+    {
+      "name": "native canvas renders a stretched connected surface",
+      "restWidth": 172,
+      "stretchedWidth": 659
+    },
+    {
+      "name": "touch release switches page and destination animation settles"
+    },
+    {
+      "name": "dragging outside cancels page change"
+    },
+    {
+      "name": "all four native routes work and stop drawing at rest"
+    },
+    {
+      "name": "large text remeasures canvas and keyboard hide stops frames"
+    }
+  ],
+  "screens": [
+    "companion-rest.png",
+    "water-connection.png",
+    "profile-settled.png",
+    "observation.png",
+    "records.png",
+    "profile-large.png"
+  ],
+  "errors": []
+}

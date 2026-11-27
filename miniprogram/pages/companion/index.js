@@ -1,9 +1,16 @@
+const { VoiceSession } = require('../../services/voice');
 const { getSettings, environmentKey } = require('../../config/env');
 const { chat, getBackendStatus } = require('../../services/api');
 const { syncTab, windowInfo, keyboardInset } = require('../../utils/ui');
+const { getAutoRead, saveAutoRead } = require('../../config/voice');
 
 Page({
   data: {
+    voiceState: 'idle',
+    voiceLabel: '',
+    voiceSeconds: 0,
+    autoRead: true,
+    speakingId: '',
     mode: 'demo',
     largeText: false,
     input: '',
@@ -23,10 +30,17 @@ Page({
     replyPresented: false
   },
   onShow() {
+    if (!this._voice)
+      this._voice = new VoiceSession((patch) => {
+        this.setData(
+          patch.voiceState === 'idle' ? Object.assign({ speakingId: '' }, patch) : patch
+        );
+      });
     const config = getSettings();
     const key = environmentKey();
-    const patch = { mode: config.mode, largeText: config.largeText, pageActive: true };
+    const patch = { mode: config.mode, largeText: config.largeText, pageActive: true, autoRead: getAutoRead() };
     if (key !== this._environment) {
+      this._voice.cancel();
       this._environment = key;
       this._requestId = (this._requestId || 0) + 1;
       const cached = getApp().globalData.chat;
@@ -60,7 +74,9 @@ Page({
     this.refreshConnection();
   },
   onHide() {
+    this._autoReadGeneration = (this._autoReadGeneration || 0) + 1;
     this.stopKeyboardListener();
+    if (this._voice) this._voice.cancel();
     this.setData({ pageActive: false });
     this.dismissKeyboard();
   },
@@ -103,6 +119,7 @@ Page({
   },
   onUnload() {
     this.stopKeyboardListener();
+    if (this._voice) this._voice.cancel();
     this._requestId = (this._requestId || 0) + 1;
     this._connectionVersion = (this._connectionVersion || 0) + 1;
   },
@@ -169,6 +186,8 @@ Page({
     this.setData({ chatOpen: true, chatWasOpened: true });
   },
   closeChat() {
+    this._voice?.cancel();
+    this._autoReadGeneration = (this._autoReadGeneration || 0) + 1;
     this.dismissKeyboard();
     this.setData({ chatOpen: false });
   },
@@ -190,7 +209,74 @@ Page({
     this.setData({ input: event.currentTarget.dataset.message });
     this.sendMessage();
   },
+  onVoice() {
+    if (this.data.sending) return;
+    if (this.data.voiceState === 'recording') {
+      this._voice.stopRecording();
+      return;
+    }
+    if (this.data.voiceState !== 'idle') {
+      this._voice.cancel();
+      return;
+    }
+    this.openChat();
+    this.dismissKeyboard();
+    this._voice
+      .start((text) => {
+        const draft = [this.data.input.trim(), text].filter(Boolean).join(' ');
+        if (draft.length > 500) {
+          wx.showToast({
+            title: '合并后超过 500 字，请先发送当前内容',
+            icon: 'none'
+          });
+          return;
+        }
+        this.setData({ input: draft, chatOpen: true });
+      })
+      .catch((error) => wx.showToast({ title: error.message, icon: 'none' }));
+  },
+  cancelVoice() { this._voice?.cancel(); },
+  toggleSpeechPlayback() { this._voice?.togglePlayback(); },
+  onSpeak(event) {
+    if (this.data.sending) return;
+    const message = this.data.messages.find((item) => item.id === event.detail.id);
+    if (!message || message.id === 'greeting' || message.role !== 'assistant' || message.error) return;
+    if (
+      this.data.speakingId === message.id &&
+      ['synthesizing', 'playing', 'paused'].includes(this.data.voiceState)
+    ) {
+      this._voice.cancel();
+      return;
+    }
+    if (!['idle', 'synthesizing', 'playing', 'paused'].includes(this.data.voiceState)) return;
+    this.readReply(message);
+  },
+  onAutoReadChange(event) {
+    const autoRead = event.detail.value === true;
+    saveAutoRead(autoRead);
+    this.setData({ autoRead });
+    if (!autoRead && this._voice && ['synthesizing', 'playing', 'paused'].includes(this.data.voiceState))
+      this._voice.cancel();
+  },
+  readReply(message) {
+    if (!this._voice || !this.data.pageActive) return;
+    const pending = this._voice.speak(message.content).catch((error) => {
+      this.setData({ speakingId: '' });
+      wx.showToast({ title: error.message, icon: 'none' });
+    });
+    if (this._voice.state === 'synthesizing' || this._voice.state === 'playing')
+      this.setData({ speakingId: message.id });
+    return pending;
+  },
   async sendMessage() {
+    if (this.data.sending) return;
+    if (
+      this.data.voiceState &&
+      !['idle', 'synthesizing', 'playing', 'paused'].includes(this.data.voiceState)
+    ) {
+      wx.showToast({ title: '请先结束语音操作', icon: 'none' });
+      return;
+    }
     const value = this.data.input.trim();
     if (!value || this.data.sending) return;
     if (value.length > 500) {
@@ -198,6 +284,8 @@ Page({
       return;
     }
     this.dismissKeyboard();
+    if (this._voice && ['synthesizing', 'playing', 'paused'].includes(this.data.voiceState))
+      this._voice.cancel();
     const key = environmentKey();
     const requestId = (this._requestId || 0) + 1;
     this._requestId = requestId;
@@ -212,6 +300,8 @@ Page({
       chatWasOpened: true,
       replyPresented: false
     });
+    const autoReadGeneration = this._autoReadGeneration;
+    let replyToRead;
     try {
       const result = await chat(value);
       if (requestId !== this._requestId || key !== environmentKey()) return;
@@ -236,6 +326,7 @@ Page({
               : '服务已连接'
       });
       getApp().globalData.chat = { key, messages: next };
+      replyToRead = next[next.length - 1];
     } catch (error) {
       if (requestId !== this._requestId || key !== environmentKey()) return;
       this.setData({
@@ -252,5 +343,17 @@ Page({
       if (requestId === this._requestId && key === environmentKey())
         this.setData({ sending: false });
     }
+    if (
+      replyToRead &&
+      autoReadGeneration === this._autoReadGeneration &&
+      requestId === this._requestId &&
+      key === environmentKey() &&
+      this.data.mode === 'live' &&
+      this.data.autoRead &&
+      this.data.pageActive &&
+      this.data.chatOpen &&
+      this.data.voiceState === 'idle'
+    )
+      this.readReply(replyToRead);
   }
 });

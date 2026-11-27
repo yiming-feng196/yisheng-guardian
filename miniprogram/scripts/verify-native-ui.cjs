@@ -114,7 +114,7 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
     check('blur restores the layout without a final height event', { synthetic: true });
     await call('closeChat');
     const observationPage = await route('observation');
-    const startButton = await observationPage.$('.btn-primary'),
+    const startButton = await observationPage.$('.btn-secondary'),
       startSize = await startButton.size(),
       startOffset = await startButton.offset(),
       startInfo = await mp.systemInfo(),
@@ -136,8 +136,8 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
     await call('nextStep');
     await call('prepareSample');
     assert.equal((await data()).sampleReady, false);
-    assert.equal((await data()).noticeVisible, true);
-    await call('closeNotice');
+    assert.equal((await data()).step, 0);
+    assert.equal((await data()).signedIn, false);
     check('live observation refuses fake recording or upload');
     await route('records');
     assert.equal((await data()).needsLogin, true);

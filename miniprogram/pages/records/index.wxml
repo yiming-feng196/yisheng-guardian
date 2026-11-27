@@ -50,7 +50,7 @@
   <view wx:elif="{{!records.length}}">
     <empty-state
       title="暂无观察记录"
-      message="完成一次观察后，记录将在这里显示。当前流程体验不会生成真实记录。"
+      message="{{mode === 'demo' ? '当前流程体验不会生成真实记录。' : '发起观察分析后，可在这里查看任务进度。'}}"
       action="前往观察"
       bindaction="openObservation"
     />
@@ -104,6 +104,24 @@
       '观察信息仅供参考，不能替代专业诊断。'}}
     </text>
   </block>
+  <view wx:if="{{mode === 'live' && !needsLogin}}" class="audio-list">
+    <view class="records-toolbar">
+      <text class="title">观察录音</text>
+      <button class="refresh-button" size="mini" bindtap="loadAudios">刷新录音</button>
+    </view>
+    <text wx:if="{{audioError}}" class="inline-feedback text-error" aria-role="status">{{audioError}}</text>
+    <text wx:elif="{{audioLoading}}" class="page-note">正在读取录音…</text>
+    <text wx:elif="{{!audios.length}}" class="page-note">暂无已上传的录音</text>
+    <view wx:for="{{audios}}" wx:key="id" class="audio-card glass-surface">
+      <text class="record-title">录音 {{item.id}} · {{item.duration}} 秒</text>
+      <text wx:if="{{item.time}}" class="record-time">{{item.time}}</text>
+      <view class="audio-actions">
+        <button class="btn btn-secondary" data-index="{{index}}" bindtap="playAudio">{{activeAudioId === item.id ? '停止' : '试听'}}</button>
+        <button wx:if="{{item.canAnalyze}}" class="btn btn-secondary" data-index="{{index}}" disabled="{{!!audioActionId}}" bindtap="analyzeAudio">发起分析</button>
+        <button class="btn btn-plain" data-index="{{index}}" disabled="{{!!audioActionId}}" bindtap="deleteAudio">删除</button>
+      </view>
+    </view>
+  </view>
   <glass-modal
     visible="{{reportVisible}}"
     title="{{selectedRecord.title || ''}}"
