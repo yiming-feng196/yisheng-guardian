@@ -258,6 +258,7 @@
     <text>退出登录</text>
   </button>
   <glass-modal
+    id="about-sheet"
     visible="{{aboutVisible}}"
     title="关于忆声智护"
     content="忆声智护 V{{version}}
