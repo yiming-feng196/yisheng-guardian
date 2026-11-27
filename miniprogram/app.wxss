@@ -12,7 +12,6 @@ page {
   --surface-shadow: 0 12rpx 32rpx rgba(74, 93, 137, 0.055);
   --body-leading: 1.6;
   height: 100%;
-  isolation: isolate;
   background: #dce6f5;
   color: #142536;
   font-family:
@@ -45,6 +44,7 @@ label {
   min-height: 100%;
   padding: var(--space-4) var(--page-gutter) calc(var(--nav-space, 100px) + var(--space-4));
   position: relative;
+  isolation: isolate;
   color: var(--text);
   font-size: var(--font-body);
 }

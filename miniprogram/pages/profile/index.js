@@ -88,9 +88,11 @@ Page({
   },
   showAbout() {
     this.setData({ aboutVisible: true });
+    syncTab(this, 3, true);
   },
   closeAbout() {
     this.setData({ aboutVisible: false });
+    syncTab(this, 3, this.data.logoutVisible);
   },
   toggleLogin() {
     if (!this.data.busy) this.setData({ loginExpanded: !this.data.loginExpanded });
@@ -316,10 +318,13 @@ Page({
     }
   },
   signOut() {
-    if (!this.data.busy) this.setData({ logoutVisible: true });
+    if (this.data.busy) return;
+    this.setData({ logoutVisible: true });
+    syncTab(this, 3, true);
   },
   cancelSignOut() {
     this.setData({ logoutVisible: false });
+    syncTab(this, 3, this.data.aboutVisible);
   },
   confirmSignOut() {
     if (this.data.busy) return;
@@ -334,5 +339,6 @@ Page({
       statusArea: '',
       statusError: false
     });
+    syncTab(this, 3, this.data.aboutVisible);
   }
 });

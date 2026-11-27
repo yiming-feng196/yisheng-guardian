@@ -106,9 +106,9 @@
   </block>
   <glass-modal
     visible="{{reportVisible}}"
-    title="{{selectedRecord.title}}"
-    caption="{{selectedRecord.displayTime}}"
-    content="{{selectedRecord.content}}"
+    title="{{selectedRecord.title || ''}}"
+    caption="{{selectedRecord.displayTime || ''}}"
+    content="{{selectedRecord.content || ''}}"
     footnote="{{mode === 'demo' ? '演示内容，不是健康评估或医学结论。' : '观察信息仅供参考，不能替代专业诊断。'}}"
     confirm-text="关闭"
     bindclose="closeReport"

@@ -20,7 +20,7 @@ Page({
       this.setData({ step: 0, consent: false, sampleReady: false });
     }
     this.setData({ mode: config.mode, largeText: config.largeText });
-    syncTab(this, 1);
+    syncTab(this, 1, this.data.noticeVisible);
   },
   onConsentChange(event) {
     this.setData({ consent: event.detail.value.indexOf('consent') !== -1 });
@@ -28,6 +28,7 @@ Page({
   prepareSample() {
     if (this.data.mode !== 'demo') {
       this.setData({ noticeVisible: true });
+      syncTab(this, 1, true);
       return;
     }
     this.setData({ sampleReady: true });
@@ -48,6 +49,7 @@ Page({
   },
   closeNotice() {
     this.setData({ noticeVisible: false });
+    syncTab(this, 1);
   },
   openCompanion() {
     wx.switchTab({ url: '/pages/companion/index' });

@@ -50,6 +50,7 @@ Page({
       selectedRecord: null
     };
     if (changed || needsLogin) patch.records = [];
+    if (this.data.reportVisible) syncTab(this, 2);
     this.setData(patch);
     if (needsLogin) return;
     const promise = this.fetchRecords(version, key, token);
@@ -92,9 +93,11 @@ Page({
       }),
       reportVisible: true
     });
+    syncTab(this, 2, true);
   },
   closeReport() {
     this.setData({ reportVisible: false, selectedRecord: null });
+    syncTab(this, 2);
   },
   openProfile() {
     getApp().globalData.profileAction = 'login';
