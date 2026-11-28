@@ -19,14 +19,14 @@ public interface AssistantMessageMapper {
 
     @Select("""
             SELECT * FROM assistant_message WHERE conversation_id=#{conversationId}
-            ORDER BY turn_no, FIELD(role,'USER','ASSISTANT'), id
+            ORDER BY turn_no, CASE role WHEN 'USER' THEN 1 WHEN 'ASSISTANT' THEN 2 ELSE 0 END, id
             """)
     List<AssistantMessage> listAll(String conversationId);
 
     @Select("""
             SELECT * FROM assistant_message
             WHERE conversation_id=#{conversationId} AND turn_no > #{afterTurn}
-            ORDER BY turn_no, FIELD(role,'USER','ASSISTANT'), id
+            ORDER BY turn_no, CASE role WHEN 'USER' THEN 1 WHEN 'ASSISTANT' THEN 2 ELSE 0 END, id
             """)
     List<AssistantMessage> listAfterTurn(@Param("conversationId") String conversationId,
                                          @Param("afterTurn") int afterTurn);
@@ -34,7 +34,7 @@ public interface AssistantMessageMapper {
     @Select("""
             SELECT * FROM assistant_message
             WHERE conversation_id=#{conversationId} AND turn_no BETWEEN #{fromTurn} AND #{toTurn}
-            ORDER BY turn_no, FIELD(role,'USER','ASSISTANT'), id
+            ORDER BY turn_no, CASE role WHEN 'USER' THEN 1 WHEN 'ASSISTANT' THEN 2 ELSE 0 END, id
             """)
     List<AssistantMessage> listRange(@Param("conversationId") String conversationId,
                                     @Param("fromTurn") int fromTurn,
