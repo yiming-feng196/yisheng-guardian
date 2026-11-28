@@ -5,7 +5,7 @@
   bindtap="select"
 >
   <view class="setting-symbol">
-    <image src="/assets/icons/{{icon}}.png" mode="aspectFit" aria-hidden="true" />
+    <image class="setting-icon" src="/assets/icons/{{icon}}.png" mode="aspectFit" aria-hidden="true" />
   </view>
   <view class="setting-copy">
     <text class="setting-label">{{label}}</text>

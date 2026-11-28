@@ -27,7 +27,7 @@
       id="{{item.id}}"
       class="chat-message chat-message--{{item.role}} {{item.id === scrollTarget ? 'motion-enter' : ''}}"
     >
-      <text class="chat-bubble {{item.error ? 'chat-bubble--error' : ''}}" selectable="{{true}}">{{item.content}}</text>
+      <text class="chat-bubble {{item.error ? 'chat-bubble--error' : ''}}" user-select="{{true}}">{{item.content}}</text>
       <view wx:if="{{mode === 'live' && item.role === 'assistant' && !item.error && item.id !== 'greeting'}}" class="read-actions">
         <button class="read-reply" data-id="{{item.id}}" disabled="{{sending || (voiceState !== 'idle' && voiceState !== 'playing' && voiceState !== 'synthesizing' && voiceState !== 'paused')}}" bindtap="speak">{{speakingId === item.id ? (voiceState === 'playing' || voiceState === 'paused' ? '停止朗读' : '取消朗读') : '朗读回复'}}</button>
         <button wx:if="{{speakingId === item.id && (voiceState === 'playing' || voiceState === 'paused')}}" class="read-reply" bindtap="toggleSpeechPlayback">{{voiceState === 'paused' ? '继续朗读' : '暂停朗读'}}</button>
@@ -60,9 +60,9 @@
       bindconfirm="send"
     />
     <button
-      class="send-button motion-press"
+      class="send-button motion-press {{sendDisabled ? 'send-button--disabled' : ''}} {{sending ? 'send-button--loading' : ''}}"
       hover-class="pressed"
-      disabled="{{sending || !value || (voiceState !== 'idle' && voiceState !== 'playing' && voiceState !== 'synthesizing' && voiceState !== 'paused')}}"
+      disabled="{{sendDisabled}}"
       loading="{{sending}}"
       aria-label="发送消息"
       bindtap="send"

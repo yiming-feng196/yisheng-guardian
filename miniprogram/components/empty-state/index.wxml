@@ -1,6 +1,6 @@
 <view class="state glass-surface">
   <view class="state-symbol">
-    <image src="/assets/icons/{{icon}}.png" mode="aspectFit" aria-hidden="true" />
+    <image class="state-icon" src="/assets/icons/{{icon}}.png" mode="aspectFit" aria-hidden="true" />
   </view>
   <text class="state-title">{{title}}</text>
   <text class="state-message {{error ? 'text-error' : ''}}">{{message}}</text>

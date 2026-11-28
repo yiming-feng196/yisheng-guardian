@@ -14,7 +14,7 @@
   border-radius: 36rpx;
   background: linear-gradient(140deg, rgba(255, 255, 255, 0.6), rgba(218, 239, 233, 0.7));
 }
-.state-symbol image {
+.state-icon {
   width: 64rpx;
   height: 64rpx;
 }

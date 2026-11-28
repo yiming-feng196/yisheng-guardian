@@ -718,6 +718,7 @@ test('WeChat domain, TLS and network failures produce distinct actionable messag
   const api = state.load('services/api.js');
   for (const [native, code] of [
     ['request:fail url not in domain list', 'DOMAIN_NOT_ALLOWED'],
+    ['request:fail net::ERR_CONNECTION_REFUSED', 'CONNECTION_REFUSED'],
     ['request:fail ssl certificate error', 'TLS_ERROR'],
     ['request:fail timeout', 'NETWORK_TIMEOUT']
   ]) {

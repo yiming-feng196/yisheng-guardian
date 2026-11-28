@@ -13,6 +13,14 @@ Component({
     scrollTarget: String,
     mode: String
   },
+  data: { sendDisabled: true },
+  observers: {
+    'sending, value, voiceState'(sending, value, voiceState) {
+      const voiceBusy = !['idle', 'playing', 'synthesizing', 'paused'].includes(voiceState);
+      const sendDisabled = sending || !value || voiceBusy;
+      if (sendDisabled !== this.data.sendDisabled) this.setData({ sendDisabled });
+    }
+  },
   methods: {
     autoReadChange(event) {
       this.triggerEvent('autoread', { value: event.detail.value });

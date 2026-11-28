@@ -4,6 +4,7 @@ import com.alz.assistant.SpeechTranscriptionService;
 import com.alz.config.StoragePaths;
 import com.alz.exception.ScreeningServiceException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,8 +72,9 @@ public class AssistantSpeechController {
     }
 
     @ExceptionHandler(ScreeningServiceException.class)
-    @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.BAD_GATEWAY)
-    public Map<String, String> transcriptionFailure(ScreeningServiceException exception) {
-        return Map.of("message", exception.getMessage());
+    public ResponseEntity<Map<String, String>> transcriptionFailure(ScreeningServiceException exception) {
+        HttpStatus status = exception instanceof SpeechTranscriptionService.NoSpeechException
+                ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.BAD_GATEWAY;
+        return ResponseEntity.status(status).body(Map.of("message", exception.getMessage()));
     }
 }

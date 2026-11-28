@@ -42,6 +42,9 @@ function networkError(error) {
   } else if (/ssl|certificate|cert |tls|证书/i.test(detail)) {
     message = '服务器 HTTPS 证书或 TLS 校验失败，请检查服务器证书配置。';
     code = 'TLS_ERROR';
+  } else if (/ERR_CONNECTION_REFUSED|ECONNREFUSED|connection refused/i.test(detail)) {
+    message = '服务器拒绝连接。请确认电脑后端已启动，且服务地址和端口正确。';
+    code = 'CONNECTION_REFUSED';
   } else if (/timeout/i.test(detail)) {
     message = '请求超时。请确认电脑后端正在运行，手机与电脑可以互访。';
     code = 'NETWORK_TIMEOUT';

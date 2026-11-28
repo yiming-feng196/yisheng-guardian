@@ -36,13 +36,13 @@
   align-items: center;
   height: 42rpx;
 }
-.brand-wave view {
+.brand-wave-bar {
   width: 8rpx;
   height: 20rpx;
   border-radius: 8rpx;
   background: linear-gradient(#55b8ae, #96d7d1);
 }
-.brand-wave view:nth-child(2) {
+.brand-wave-bar--tall {
   height: 38rpx;
 }
 

@@ -74,15 +74,17 @@ class EmotionEngine:
         if missing:
             raise RuntimeError(f"Missing vision model files: {', '.join(missing)}")
 
+        # Let Python open Unicode Windows paths before passing the ONNX bytes to OpenCV.
         self.detector = cv.FaceDetectorYN.create(
-            str(FACE_MODEL),
-            "",
+            "onnx",
+            np.frombuffer(FACE_MODEL.read_bytes(), dtype=np.uint8),
+            np.empty(0, dtype=np.uint8),
             (320, 320),
             score_threshold=float(os.getenv("VISION_FACE_SCORE_THRESHOLD", "0.78")),
             nms_threshold=0.3,
             top_k=5000,
         )
-        self.expression = cv.dnn.readNet(str(EMOTION_MODEL))
+        self.expression = cv.dnn.readNetFromONNX(np.frombuffer(EMOTION_MODEL.read_bytes(), dtype=np.uint8))
         self._lock = threading.Lock()
 
     @staticmethod

@@ -14,26 +14,36 @@ if (Test-Path -LiteralPath $envPath) {
         }
     }
 }
-if ($Voice) {
-    & (Join-Path $projectRoot 'start-voice.ps1')
-    if (!$env:PYTHON_TRANSCRIPTION_URL) { $env:PYTHON_TRANSCRIPTION_URL = 'http://127.0.0.1:5010/api/transcription' }
-}
 if ($env:DEEPSEEK_API_KEY -and !$env:DEEPSEEK_ENABLED) { $env:DEEPSEEK_ENABLED = 'true' }
 
-# Per-machine mini-program configuration; no model credential is sent to the client.
-$ipConfigs = @(Get-NetIPConfiguration | Where-Object { $_.IPv4DefaultGateway -and $_.IPv4Address })
-$wifiConfig = $ipConfigs | Where-Object { $_.InterfaceAlias -match 'WLAN|Wi-Fi|无线' } | Select-Object -First 1
-if (!$wifiConfig) { $wifiConfig = $ipConfigs | Select-Object -First 1 }
-$deviceIp = if ($wifiConfig) { @($wifiConfig.IPv4Address.IPAddress)[0] } else { '' }
-$deviceBase = if ($deviceIp) { "http://${deviceIp}:8080" } else { '' }
-$deployment = @{ enabled=$true; forceLocal=$true; revision="native-local:$deviceIp"; devtoolsBaseUrl='http://127.0.0.1:8080'; deviceBaseUrl=$deviceBase }
-$utf8 = New-Object System.Text.UTF8Encoding($false)
-[IO.File]::WriteAllText((Join-Path $projectRoot 'miniprogram/config/deployment.js'), ('// Generated local development endpoints; no API credentials.' + [Environment]::NewLine + 'module.exports = ' + ($deployment | ConvertTo-Json) + ';' + [Environment]::NewLine), $utf8)
-$privatePath = Join-Path $projectRoot 'miniprogram/project.private.config.json'
-$private = if (Test-Path -LiteralPath $privatePath) { Get-Content -LiteralPath $privatePath -Raw | ConvertFrom-Json } else { [PSCustomObject]@{ setting=[PSCustomObject]@{} } }
-if (!$private.setting) { $private | Add-Member -MemberType NoteProperty -Name setting -Value ([PSCustomObject]@{}) -Force }
-$private.setting | Add-Member -MemberType NoteProperty -Name urlCheck -Value $false -Force
-[IO.File]::WriteAllText($privatePath, ($private | ConvertTo-Json -Depth 20), $utf8)
+function Publish-MiniProgramEndpoints {
+    $ipConfigs = @(Get-NetIPConfiguration | Where-Object { $_.IPv4DefaultGateway -and $_.IPv4Address })
+    $wifiConfig = $ipConfigs | Where-Object { $_.NetAdapter.MediaType -eq 'Native 802.11' -or $_.InterfaceAlias -match 'WLAN|Wi-Fi' } | Select-Object -First 1
+    if (!$wifiConfig) { $wifiConfig = $ipConfigs | Select-Object -First 1 }
+    $deviceIp = if ($wifiConfig) { @($wifiConfig.IPv4Address.IPAddress)[0] } else { '' }
+    $deviceBase = if ($deviceIp) { "http://${deviceIp}:8080" } else { '' }
+    $deployment = @{ enabled=$true; forceLocal=$true; revision="native-local:$deviceIp"; devtoolsBaseUrl='http://127.0.0.1:8080'; deviceBaseUrl=$deviceBase }
+    $utf8 = New-Object System.Text.UTF8Encoding($false)
+    [IO.File]::WriteAllText((Join-Path $projectRoot 'miniprogram/config/deployment.js'), ('// Generated local development endpoints; no API credentials.' + [Environment]::NewLine + 'module.exports = ' + ($deployment | ConvertTo-Json) + ';' + [Environment]::NewLine), $utf8)
+    if ($deviceBase) { Write-Output "Phone endpoint (same reachable network): $deviceBase" }
+}
+
+function Test-BackendReady {
+    try {
+        $status = Invoke-RestMethod 'http://127.0.0.1:8080/assistant/status' -TimeoutSec 2
+        $health = Invoke-RestMethod 'http://127.0.0.1:8080/actuator/health' -TimeoutSec 2
+        $readiness = Invoke-RestMethod 'http://127.0.0.1:8080/actuator/health/readiness' -TimeoutSec 2
+        return $status.service -eq 'yisheng-backend' -and $health.status -eq 'UP' -and $readiness.status -eq 'UP'
+    } catch { return $false }
+}
+
+function Confirm-VoiceGateway {
+    if (!$Voice) { return }
+    $status = Invoke-RestMethod 'http://127.0.0.1:8080/assistant/voice/status' -TimeoutSec 6
+    if ($status.service -ne 'yisheng-voice' -or $status.asrReady -ne $true) {
+        throw 'Backend voice gateway did not report ASR readiness.'
+    }
+}
 
 $javaExe = Get-ChildItem -LiteralPath (Join-Path $toolsRoot 'java') -Filter java.exe -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Directory.Name -eq 'bin' } | Select-Object -First 1
 $redisExe = Get-ChildItem -LiteralPath (Join-Path $toolsRoot 'redis') -Filter redis-server.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -73,13 +83,19 @@ if ($Build -or !(Test-Path -LiteralPath $jarPath)) {
 }
 
 $existingBackend = Get-NetTCPConnection -State Listen -LocalPort 8080 -ErrorAction SilentlyContinue
+if ($existingBackend -and !(Test-BackendReady)) {
+    throw 'Port 8080 is in use or the existing backend is unhealthy. The existing process was not stopped.'
+}
+
+if ($Voice) {
+    & (Join-Path $projectRoot 'start-voice.ps1')
+    if (!$env:PYTHON_TRANSCRIPTION_URL) { $env:PYTHON_TRANSCRIPTION_URL = 'http://127.0.0.1:5010/api/transcription' }
+}
 if ($existingBackend) {
-    try {
-        $status = Invoke-RestMethod 'http://127.0.0.1:8080/assistant/status' -TimeoutSec 3
-        $existingHealth = Invoke-RestMethod 'http://127.0.0.1:8080/actuator/health' -TimeoutSec 3
-        if ($status.service -eq 'yisheng-backend' -and $existingHealth.status -eq 'UP') { Write-Output 'Backend is already running: http://127.0.0.1:8080'; exit 0 }
-    } catch { }
-    throw 'Port 8080 is in use. The existing process was not stopped.'
+    Confirm-VoiceGateway
+    Publish-MiniProgramEndpoints
+    Write-Output 'Backend already healthy: http://127.0.0.1:8080'
+    exit 0
 }
 
 $redisPort = Get-NetTCPConnection -State Listen -LocalPort 6380 -ErrorAction SilentlyContinue
@@ -93,20 +109,25 @@ if (!$redisPort) {
     @("bind 127.0.0.1", "port 6380", "protected-mode yes", "maxclients 1024", "requirepass $($secrets.redisPassword)", "dir ./data", "appendonly yes", "save 300 10", "loglevel notice") | Set-Content -LiteralPath $redisConfig -Encoding ASCII
     $redis = Start-Process -FilePath $redisExe.FullName -ArgumentList @('redis-local.conf') -WorkingDirectory $redisExe.Directory.FullName -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logRoot 'redis.out.log') -RedirectStandardError (Join-Path $logRoot 'redis.err.log')
     $redisId = $redis.Id
-} elseif (Test-Path -LiteralPath $pidPath) {
-    $redisId = (Get-Content -LiteralPath $pidPath -Raw | ConvertFrom-Json).redis
 } else {
-    throw 'Port 6380 is already occupied by an unmanaged service.'
+    $listener = $redisPort | Select-Object -First 1
+    $previousRedis = Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)"
+    if (!$previousRedis -or $previousRedis.ExecutablePath -ne $redisExe.FullName) {
+        throw 'Port 6380 is already occupied by an unmanaged service.'
+    }
+    $redisId = $listener.OwningProcess
 }
 
 $java = Start-Process -FilePath $javaExe.FullName -ArgumentList @('-Dfile.encoding=UTF-8','-jar',"`"$jarPath`"",'--spring.profiles.active=local-native') -WorkingDirectory $projectRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logRoot 'backend.out.log') -RedirectStandardError (Join-Path $logRoot 'backend.err.log')
 @{ backend=$java.Id; redis=$redisId } | ConvertTo-Json | Set-Content -LiteralPath $pidPath -Encoding UTF8
-for ($attempt=0; $attempt -lt 30; $attempt++) {
+for ($attempt=0; $attempt -lt 45; $attempt++) {
     Start-Sleep -Seconds 1
     if ($java.HasExited) { throw 'Backend exited during startup. See .runtime/logs/backend.out.log and backend.err.log.' }
-    try {
-        $health = Invoke-RestMethod 'http://127.0.0.1:8080/actuator/health' -TimeoutSec 2
-        if ($health.status -eq 'UP') { Write-Output 'Backend ready: http://127.0.0.1:8080'; exit 0 }
-    } catch { }
+    if (Test-BackendReady) {
+        Confirm-VoiceGateway
+        Publish-MiniProgramEndpoints
+        Write-Output 'Backend ready: http://127.0.0.1:8080'
+        exit 0
+    }
 }
 throw 'Backend did not become healthy. See .runtime/logs.'

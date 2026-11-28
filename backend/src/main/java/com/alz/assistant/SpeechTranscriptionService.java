@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -50,7 +51,7 @@ public class SpeechTranscriptionService {
                     transcriptionUrl, request, Map.class);
             Object value = response.getBody() == null ? null : response.getBody().get("transcription");
             if (value == null || value.toString().isBlank()) {
-                throw new ScreeningServiceException("没有识别到有效语音");
+                throw new NoSpeechException("没有识别到有效语音");
             }
             return value.toString().trim();
         } catch (HttpStatusCodeException exception) {
@@ -59,9 +60,22 @@ public class SpeechTranscriptionService {
                 Object remote = exception.getResponseBodyAs(Map.class).get("message");
                 if (remote != null && !remote.toString().isBlank()) message = remote.toString();
             } catch (RuntimeException ignored) { }
+            if (exception.getStatusCode().value() == HttpStatus.UNPROCESSABLE_ENTITY.value()) {
+                throw new NoSpeechException(message, exception);
+            }
             throw new ScreeningServiceException(message, exception);
         } catch (ResourceAccessException exception) {
             throw new ScreeningServiceException("本地语音转写服务连接失败或处理超时", exception);
+        }
+    }
+
+    public static final class NoSpeechException extends ScreeningServiceException {
+        NoSpeechException(String message) {
+            super(message);
+        }
+
+        NoSpeechException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }

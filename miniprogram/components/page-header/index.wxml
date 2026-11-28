@@ -3,9 +3,9 @@
     <view class="heading-title">
       <text>{{title}}</text>
       <view wx:if="{{wave}}" class="brand-wave" aria-hidden="true">
-        <view></view>
-        <view></view>
-        <view></view>
+        <view class="brand-wave-bar"></view>
+        <view class="brand-wave-bar brand-wave-bar--tall"></view>
+        <view class="brand-wave-bar"></view>
       </view>
     </view>
     <text wx:if="{{subtitle}}" class="heading-subtitle">{{subtitle}}</text>

@@ -9,7 +9,7 @@
     binderror="imageError"
   />
   <view wx:else class="human-fallback">
-    <image src="/assets/logo.png" mode="aspectFit" />
+    <image class="human-fallback-icon" src="/assets/logo.png" mode="aspectFit" />
     <text>小忆在这里</text>
   </view>
   <view class="human-fade" aria-hidden="true"></view>

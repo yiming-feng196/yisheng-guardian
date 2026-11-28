@@ -1,6 +1,6 @@
 <view
   hidden="{{hidden}}"
-  class="tab-dock {{largeText ? 'tab-dock--large' : ''}}"
+  class="tab-dock {{hidden ? 'tab-dock--hidden' : ''}} {{largeText ? 'tab-dock--large' : ''}}"
   style="bottom:{{safeBottom + 8}}px"
   aria-role="tablist"
 >
